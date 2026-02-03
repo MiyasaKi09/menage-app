@@ -43,35 +43,17 @@ export function CreateHouseholdForm() {
         return
       }
 
-      // Créer le foyer
+      // Utiliser la fonction RPC pour créer le foyer avec l'admin
       const { data: household, error: householdError } = await supabase
-        .from('households')
-        .insert({
-          name: data.name,
-          created_by: user.id,
+        .rpc('create_household_with_admin', {
+          household_name: data.name,
+          creator_id: user.id,
         })
-        .select()
         .single()
 
       if (householdError) {
         console.error('Household creation error:', householdError)
         setError(`Erreur: ${householdError.message}`)
-        setIsLoading(false)
-        return
-      }
-
-      // Ajouter l'utilisateur comme membre admin
-      const { error: memberError } = await supabase
-        .from('household_members')
-        .insert({
-          household_id: household.id,
-          profile_id: user.id,
-          role: 'admin',
-        })
-
-      if (memberError) {
-        console.error('Member addition error:', memberError)
-        setError(`Erreur lors de l'ajout au foyer: ${memberError.message}`)
         setIsLoading(false)
         return
       }
