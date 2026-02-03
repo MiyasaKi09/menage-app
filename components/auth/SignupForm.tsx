@@ -52,7 +52,8 @@ export function SignupForm() {
         })
 
       if (profileError) {
-        setError('Erreur lors de la création du profil')
+        console.error('Profile creation error:', profileError)
+        setError(`Erreur lors de la création du profil: ${profileError.message}`)
         setIsLoading(false)
         return
       }
