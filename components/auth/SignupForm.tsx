@@ -40,22 +40,22 @@ export function SignupForm() {
       return
     }
 
-    // 2. Créer le profil dans la table profiles
+    // 2. Mettre à jour le profil (créé automatiquement par le trigger Database)
     if (authData.user) {
-      const { error: profileError } = await supabase
+      // Attendre un peu que le trigger Database crée le profil
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      const { error: updateError } = await supabase
         .from('profiles')
-        .insert({
-          id: authData.user.id,
-          email: data.email,
+        .update({
           username: data.username || null,
           display_name: data.display_name,
         })
+        .eq('id', authData.user.id)
 
-      if (profileError) {
-        console.error('Profile creation error:', profileError)
-        setError(`Erreur lors de la création du profil: ${profileError.message}`)
-        setIsLoading(false)
-        return
+      if (updateError) {
+        console.error('Profile update error:', updateError)
+        // Ne pas bloquer si la mise à jour échoue, le profil de base existe déjà
       }
 
       router.push('/questionnaire')
