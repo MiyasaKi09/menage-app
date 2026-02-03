@@ -44,7 +44,7 @@ export function CreateHouseholdForm() {
       }
 
       // Utiliser la fonction RPC pour créer le foyer avec l'admin
-      const { data: household, error: householdError } = await supabase
+      const { error: householdError } = await supabase
         .rpc('create_household_with_admin', {
           household_name: data.name,
           creator_id: user.id,
