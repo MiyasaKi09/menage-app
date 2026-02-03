@@ -28,13 +28,6 @@ export default async function HouseholdPage() {
     `)
     .eq('profile_id', user.id)
 
-  // Récupérer le profil
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('display_name')
-    .eq('id', user.id)
-    .single()
-
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">

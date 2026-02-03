@@ -31,6 +31,9 @@ export function Header() {
           <Link href="/household">
             <Button variant="ghost">Foyers</Button>
           </Link>
+          <Link href="/tasks">
+            <Button variant="ghost">Tâches</Button>
+          </Link>
           <span className="text-sm text-muted-foreground">
             {user?.email}
           </span>

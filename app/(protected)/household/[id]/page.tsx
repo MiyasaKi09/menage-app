@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import Link from 'next/link'
-import { Button } from '@/components/ui/Button'
 
 export default async function HouseholdDetailPage({
   params,
