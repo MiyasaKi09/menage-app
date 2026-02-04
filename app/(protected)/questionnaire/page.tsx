@@ -1,39 +1,84 @@
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { QuestionnaireForm } from '@/components/questionnaire/QuestionnaireForm'
+import { DiagonalStripe } from '@/components/ui/DiagonalStripe'
+import { GrainOverlay } from '@/components/ui/GrainOverlay'
 
-export default function QuestionnairePage() {
+export default async function QuestionnairePage() {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+
+  // Récupérer les foyers de l'utilisateur
+  const { data: memberships } = await supabase
+    .from('household_members')
+    .select(`
+      household_id,
+      role,
+      households (
+        id,
+        name
+      )
+    `)
+    .eq('profile_id', user.id)
+
+  // Si l'utilisateur n'a pas de foyer, rediriger vers la création
+  if (!memberships || memberships.length === 0) {
+    redirect('/household/setup')
+  }
+
+  // Utiliser le premier foyer par défaut
+  const householdId = memberships[0].household_id
+  const householdName = (memberships[0].households as any)?.name
+
+  // Vérifier si le questionnaire a déjà été rempli
+  const { data: existingResponse } = await supabase
+    .from('questionnaire_responses')
+    .select('id')
+    .eq('household_id', householdId)
+    .single()
+
   return (
-    <div className="max-w-2xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle>Questionnaire initial</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">
-            Aidez-nous à personnaliser votre expérience en répondant à quelques questions sur votre foyer, vos équipements et vos préférences.
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-deep-green to-[#062818] relative overflow-hidden">
+      <GrainOverlay />
+      <DiagonalStripe position="top-right" colors={['#00e676', '#ffe14f', '#00b4ff']} />
 
-          <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded">
-            <p className="text-sm font-medium">🚧 En cours de développement</p>
-            <p className="text-sm mt-1">
-              Le formulaire du questionnaire sera implémenté dans la prochaine phase. Il comprendra :
-            </p>
-            <ul className="text-sm mt-2 space-y-1 list-disc list-inside">
-              <li>Style de vie (situation, nombre de personnes, enfants, animaux)</li>
-              <li>Logement (type, surface, pièces, espace extérieur)</li>
-              <li>Équipements (lave-vaisselle, sèche-linge, robot aspirateur, etc.)</li>
-              <li>Disponibilité et préférences</li>
+      <div className="relative z-10 p-6 max-w-3xl mx-auto space-y-6">
+        {/* Header */}
+        <div>
+          <div className="font-space-mono text-xs opacity-50 uppercase tracking-wider mb-1 text-cream">
+            {householdName}
+          </div>
+          <h1 className="font-anton text-4xl md:text-5xl text-cream uppercase leading-none mb-4">
+            QUESTIONNAIRE
+          </h1>
+          <p className="font-outfit text-cream opacity-80 text-lg">
+            {existingResponse
+              ? 'Modifiez vos réponses pour ajuster les tâches de votre foyer'
+              : 'Répondez à quelques questions pour personnaliser les tâches de votre foyer'}
+          </p>
+        </div>
+
+        {/* Infobox */}
+        <div className="border-4 border-black bg-yellow p-6 shadow-brutal">
+          <GrainOverlay opacity={0.03} />
+          <div className="relative z-10">
+            <h2 className="font-anton text-xl uppercase mb-2">💡 Comment ça marche ?</h2>
+            <ul className="font-outfit space-y-2 text-sm">
+              <li>✅ Nous créons automatiquement les tâches adaptées à votre foyer</li>
+              <li>📊 Les points sont ajustés selon la complexité de votre logement</li>
+              <li>🔄 Vous pourrez toujours modifier vos réponses plus tard</li>
             </ul>
           </div>
+        </div>
 
-          <div className="pt-4">
-            <Link href="/dashboard">
-              <Button>Retour au dashboard</Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Form */}
+        <QuestionnaireForm householdId={householdId} userId={user.id} />
+      </div>
     </div>
   )
 }
