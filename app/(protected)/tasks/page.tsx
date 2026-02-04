@@ -42,13 +42,13 @@ export default async function TasksPage() {
       household_id,
       custom_points,
       is_active,
-      task_templates (
+      task_templates:template_id (
         id,
         name,
         tip,
         base_points,
         duration_minutes,
-        categories (
+        categories:category_id (
           name,
           emoji
         )
