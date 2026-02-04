@@ -34,28 +34,28 @@ export default async function TasksPage() {
   const householdId = memberships[0].household_id
   const householdName = (memberships[0].households as any)?.name
 
-  // Récupérer les tâches du foyer avec leurs catégories
-  const { data: tasks, error: tasksError } = await supabase
-    .from('household_tasks')
-    .select(`
-      id,
-      household_id,
-      custom_points,
-      is_active,
-      task_templates!template_id (
-        id,
-        name,
-        tip,
-        base_points,
-        duration_minutes,
-        categories!category_id (
-          name,
-          emoji
-        )
-      )
-    `)
-    .eq('household_id', householdId)
-    .eq('is_active', true)
+  // Récupérer les tâches du foyer avec leurs catégories via RPC
+  const { data: rawTasks, error: tasksError } = await supabase
+    .rpc('get_household_tasks_with_details', { p_household_id: householdId })
+
+  // Transform the flat result into nested structure for compatibility
+  const tasks = rawTasks?.map(task => ({
+    id: task.id,
+    household_id: task.household_id,
+    custom_points: task.custom_points,
+    is_active: task.is_active,
+    task_templates: {
+      id: task.template_id,
+      name: task.template_name,
+      tip: task.template_tip,
+      base_points: task.template_base_points,
+      duration_minutes: task.template_duration_minutes,
+      categories: {
+        name: task.category_name,
+        emoji: task.category_emoji
+      }
+    }
+  }))
 
   // Log pour debug
   if (tasksError) {
