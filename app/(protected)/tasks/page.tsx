@@ -60,9 +60,11 @@ export default async function TasksPage() {
   // Log pour debug
   if (tasksError) {
     console.error('Error fetching tasks:', tasksError)
+    console.error('Error details:', JSON.stringify(tasksError, null, 2))
   }
   console.log('Tasks fetched:', tasks?.length || 0, 'tasks')
-  console.log('Sample task:', tasks?.[0])
+  console.log('Sample task:', JSON.stringify(tasks?.[0], null, 2))
+  console.log('All tasks:', JSON.stringify(tasks, null, 2))
 
   const taskCount = tasks?.length || 0
 
@@ -91,7 +93,22 @@ export default async function TasksPage() {
         </div>
 
         {/* Tasks */}
-        {!tasks || tasks.length === 0 ? (
+        {tasksError && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-red">Erreur de chargement</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="font-outfit opacity-70 mb-2">
+                Une erreur s'est produite lors du chargement des tâches:
+              </p>
+              <pre className="text-xs bg-black/20 p-4 rounded overflow-auto">
+                {JSON.stringify(tasksError, null, 2)}
+              </pre>
+            </CardContent>
+          </Card>
+        )}
+        {!tasksError && (!tasks || tasks.length === 0) ? (
           <Card>
             <CardHeader>
               <CardTitle>Aucune tâche disponible</CardTitle>
@@ -100,6 +117,14 @@ export default async function TasksPage() {
               <p className="font-outfit opacity-70">
                 Aucune tâche n'a été configurée pour ce foyer. Les tâches seront bientôt disponibles.
               </p>
+              <details className="mt-4">
+                <summary className="cursor-pointer text-sm opacity-60">Debug info</summary>
+                <pre className="text-xs bg-black/20 p-4 rounded overflow-auto mt-2">
+                  Household ID: {householdId}
+                  {'\n'}Tasks count: {tasks?.length || 0}
+                  {'\n'}Raw data: {JSON.stringify(tasks, null, 2)}
+                </pre>
+              </details>
             </CardContent>
           </Card>
         ) : (
