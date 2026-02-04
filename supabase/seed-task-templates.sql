@@ -39,8 +39,7 @@ BEGIN
     ('Nettoyer le four', 45, 4, 100, cat_cuisine, freq_weekly, '🔥', 'Nettoyage en profondeur du four'),
     ('Vider le lave-vaisselle', 10, 1, 20, cat_cuisine, freq_daily, '🍽️', 'Vider et ranger la vaisselle propre'),
     ('Sortir les poubelles', 10, 1, 30, cat_cuisine, freq_daily, '🗑️', 'Sortir les poubelles et mettre un nouveau sac'),
-    ('Nettoyer le réfrigérateur', 30, 3, 80, cat_cuisine, freq_weekly, '❄️', 'Nettoyer et organiser le réfrigérateur')
-  ON CONFLICT (name) DO NOTHING;
+    ('Nettoyer le réfrigérateur', 30, 3, 80, cat_cuisine, freq_weekly, '❄️', 'Nettoyer et organiser le réfrigérateur');
 
   -- SALLE DE BAIN
   INSERT INTO task_templates (name, duration_minutes, difficulty, base_points, category_id, frequency_id, icon, tip) VALUES
@@ -48,7 +47,7 @@ BEGIN
     ('Nettoyer la salle de bain', 25, 3, 70, cat_sanitaire, freq_weekly, '🚿', 'Nettoyer lavabo, baignoire et surfaces'),
     ('Nettoyer la douche', 20, 3, 50, cat_sanitaire, freq_weekly, '🚿', 'Nettoyer parois, robinetterie et sol de douche'),
     ('Nettoyer les miroirs', 10, 1, 20, cat_sanitaire, freq_weekly, '🪞', 'Nettoyer les miroirs sans traces')
-  ON CONFLICT (name) DO NOTHING;
+;
 
   -- BUANDERIE
   INSERT INTO task_templates (name, duration_minutes, difficulty, base_points, category_id, frequency_id, icon, tip) VALUES
@@ -57,7 +56,7 @@ BEGIN
     ('Plier et ranger le linge', 25, 2, 50, cat_buanderie, freq_weekly, '👔', 'Plier et ranger le linge propre'),
     ('Repasser le linge', 30, 3, 60, cat_buanderie, freq_weekly, '👔', 'Repasser le linge qui en a besoin'),
     ('Changer les draps', 20, 2, 50, cat_chambre, freq_weekly, '🛏️', 'Changer et laver les draps du lit')
-  ON CONFLICT (name) DO NOTHING;
+;
 
   -- SALON
   INSERT INTO task_templates (name, duration_minutes, difficulty, base_points, category_id, frequency_id, icon, tip) VALUES
@@ -66,7 +65,7 @@ BEGIN
     ('Dépoussiérer les meubles', 20, 1, 40, cat_salon, freq_weekly, '✨', 'Dépoussiérer toutes les surfaces'),
     ('Aérer les pièces', 5, 1, 10, cat_general, freq_daily, '🌬️', 'Ouvrir les fenêtres pour aérer'),
     ('Ranger les jouets', 15, 1, 30, cat_salon, freq_daily, '🧸', 'Ranger les jouets des enfants')
-  ON CONFLICT (name) DO NOTHING;
+;
 
   -- EXTÉRIEUR
   INSERT INTO task_templates (name, duration_minutes, difficulty, base_points, category_id, frequency_id, icon, tip) VALUES
@@ -74,27 +73,27 @@ BEGIN
     ('Désherber', 45, 3, 80, cat_exterieur, freq_weekly, '🌿', 'Enlever les mauvaises herbes'),
     ('Arroser les plantes', 15, 1, 30, cat_exterieur, freq_weekly, '💧', 'Arroser toutes les plantes'),
     ('Nettoyer le balcon/terrasse', 20, 2, 50, cat_exterieur, freq_weekly, '🧹', 'Balayer et nettoyer le balcon ou la terrasse')
-  ON CONFLICT (name) DO NOTHING;
+;
 
   -- GÉNÉRAL (sols et surfaces)
   INSERT INTO task_templates (name, duration_minutes, difficulty, base_points, category_id, frequency_id, icon, tip) VALUES
     ('Passer la serpillière', 30, 3, 70, cat_general, freq_weekly, '🧽', 'Laver tous les sols'),
     ('Nettoyer les vitres', 40, 3, 80, cat_general, freq_weekly, '🪟', 'Nettoyer les vitres intérieures et extérieures')
-  ON CONFLICT (name) DO NOTHING;
+;
 
   -- RANGEMENT
   INSERT INTO task_templates (name, duration_minutes, difficulty, base_points, category_id, frequency_id, icon, tip) VALUES
     ('Ranger le salon', 20, 2, 40, cat_salon, freq_weekly, '🛋️', 'Ranger et organiser le salon'),
     ('Ranger la cuisine', 20, 2, 40, cat_cuisine, freq_weekly, '🍽️', 'Ranger et organiser la cuisine'),
     ('Ranger la chambre', 20, 2, 40, cat_chambre, freq_weekly, '🛏️', 'Ranger et organiser la chambre')
-  ON CONFLICT (name) DO NOTHING;
+;
 
   -- GÉNÉRAL (courses & gestion)
   INSERT INTO task_templates (name, duration_minutes, difficulty, base_points, category_id, frequency_id, icon, tip) VALUES
     ('Faire les courses', 60, 3, 80, cat_general, freq_weekly, '🛒', 'Faire les courses pour le foyer'),
     ('Planifier les repas', 30, 2, 50, cat_general, freq_weekly, '📋', 'Planifier les repas de la semaine'),
     ('Vérifier les dates de péremption', 15, 1, 20, cat_general, freq_weekly, '📅', 'Vérifier et jeter les produits périmés')
-  ON CONFLICT (name) DO NOTHING;
+;
 END $$;
 
 -- Verify the result
@@ -104,7 +103,7 @@ SELECT
   COUNT(tt.id) as task_count
 FROM categories c
 LEFT JOIN task_templates tt ON c.id = tt.category_id
-GROUP BY c.name, c.emoji
+GROUP BY c.name, c.emoji, c.display_order
 ORDER BY c.display_order;
 
 -- Show all templates
