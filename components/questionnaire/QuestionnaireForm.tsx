@@ -64,6 +64,16 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
         has_dishwasher: responses.equipment?.includes('dishwasher') || false,
         has_washing_machine: responses.equipment?.includes('washing_machine') || false,
         has_dryer: responses.equipment?.includes('dryer') || false,
+        // Nouveaux champs enrichis
+        has_robot_vacuum: responses.equipment?.includes('robot_vacuum') || false,
+        has_ac: responses.equipment?.includes('ac') || false,
+        bathroom_count: Number(responses.bathroom_count) || 1,
+        has_ventilation: responses.equipment?.includes('ventilation') || false,
+        cleanliness_level: Number(responses.cleanliness_level) || 3,
+        available_minutes_daily: Number(responses.available_minutes_daily) || 30,
+        water_hardness: (responses.water_hardness === 'unknown' ? 'medium' : responses.water_hardness) as 'soft' | 'medium' | 'hard' | undefined,
+        floor_type: responses.floor_type as 'tile' | 'wood' | 'carpet' | 'mixed' | undefined,
+        allergies: responses.allergies?.filter((a: string) => a !== 'none') || [],
       }
 
       const result = await applyQuestionnaire(
