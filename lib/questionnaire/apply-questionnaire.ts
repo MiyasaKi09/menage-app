@@ -64,7 +64,7 @@ export async function applyQuestionnaire(
     // 3. Récupérer tous les task_templates disponibles
     const { data: templates, error: templatesError } = await supabase
       .from('task_templates')
-      .select('id, name, default_points, category_id')
+      .select('id, name, base_points, category_id')
 
     if (templatesError) {
       console.error('Error fetching templates:', templatesError)
@@ -109,7 +109,7 @@ export async function applyQuestionnaire(
       }
 
       const points = calculateTaskPoints(
-        template.default_points,
+        template.base_points,
         assignment.pointsMultiplier
       )
 
