@@ -40,13 +40,13 @@ export default async function TasksPage() {
     .select(`
       id,
       household_id,
-      points_value,
+      custom_points,
       is_active,
       task_templates (
         id,
         name,
         description,
-        default_points,
+        base_points,
         estimated_duration,
         categories (
           name,

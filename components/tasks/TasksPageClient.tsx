@@ -7,13 +7,13 @@ import { TaskCompletionModal } from './TaskCompletionModal'
 interface Task {
   id: string
   household_id: string
-  points_value: number
+  custom_points: number
   is_active: boolean
   task_templates: {
     id: string
     name: string
     description: string | null
-    default_points: number
+    base_points: number
     estimated_duration: number | null
     categories: {
       name: string

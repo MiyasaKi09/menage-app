@@ -11,13 +11,13 @@ import { cn } from '@/lib/utils/cn'
 interface Task {
   id: string
   household_id: string
-  points_value: number
+  custom_points: number
   is_active: boolean
   task_templates: {
     id: string
     name: string
     description: string | null
-    default_points: number
+    base_points: number
     estimated_duration: number | null
     categories: {
       name: string
@@ -50,7 +50,7 @@ export function TaskList({ tasks, householdId, userId, onTaskCompleted }: TaskLi
           household_task_id: task.id,
           profile_id: userId,
           household_id: householdId,
-          points_earned: task.points_value,
+          points_earned: task.custom_points,
           completed_at: new Date().toISOString(),
         })
         .select()
@@ -65,7 +65,7 @@ export function TaskList({ tasks, householdId, userId, onTaskCompleted }: TaskLi
       // 2. Mettre à jour les statistiques du profil
       const { error: profileError } = await supabase.rpc('increment_profile_stats', {
         p_profile_id: userId,
-        p_points: task.points_value,
+        p_points: task.custom_points,
       })
 
       if (profileError) {
@@ -76,7 +76,7 @@ export function TaskList({ tasks, householdId, userId, onTaskCompleted }: TaskLi
       const { error: memberError } = await supabase.rpc('increment_household_member_stats', {
         p_profile_id: userId,
         p_household_id: householdId,
-        p_points: task.points_value,
+        p_points: task.custom_points,
       })
 
       if (memberError) {
@@ -85,7 +85,7 @@ export function TaskList({ tasks, householdId, userId, onTaskCompleted }: TaskLi
 
       // Appeler le callback pour afficher la modal de célébration
       if (onTaskCompleted) {
-        onTaskCompleted(task, task.points_value)
+        onTaskCompleted(task, task.custom_points)
       }
 
       // Rafraîchir la page pour afficher les nouvelles stats
@@ -152,7 +152,7 @@ export function TaskList({ tasks, householdId, userId, onTaskCompleted }: TaskLi
                     </p>
                   )}
                   <div className="flex gap-4 mt-2 font-space-mono text-xs opacity-60">
-                    <span>⭐ {task.points_value} pts</span>
+                    <span>⭐ {task.custom_points} pts</span>
                     {task.task_templates.estimated_duration && (
                       <span>⏱️ ~{task.task_templates.estimated_duration} min</span>
                     )}
