@@ -98,8 +98,9 @@ export function TaskList({ tasks, householdId, userId, onTaskCompleted }: TaskLi
   }
 
   // Grouper les tâches par catégorie
-  const tasksByCategory = tasks.reduce((acc, task) => {
-    const categoryName = task.task_templates.categories.name
+  const tasksByCategory = (tasks || []).reduce((acc, task) => {
+    const categoryName = task.task_templates.categories?.name
+    if (!categoryName) return acc // Skip tasks without category
     if (!acc[categoryName]) {
       acc[categoryName] = []
     }
