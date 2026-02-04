@@ -34,7 +34,7 @@ export default async function TasksPage() {
   const householdId = memberships[0].household_id
   const householdName = (memberships[0].households as any)?.name
 
-  // Récupérer les tâches du foyer
+  // Récupérer les tâches du foyer avec leurs catégories
   const { data: tasks, error: tasksError } = await supabase
     .from('household_tasks')
     .select(`
