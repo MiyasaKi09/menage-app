@@ -12,12 +12,12 @@ interface Task {
   task_templates: {
     id: string
     name: string
-    description: string | null
+    tip: string | null
     base_points: number
-    estimated_duration: number | null
+    duration_minutes: number
     categories: {
       name: string
-      icon: string | null
+      emoji: string
     }
   }
 }

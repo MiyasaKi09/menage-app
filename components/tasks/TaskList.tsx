@@ -16,12 +16,12 @@ interface Task {
   task_templates: {
     id: string
     name: string
-    description: string | null
+    tip: string | null
     base_points: number
-    estimated_duration: number | null
+    duration_minutes: number
     categories: {
       name: string
-      icon: string | null
+      emoji: string
     }
   }
 }
@@ -146,15 +146,15 @@ export function TaskList({ tasks, householdId, userId, onTaskCompleted }: TaskLi
                   <h4 className="font-anton text-lg uppercase">
                     {task.task_templates.name}
                   </h4>
-                  {task.task_templates.description && (
+                  {task.task_templates.tip && (
                     <p className="font-outfit text-sm opacity-70 mt-1">
-                      {task.task_templates.description}
+                      {task.task_templates.tip}
                     </p>
                   )}
                   <div className="flex gap-4 mt-2 font-space-mono text-xs opacity-60">
                     <span>⭐ {task.custom_points} pts</span>
-                    {task.task_templates.estimated_duration && (
-                      <span>⏱️ ~{task.task_templates.estimated_duration} min</span>
+                    {task.task_templates.duration_minutes && (
+                      <span>⏱️ ~{task.task_templates.duration_minutes} min</span>
                     )}
                   </div>
                 </div>
