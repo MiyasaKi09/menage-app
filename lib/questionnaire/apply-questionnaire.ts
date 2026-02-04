@@ -28,22 +28,25 @@ export async function applyQuestionnaire(
     // 1. Sauvegarder les réponses du questionnaire
     const { error: saveError } = await supabase
       .from('questionnaire_responses')
-      .upsert({
-        household_id: responses.household_id,
-        profile_id: profileId,
-        housing_type: responses.housing_type,
-        room_count: responses.room_count,
-        has_outdoor_space: responses.has_outdoor_space,
-        outdoor_type: responses.outdoor_type || null,
-        has_pets: responses.has_pets,
-        pet_types: responses.pet_types || [],
-        household_size: responses.household_size,
-        has_children: responses.has_children,
-        cooking_frequency: responses.cooking_frequency,
-        has_dishwasher: responses.has_dishwasher,
-        has_washing_machine: responses.has_washing_machine,
-        has_dryer: responses.has_dryer,
-      })
+      .upsert(
+        {
+          household_id: responses.household_id,
+          profile_id: profileId,
+          housing_type: responses.housing_type,
+          room_count: responses.room_count,
+          has_outdoor_space: responses.has_outdoor_space,
+          outdoor_type: responses.outdoor_type || null,
+          has_pets: responses.has_pets,
+          pet_types: responses.pet_types || [],
+          household_size: responses.household_size,
+          has_children: responses.has_children,
+          cooking_frequency: responses.cooking_frequency,
+          has_dishwasher: responses.has_dishwasher,
+          has_washing_machine: responses.has_washing_machine,
+          has_dryer: responses.has_dryer,
+        },
+        { onConflict: 'household_id' }
+      )
 
     if (saveError) {
       console.error('Error saving questionnaire:', saveError)
