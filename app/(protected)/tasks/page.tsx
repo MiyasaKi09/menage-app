@@ -35,7 +35,7 @@ export default async function TasksPage() {
   const householdName = (memberships[0].households as any)?.name
 
   // Récupérer les tâches du foyer
-  const { data: tasks } = await supabase
+  const { data: tasks, error: tasksError } = await supabase
     .from('household_tasks')
     .select(`
       id,
@@ -56,7 +56,13 @@ export default async function TasksPage() {
     `)
     .eq('household_id', householdId)
     .eq('is_active', true)
-    .order('task_templates(name)')
+
+  // Log pour debug
+  if (tasksError) {
+    console.error('Error fetching tasks:', tasksError)
+  }
+  console.log('Tasks fetched:', tasks?.length || 0, 'tasks')
+  console.log('Sample task:', tasks?.[0])
 
   const taskCount = tasks?.length || 0
 
