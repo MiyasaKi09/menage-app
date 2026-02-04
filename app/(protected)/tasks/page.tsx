@@ -2,8 +2,10 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { DiagonalStripe } from '@/components/ui/DiagonalStripe'
+import { GrainOverlay } from '@/components/ui/GrainOverlay'
 import Link from 'next/link'
-import { TaskList } from '@/components/tasks/TaskList'
+import { TasksPageClient } from '@/components/tasks/TasksPageClient'
 
 export default async function TasksPage() {
   const supabase = await createClient()
@@ -56,34 +58,52 @@ export default async function TasksPage() {
     .eq('is_active', true)
     .order('task_templates(name)')
 
-  return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold">Tâches</h1>
-          <p className="text-muted-foreground">
-            {householdName} - {tasks?.length || 0} tâche{(tasks?.length || 0) > 1 ? 's' : ''} disponible{(tasks?.length || 0) > 1 ? 's' : ''}
-          </p>
-        </div>
-        <Link href="/tasks/history">
-          <Button variant="outline" size="sm">Voir l'historique</Button>
-        </Link>
-      </div>
+  const taskCount = tasks?.length || 0
 
-      {!tasks || tasks.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Aucune tâche disponible</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Aucune tâche n'a été configurée pour ce foyer. Les tâches seront bientôt disponibles.
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-deep-purple to-[#1f0833] relative overflow-hidden">
+      <GrainOverlay />
+      <DiagonalStripe position="top-left" colors={['#ffe14f', '#ff6b2c', '#00b4ff']} />
+
+      <div className="relative z-10 p-6 space-y-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <div className="font-space-mono text-xs opacity-50 uppercase tracking-wider mb-1 text-cream">
+              {householdName}
+            </div>
+            <h1 className="font-anton text-4xl md:text-5xl text-cream uppercase leading-none">
+              TÂCHES
+            </h1>
+            <p className="font-space-mono text-sm text-cream opacity-60 mt-2">
+              {taskCount} tâche{taskCount > 1 ? 's' : ''} disponible{taskCount > 1 ? 's' : ''}
             </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <TaskList tasks={tasks as any} householdId={householdId} userId={user.id} />
-      )}
+          </div>
+          <Link href="/tasks/history">
+            <Button variant="outline" size="sm">Voir l'historique</Button>
+          </Link>
+        </div>
+
+        {/* Tasks */}
+        {!tasks || tasks.length === 0 ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Aucune tâche disponible</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="font-outfit opacity-70">
+                Aucune tâche n'a été configurée pour ce foyer. Les tâches seront bientôt disponibles.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <TasksPageClient
+            tasks={tasks as any}
+            householdId={householdId}
+            userId={user.id}
+          />
+        )}
+      </div>
     </div>
   )
 }

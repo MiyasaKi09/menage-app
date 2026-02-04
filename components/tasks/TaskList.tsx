@@ -2,9 +2,11 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { CategoryIcon } from '@/components/ui/CategoryIcon'
+import { GrainOverlay } from '@/components/ui/GrainOverlay'
 import { createClient } from '@/lib/supabase/client'
+import { cn } from '@/lib/utils/cn'
 
 interface Task {
   id: string
@@ -28,12 +30,14 @@ interface TaskListProps {
   tasks: Task[]
   householdId: string
   userId: string
+  onTaskCompleted?: (task: Task, points: number) => void
 }
 
-export function TaskList({ tasks, householdId, userId }: TaskListProps) {
+export function TaskList({ tasks, householdId, userId, onTaskCompleted }: TaskListProps) {
   const router = useRouter()
   const supabase = createClient()
   const [completingTaskId, setCompletingTaskId] = useState<string | null>(null)
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
 
   const handleCompleteTask = async (task: Task) => {
     setCompletingTaskId(task.id)
@@ -54,7 +58,6 @@ export function TaskList({ tasks, householdId, userId }: TaskListProps) {
 
       if (historyError) {
         console.error('Erreur lors de la création de l\'historique:', historyError)
-        alert('Erreur lors de la complétion de la tâche')
         setCompletingTaskId(null)
         return
       }
@@ -80,13 +83,15 @@ export function TaskList({ tasks, householdId, userId }: TaskListProps) {
         console.error('Erreur lors de la mise à jour du membre:', memberError)
       }
 
+      // Appeler le callback pour afficher la modal de célébration
+      if (onTaskCompleted) {
+        onTaskCompleted(task, task.points_value)
+      }
+
       // Rafraîchir la page pour afficher les nouvelles stats
       router.refresh()
-
-      alert(`✅ Tâche complétée ! +${task.points_value} points`)
     } catch (error) {
       console.error('Erreur:', error)
-      alert('Erreur lors de la complétion de la tâche')
     } finally {
       setCompletingTaskId(null)
     }
@@ -103,51 +108,71 @@ export function TaskList({ tasks, householdId, userId }: TaskListProps) {
   }, {} as Record<string, Task[]>)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {Object.entries(tasksByCategory).map(([categoryName, categoryTasks]) => (
-        <Card key={categoryName}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <span>{categoryTasks[0].task_templates.categories.icon || '📋'}</span>
-              <span>{categoryName}</span>
-              <span className="text-sm font-normal text-muted-foreground">
-                ({categoryTasks.length})
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {categoryTasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex-1">
-                    <h3 className="font-medium">{task.task_templates.name}</h3>
-                    {task.task_templates.description && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {task.task_templates.description}
-                      </p>
+        <div key={categoryName} className="border-4 border-black bg-off-white shadow-brutal overflow-hidden">
+          <GrainOverlay />
+
+          {/* Category Header */}
+          <div className="relative z-10 p-4 border-b-4 border-black bg-orange flex items-center gap-4">
+            <CategoryIcon category={categoryName} size={48} />
+            <div className="flex-1">
+              <h3 className="font-anton text-xl uppercase">{categoryName}</h3>
+              <p className="font-space-mono text-xs opacity-70">
+                {categoryTasks.length} tâche{categoryTasks.length > 1 ? 's' : ''}
+              </p>
+            </div>
+          </div>
+
+          {/* Task List */}
+          <div className="relative z-10 p-4 space-y-3">
+            {categoryTasks.map((task) => (
+              <div
+                key={task.id}
+                onMouseEnter={() => setHoveredId(task.id)}
+                onMouseLeave={() => setHoveredId(null)}
+                className={cn(
+                  "flex items-center border-3 border-black bg-cream transition-all cursor-pointer overflow-hidden",
+                  hoveredId === task.id && "translate-x-2 shadow-brutal-sm"
+                )}
+              >
+                {/* Icon */}
+                <div className="w-20 h-20 border-r-3 border-black bg-black/5 flex items-center justify-center flex-shrink-0">
+                  <CategoryIcon category={categoryName} size={40} />
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 p-4">
+                  <h4 className="font-anton text-lg uppercase">
+                    {task.task_templates.name}
+                  </h4>
+                  {task.task_templates.description && (
+                    <p className="font-outfit text-sm opacity-70 mt-1">
+                      {task.task_templates.description}
+                    </p>
+                  )}
+                  <div className="flex gap-4 mt-2 font-space-mono text-xs opacity-60">
+                    <span>⭐ {task.points_value} pts</span>
+                    {task.task_templates.estimated_duration && (
+                      <span>⏱️ ~{task.task_templates.estimated_duration} min</span>
                     )}
-                    <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                      <span>⭐ {task.points_value} points</span>
-                      {task.task_templates.estimated_duration && (
-                        <span>⏱️ ~{task.task_templates.estimated_duration} min</span>
-                      )}
-                    </div>
                   </div>
+                </div>
+
+                {/* Action Button */}
+                <div className="p-4 flex-shrink-0">
                   <Button
+                    size="sm"
                     onClick={() => handleCompleteTask(task)}
                     disabled={completingTaskId === task.id}
-                    size="sm"
                   >
-                    {completingTaskId === task.id ? 'En cours...' : 'Compléter'}
+                    {completingTaskId === task.id ? 'EN COURS...' : 'COMPLÉTER'}
                   </Button>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            ))}
+          </div>
+        </div>
       ))}
     </div>
   )
