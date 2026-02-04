@@ -40,7 +40,7 @@ export function determineTaskAssignments(
   const bathroomCount = responses.bathroom_count || 1
 
   // Facteur d'allergies (augmente fréquence des tâches anti-poussière)
-  const hasAllergies = responses.allergies && responses.allergies.length > 0 && !responses.allergies.includes('none')
+  const hasAllergies = !!(responses.allergies && responses.allergies.length > 0 && !responses.allergies.includes('none'))
   const allergyMultiplier = hasAllergies ? 1.2 : 1.0
 
   // ====== CUISINE (25 tâches) ======
