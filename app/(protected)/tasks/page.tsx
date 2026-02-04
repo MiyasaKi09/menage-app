@@ -39,7 +39,19 @@ export default async function TasksPage() {
     .rpc('get_household_tasks_with_details', { p_household_id: householdId })
 
   // Transform the flat result into nested structure for compatibility
-  const tasks = rawTasks?.map(task => ({
+  const tasks = rawTasks?.map((task: {
+    id: string
+    household_id: string
+    custom_points: number | null
+    is_active: boolean
+    template_id: string
+    template_name: string
+    template_tip: string | null
+    template_base_points: number
+    template_duration_minutes: number
+    category_name: string
+    category_emoji: string
+  }) => ({
     id: task.id,
     household_id: task.household_id,
     custom_points: task.custom_points,
