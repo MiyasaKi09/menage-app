@@ -45,12 +45,12 @@ export default async function TasksPage() {
       task_templates (
         id,
         name,
-        description,
+        tip,
         base_points,
-        estimated_duration,
+        duration_minutes,
         categories (
           name,
-          icon
+          emoji
         )
       )
     `)
