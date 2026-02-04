@@ -1,10 +1,12 @@
+import React from 'react'
+
 interface CategoryIconProps {
   category: string
   size?: number
 }
 
 export function CategoryIcon({ category, size = 60 }: CategoryIconProps) {
-  const icons: Record<string, JSX.Element> = {
+  const icons: Record<string, React.ReactElement> = {
     'Cuisine & Vaisselle': (
       <svg viewBox="0 0 100 100" width={size} height={size}>
         {/* Stack of plates */}
