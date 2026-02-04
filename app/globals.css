@@ -4,46 +4,100 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Deep backgrounds */
+    --deep-blue: 13 27 76;      /* #0d1b4c */
+    --deep-green: 10 54 34;     /* #0a3622 */
+    --deep-purple: 45 10 78;    /* #2d0a4e */
+    --deep-orange: 122 40 0;    /* #7a2800 */
+
+    /* Vibrant accents */
+    --yellow: 255 225 79;       /* #ffe14f */
+    --orange: 255 107 44;       /* #ff6b2c */
+    --red: 255 59 92;           /* #ff3b5c */
+    --green: 0 230 118;         /* #00e676 */
+    --blue: 0 180 255;          /* #00b4ff */
+    --purple: 178 75 255;       /* #b24bff */
+    --pink: 255 110 199;        /* #ff6ec7 */
+
+    /* Neutrals */
+    --cream: 253 246 227;       /* #fdf6e3 */
+    --off-white: 248 244 236;   /* #f8f4ec */
+    --black: 8 8 8;             /* #080808 */
+    --charcoal: 26 26 26;       /* #1a1a1a */
+
+    /* Semantic tokens */
+    --background: var(--cream);
+    --foreground: var(--charcoal);
+    --card: var(--off-white);
+    --card-foreground: var(--charcoal);
+    --primary: var(--yellow);
+    --primary-foreground: var(--charcoal);
+    --secondary: var(--blue);
+    --secondary-foreground: var(--charcoal);
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
-  }
+    --accent: var(--yellow);
+    --accent-foreground: var(--charcoal);
+    --destructive: var(--red);
+    --destructive-foreground: 255 255 255;
+    --border: var(--charcoal);
+    --input: var(--charcoal);
+    --ring: var(--yellow);
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    /* No radius - sharp edges */
+    --radius: 0rem;
   }
 }
+
+/* Custom animations */
+@keyframes pulse-urgent {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes confetti-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(30px) rotate(360deg); opacity: 0; }
+}
+
+@keyframes starburst-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Staggered animations for lists */
+.stagger-item {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0s; }
+.stagger-item:nth-child(2) { animation-delay: 0.1s; }
+.stagger-item:nth-child(3) { animation-delay: 0.2s; }
+.stagger-item:nth-child(4) { animation-delay: 0.3s; }
+.stagger-item:nth-child(5) { animation-delay: 0.4s; }
 
 @layer base {
   * {
