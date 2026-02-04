@@ -79,7 +79,7 @@ export async function applyQuestionnaire(
     // 4. Récupérer les tâches existantes du foyer
     const { data: existingTasks, error: existingError } = await supabase
       .from('household_tasks')
-      .select('id, task_template_id, is_active, points_value')
+      .select('id, template_id, is_active, points_value')
       .eq('household_id', responses.household_id)
 
     if (existingError) {
@@ -93,7 +93,7 @@ export async function applyQuestionnaire(
     }
 
     const existingTasksByTemplateId = new Map(
-      (existingTasks || []).map((t) => [t.task_template_id, t])
+      (existingTasks || []).map((t) => [t.template_id, t])
     )
 
     let tasksCreated = 0
@@ -134,7 +134,7 @@ export async function applyQuestionnaire(
           .from('household_tasks')
           .insert({
             household_id: responses.household_id,
-            task_template_id: template.id,
+            template_id: template.id,
             is_active: true,
             points_value: points,
           })
