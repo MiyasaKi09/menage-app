@@ -148,7 +148,7 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
             }`}
           >
             <div className="flex items-center gap-3">
-              <span className="text-2xl">{task.category_emoji}</span>
+              <span className="text-2xl">{task.category_emoji || '📋'}</span>
               <div>
                 <p className="font-anton text-sm uppercase">{task.task_name}</p>
                 <p className="font-space-mono text-xs opacity-60">

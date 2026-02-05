@@ -23,6 +23,15 @@ export default async function DashboardPage() {
     .eq('id', user?.id)
     .single()
 
+  // Vérifier si le questionnaire a été complété
+  const { data: questionnaire } = await supabase
+    .from('profile_questionnaire')
+    .select('id')
+    .eq('profile_id', user?.id)
+    .maybeSingle()
+
+  const hasCompletedQuestionnaire = !!questionnaire
+
   // Récupérer les foyers de l'utilisateur
   const { data: households } = await supabase
     .from('household_members')
@@ -169,32 +178,31 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        {/* Next Steps Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Prochaines étapes</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {(!households || households.length === 0) && (
-              <div className="flex items-center gap-3 font-outfit">
-                <span className="text-2xl">🏠</span>
-                <Link href="/household/setup" className="underline font-bold hover:text-yellow transition-colors">
-                  Créez ou rejoignez un foyer
-                </Link>
-              </div>
-            )}
-            <div className="flex items-center gap-3 font-outfit">
-              <span className="text-2xl">📝</span>
-              <Link href="/questionnaire" className="underline font-bold hover:text-yellow transition-colors">
-                Complétez le questionnaire initial
-              </Link>
-            </div>
-            <div className="flex items-center gap-3 font-outfit">
-              <span className="text-2xl">✅</span>
-              <span className="font-bold">Commencez à accomplir des tâches</span>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Next Steps Section - Only show if there are pending steps */}
+        {((!households || households.length === 0) || !hasCompletedQuestionnaire) && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Prochaines étapes</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {(!households || households.length === 0) ? (
+                <div className="flex items-center gap-3 font-outfit">
+                  <span className="text-2xl">🏠</span>
+                  <Link href="/household/setup" className="underline font-bold hover:text-yellow transition-colors">
+                    Créez ou rejoignez un foyer
+                  </Link>
+                </div>
+              ) : !hasCompletedQuestionnaire ? (
+                <div className="flex items-center gap-3 font-outfit">
+                  <span className="text-2xl">📝</span>
+                  <Link href="/questionnaire" className="underline font-bold hover:text-yellow transition-colors">
+                    Complétez le questionnaire initial
+                  </Link>
+                </div>
+              ) : null}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Bottom Rainbow Bar */}
