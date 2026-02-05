@@ -104,7 +104,7 @@ BEGIN
       CASE
         -- Overdue: 1000 base + 50 per day overdue
         WHEN ht.next_due_at < p_target_date THEN
-          1000 + ((p_target_date - ht.next_due_at) * 50)
+          1000 + ((p_target_date::date - ht.next_due_at::date) * 50)
         -- Due today: 500 base + urgency factor from frequency
         WHEN ht.next_due_at = p_target_date THEN
           500 + (10 - LEAST(f.days_default / 7, 10))::INT

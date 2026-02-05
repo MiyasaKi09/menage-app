@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTransition } from 'react'
 import { Button } from '@/components/ui/Button'
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
 
@@ -10,16 +11,22 @@ interface DateSelectorProps {
 
 export function DateSelector({ currentDate }: DateSelectorProps) {
   const router = useRouter()
+  const [isPending, startTransition] = useTransition()
 
   const navigate = (days: number) => {
     const date = new Date(currentDate + 'T12:00:00') // Noon to avoid timezone issues
     date.setDate(date.getDate() + days)
     const newDateStr = date.toISOString().split('T')[0]
-    router.push(`/tasks/schedule?date=${newDateStr}`)
+
+    startTransition(() => {
+      router.push(`/tasks/schedule?date=${newDateStr}`)
+    })
   }
 
   const goToToday = () => {
-    router.push('/tasks/schedule')
+    startTransition(() => {
+      router.push('/tasks/schedule')
+    })
   }
 
   // Check if we're viewing today
@@ -35,13 +42,14 @@ export function DateSelector({ currentDate }: DateSelectorProps) {
   })
 
   return (
-    <div className="bg-cream border-4 border-black p-4 shadow-brutal">
+    <div className="bg-cream border-4 border-black p-4 shadow-brutal transition-opacity duration-200" style={{ opacity: isPending ? 0.6 : 1 }}>
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         {/* Left: Previous Day Button */}
         <Button
           variant="outline"
           size="sm"
           onClick={() => navigate(-1)}
+          disabled={isPending}
           className="flex items-center justify-center gap-2 sm:flex-1"
         >
           <ChevronLeft className="w-4 h-4" />
@@ -59,6 +67,7 @@ export function DateSelector({ currentDate }: DateSelectorProps) {
               variant="default"
               size="sm"
               onClick={goToToday}
+              disabled={isPending}
               className="font-space-mono text-xs"
             >
               AUJOURD'HUI
@@ -71,6 +80,7 @@ export function DateSelector({ currentDate }: DateSelectorProps) {
           variant="outline"
           size="sm"
           onClick={() => navigate(1)}
+          disabled={isPending}
           className="flex items-center justify-center gap-2 sm:flex-1"
         >
           <span className="font-space-mono text-xs">JOUR SUIVANT</span>

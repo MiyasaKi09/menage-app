@@ -59,27 +59,29 @@ export default async function SchedulePage(props: {
     }
   }
 
-  // 5. Generate schedule for target date if needed
-  try {
-    const { data: scheduleResult, error: generateError } = await supabase.rpc('generate_daily_schedule', {
-      p_household_id: householdId,
-      p_target_date: targetDateStr
-    })
-
-    if (generateError) {
-      console.error('Error generating schedule:', generateError)
-    } else {
-      console.log('Schedule generation result:', scheduleResult)
-    }
-  } catch (error) {
-    console.error('Error calling generate_daily_schedule:', error)
-    // Non-blocking - schedule might already exist
-  }
-
-  // 6. Fetch schedule for next 7 days
+  // 5. Generate schedule for next 7 days (from target date)
   const endDate = new Date(targetDate)
   endDate.setDate(endDate.getDate() + 6) // +6 days = 7 days total
   const endDateStr = endDate.toISOString().split('T')[0]
+
+  // Generate planning for each of the 7 days
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(targetDate)
+    date.setDate(date.getDate() + i)
+    const dateStr = date.toISOString().split('T')[0]
+
+    try {
+      await supabase.rpc('generate_daily_schedule', {
+        p_household_id: householdId,
+        p_target_date: dateStr
+      })
+    } catch (error) {
+      console.error(`Error generating schedule for ${dateStr}:`, error)
+      // Non-blocking - continue with other days
+    }
+  }
+
+  // 6. Fetch schedule for next 7 days
 
   const { data: schedule, error: scheduleError } = await supabase.rpc('get_schedule_for_dates', {
     p_household_id: householdId,
