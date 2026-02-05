@@ -99,9 +99,14 @@ export default async function TasksPage() {
               {taskCount} tâche{taskCount > 1 ? 's' : ''} disponible{taskCount > 1 ? 's' : ''}
             </p>
           </div>
-          <Link href="/tasks/history">
-            <Button variant="outline" size="sm">Voir l'historique</Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/tasks/schedule">
+              <Button variant="outline" size="sm">Vue Planning</Button>
+            </Link>
+            <Link href="/tasks/history">
+              <Button variant="outline" size="sm">Historique</Button>
+            </Link>
+          </div>
         </div>
 
         {/* Tasks */}
