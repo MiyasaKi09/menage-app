@@ -284,11 +284,10 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
 
     const currentValue = responses[currentQuestion.id]
 
-    // Pour les questions à choix multiples, une réponse vide est OK si c'est une question optionnelle
+    // Pour les questions à choix multiples, on peut toujours continuer
+    // (sélection vide = "aucun" implicite)
     if (currentQuestion.type === 'multiple') {
-      // Les questions conditionnelles sont optionnelles
-      if (currentQuestion.conditionalOn) return true
-      return currentValue !== undefined && currentValue.length > 0
+      return true
     }
 
     return currentValue !== undefined && currentValue !== ''

@@ -157,6 +157,7 @@ export const QUESTIONNAIRE: Question[] = [
     question: 'Quels espaces spéciaux avez-vous ?',
     description: 'Sélectionnez tous les espaces qui s\'appliquent',
     options: [
+      { value: 'none', label: 'Aucun de ces espaces' },
       { value: 'stairs', label: 'Escaliers', description: 'Intérieurs ou extérieurs' },
       { value: 'fireplace', label: 'Cheminée / Poêle', description: 'Insert, cheminée ouverte ou poêle' },
       { value: 'dressing', label: 'Dressing', description: 'Pièce ou placard dédié' },
@@ -171,7 +172,7 @@ export const QUESTIONNAIRE: Question[] = [
     id: 'kitchen_equipment',
     type: 'multiple',
     question: 'Quels équipements de cuisine avez-vous ?',
-    description: 'Sélectionnez tout ce qui s\'applique',
+    description: 'Sélectionnez tout ce qui s\'applique (ou passez si aucun)',
     options: [
       { value: 'oven', label: 'Four', description: 'Four traditionnel ou combiné' },
       { value: 'microwave', label: 'Micro-ondes' },
@@ -277,6 +278,7 @@ export const QUESTIONNAIRE: Question[] = [
     question: 'Avez-vous des robots ménagers ?',
     description: 'Ils nécessitent un entretien régulier',
     options: [
+      { value: 'none', label: 'Aucun robot' },
       { value: 'vacuum', label: 'Robot aspirateur', description: 'Roomba, Dyson, etc.' },
       { value: 'mop', label: 'Robot laveur', description: 'iRobot Braava, etc.' },
       { value: 'self_empty', label: 'Station auto-vidage', description: 'Pour robot aspirateur' },
@@ -374,6 +376,7 @@ export const QUESTIONNAIRE: Question[] = [
     id: 'lifestyle',
     type: 'multiple',
     question: 'Votre mode de vie',
+    description: 'Sélectionnez ce qui s\'applique (ou passez)',
     options: [
       { value: 'shared_housing', label: 'Colocation', description: 'Espaces communs partagés' },
       { value: 'works_from_home', label: 'Télétravail', description: 'Bureau à domicile régulier' },
@@ -398,7 +401,9 @@ export const QUESTIONNAIRE: Question[] = [
     id: 'environment',
     type: 'multiple',
     question: 'Votre environnement',
+    description: 'Sélectionnez ce qui s\'applique (ou passez)',
     options: [
+      { value: 'none', label: 'Environnement normal' },
       { value: 'high_dust', label: 'Zone poussiéreuse', description: 'Bord de route, travaux...' },
       { value: 'high_pollen', label: 'Zone pollinique', description: 'Campagne, arbres proches' },
     ],
