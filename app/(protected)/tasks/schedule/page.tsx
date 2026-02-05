@@ -2,11 +2,10 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { ScheduleView } from '@/components/tasks/ScheduleView'
 
-export default async function SchedulePage({
-  searchParams,
-}: {
-  searchParams: { date?: string }
+export default async function SchedulePage(props: {
+  searchParams: Promise<{ date?: string }>
 }) {
+  const searchParams = await props.searchParams
   const supabase = await createClient()
 
   // 1. Check authentication
