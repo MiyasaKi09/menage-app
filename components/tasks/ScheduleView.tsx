@@ -38,35 +38,31 @@ export function ScheduleView({
   userId,
   currentDate
 }: ScheduleViewProps) {
-  // Group tasks by date
-  const tasksByDate = schedule.reduce((acc, task) => {
-    if (!acc[task.scheduled_date]) {
-      acc[task.scheduled_date] = []
-    }
-    acc[task.scheduled_date].push(task)
-    return acc
-  }, {} as Record<string, ScheduleTask[]>)
+  // Filter tasks for current date only
+  const todayTasks = schedule.filter(task => task.scheduled_date === currentDate)
 
-  // Helper to get date label (Aujourd'hui, Demain, or formatted date)
-  const getDateLabel = (dateStr: string): string => {
+  // Calculate stats
+  const totalMinutes = todayTasks.reduce((sum, t) => sum + t.duration_minutes, 0)
+  const completedCount = todayTasks.filter(t => t.status === 'completed').length
+  const isToday = currentDate === new Date().toISOString().split('T')[0]
+
+  // Helper to get date label
+  const getDateLabel = (): string => {
     const today = new Date().toISOString().split('T')[0]
     const tomorrow = new Date()
     tomorrow.setDate(tomorrow.getDate() + 1)
     const tomorrowStr = tomorrow.toISOString().split('T')[0]
 
-    if (dateStr === today) return 'Aujourd\'hui'
-    if (dateStr === tomorrowStr) return 'Demain'
+    if (currentDate === today) return 'Aujourd\'hui'
+    if (currentDate === tomorrowStr) return 'Demain'
 
-    const date = new Date(dateStr + 'T12:00:00') // Noon to avoid timezone issues
+    const date = new Date(currentDate + 'T12:00:00')
     return date.toLocaleDateString('fr-FR', {
       weekday: 'long',
       day: 'numeric',
       month: 'long'
     })
   }
-
-  // Get sorted dates
-  const sortedDates = Object.keys(tasksByDate).sort()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-deep-purple to-[#1f0833] relative overflow-hidden">
@@ -100,14 +96,14 @@ export function ScheduleView({
         {/* Date Selector */}
         <DateSelector currentDate={currentDate} />
 
-        {/* Schedule by Day */}
-        {sortedDates.length === 0 ? (
+        {/* Schedule for Current Day */}
+        {todayTasks.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
               <div className="text-6xl mb-4">🎉</div>
               <h3 className="font-anton text-2xl uppercase mb-2">Aucune tâche planifiée</h3>
               <p className="font-outfit opacity-70 mb-4">
-                Toutes vos tâches sont à jour ! Profitez-en pour vous reposer.
+                Toutes vos tâches sont à jour pour ce jour ! Profitez-en pour vous reposer.
               </p>
               <Link href="/tasks">
                 <Button>Voir toutes les tâches</Button>
@@ -115,54 +111,43 @@ export function ScheduleView({
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-6">
-            {sortedDates.map(date => {
-              const tasks = tasksByDate[date]
-              const totalMinutes = tasks.reduce((sum, t) => sum + t.duration_minutes, 0)
-              const completedCount = tasks.filter(t => t.status === 'completed').length
-              const isToday = date === new Date().toISOString().split('T')[0]
+          <Card>
+            <CardHeader className={`border-b-4 border-black ${
+              isToday ? 'bg-orange' : 'bg-yellow'
+            }`}>
+              <div className="flex justify-between items-center flex-wrap gap-2">
+                <div>
+                  <CardTitle className="font-anton text-2xl uppercase flex items-center gap-2">
+                    {getDateLabel()}
+                    {isToday && (
+                      <span className="text-sm bg-black text-cream px-2 py-1 font-space-mono">
+                        AUJOURD'HUI
+                      </span>
+                    )}
+                  </CardTitle>
+                  <p className="font-space-mono text-xs opacity-70 mt-1">
+                    {todayTasks.length} tâche{todayTasks.length > 1 ? 's' : ''} · {totalMinutes} min · {completedCount}/{todayTasks.length} terminée{completedCount > 1 ? 's' : ''}
+                  </p>
+                </div>
+                {completedCount === todayTasks.length && (
+                  <div className="font-space-mono text-sm text-green bg-black px-3 py-1 uppercase">
+                    ✓ JOUR TERMINÉ
+                  </div>
+                )}
+              </div>
+            </CardHeader>
 
-              return (
-                <Card key={date}>
-                  <CardHeader className={`border-b-4 border-black ${
-                    isToday ? 'bg-orange' : 'bg-yellow'
-                  }`}>
-                    <div className="flex justify-between items-center flex-wrap gap-2">
-                      <div>
-                        <CardTitle className="font-anton text-2xl uppercase flex items-center gap-2">
-                          {getDateLabel(date)}
-                          {isToday && (
-                            <span className="text-sm bg-black text-cream px-2 py-1 font-space-mono">
-                              AUJOURD'HUI
-                            </span>
-                          )}
-                        </CardTitle>
-                        <p className="font-space-mono text-xs opacity-70 mt-1">
-                          {tasks.length} tâche{tasks.length > 1 ? 's' : ''} · {totalMinutes} min · {completedCount}/{tasks.length} terminée{completedCount > 1 ? 's' : ''}
-                        </p>
-                      </div>
-                      {completedCount === tasks.length && (
-                        <div className="font-space-mono text-sm text-green bg-black px-3 py-1 uppercase">
-                          ✓ JOUR TERMINÉ
-                        </div>
-                      )}
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className="p-4 space-y-3">
-                    {tasks.map(task => (
-                      <ScheduleTaskCard
-                        key={task.task_id}
-                        task={task}
-                        householdId={householdId}
-                        userId={userId}
-                      />
-                    ))}
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
+            <CardContent className="p-4 space-y-3">
+              {todayTasks.map(task => (
+                <ScheduleTaskCard
+                  key={task.task_id}
+                  task={task}
+                  householdId={householdId}
+                  userId={userId}
+                />
+              ))}
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
