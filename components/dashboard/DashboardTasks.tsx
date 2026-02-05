@@ -40,20 +40,37 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
     const scheduledTaskId = task.task_id
     setCompletingTaskId(scheduledTaskId)
 
+    console.log('=== COMPLETING TASK ===')
+    console.log('Task:', task)
+    console.log('Scheduled Task ID:', scheduledTaskId)
+    console.log('Household ID:', householdId)
+    console.log('User ID:', userId)
+
     try {
       const now = new Date()
 
       // 1. Mettre a jour scheduled_tasks.status
-      const { error: scheduleError } = await supabase
+      const { data: updateData, error: scheduleError } = await supabase
         .from('scheduled_tasks')
         .update({
           status: 'completed',
           completed_at: now.toISOString()
         })
         .eq('id', scheduledTaskId)
+        .select()
+
+      console.log('Update result:', { updateData, scheduleError })
 
       if (scheduleError) {
         console.error('Erreur scheduled_tasks:', scheduleError)
+        alert(`Erreur: ${scheduleError.message}`)
+        setCompletingTaskId(null)
+        return
+      }
+
+      if (!updateData || updateData.length === 0) {
+        console.error('Aucune ligne mise à jour - vérifiez les permissions RLS')
+        alert('Erreur: Impossible de mettre à jour la tâche. Vérifiez les permissions.')
         setCompletingTaskId(null)
         return
       }
@@ -75,11 +92,15 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
         historyData.task_template_id = task.template_id
       }
 
-      const { error: historyError } = await supabase
+      console.log('Inserting task_history:', historyData)
+
+      const { data: historyResult, error: historyError } = await supabase
         .from('task_history')
         .insert(historyData)
         .select()
         .single()
+
+      console.log('History result:', { historyResult, historyError })
 
       if (historyError) {
         console.error('Erreur task_history:', historyError)
@@ -94,6 +115,7 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
 
       if (profileError) {
         console.error('Erreur increment_profile_stats:', profileError)
+        // Non-bloquant, on continue
       }
 
       // 4. Mettre a jour les statistiques du membre du foyer
@@ -105,7 +127,10 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
 
       if (memberError) {
         console.error('Erreur increment_household_member_stats:', memberError)
+        // Non-bloquant, on continue
       }
+
+      console.log('=== TASK COMPLETED SUCCESSFULLY ===')
 
       // Mettre a jour l'etat local immediatement
       setLocalTasks(prev =>
