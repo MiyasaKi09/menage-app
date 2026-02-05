@@ -6,7 +6,8 @@ DO $$
 DECLARE
   v_household_id UUID;
   v_date DATE;
-  v_result JSONB;
+  v_task RECORD;
+  v_count INT;
   v_total INT := 0;
 BEGIN
   -- Trouver le foyer
@@ -27,7 +28,7 @@ BEGIN
       AND scheduled_date = v_date;
 
     -- Sélectionner et planifier les tâches
-    FOR v_result IN (
+    FOR v_task IN (
       SELECT
         ht.id as household_task_id,
         tt.name,
@@ -51,11 +52,11 @@ BEGIN
         created_at,
         updated_at
       ) VALUES (
-        (v_result->>'household_task_id')::UUID,
+        v_task.household_task_id,
         v_household_id,
         v_date,
         'pending',
-        (v_result->>'preferred_assignee_id')::UUID,
+        v_task.preferred_assignee_id,
         NOW(),
         NOW()
       );
@@ -64,12 +65,12 @@ BEGIN
     END LOOP;
 
     -- Compter les tâches planifiées pour ce jour
-    SELECT COUNT(*) INTO v_result
+    SELECT COUNT(*) INTO v_count
     FROM scheduled_tasks
     WHERE household_id = v_household_id
       AND scheduled_date = v_date;
 
-    RAISE NOTICE '  % : % tâches', v_date, v_result;
+    RAISE NOTICE '  % : % tâches', v_date, v_count;
   END LOOP;
 
   RAISE NOTICE '════════════════════════════════════════';
