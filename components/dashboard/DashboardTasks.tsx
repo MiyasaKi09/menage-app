@@ -32,6 +32,7 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
 
   const completedCount = localTasks.filter(t => t.status === 'completed').length
   const totalCount = localTasks.length
+  const pendingTasks = localTasks.filter(t => t.status !== 'completed')
 
   const handleCompleteTask = async (task: ScheduledTask) => {
     if (task.status === 'completed') return
@@ -39,12 +40,6 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
     // task_id from RPC is actually scheduled_tasks.id
     const scheduledTaskId = task.task_id
     setCompletingTaskId(scheduledTaskId)
-
-    console.log('=== COMPLETING TASK ===')
-    console.log('Task:', task)
-    console.log('Scheduled Task ID:', scheduledTaskId)
-    console.log('Household ID:', householdId)
-    console.log('User ID:', userId)
 
     try {
       const now = new Date()
@@ -58,8 +53,6 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
         })
         .eq('id', scheduledTaskId)
         .select()
-
-      console.log('Update result:', { updateData, scheduleError })
 
       if (scheduleError) {
         console.error('Erreur scheduled_tasks:', scheduleError)
@@ -92,15 +85,11 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
         historyData.task_template_id = task.template_id
       }
 
-      console.log('Inserting task_history:', historyData)
-
-      const { data: historyResult, error: historyError } = await supabase
+      const { error: historyError } = await supabase
         .from('task_history')
         .insert(historyData)
         .select()
         .single()
-
-      console.log('History result:', { historyResult, historyError })
 
       if (historyError) {
         console.error('Erreur task_history:', historyError)
@@ -129,8 +118,6 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
         console.error('Erreur increment_household_member_stats:', memberError)
         // Non-bloquant, on continue
       }
-
-      console.log('=== TASK COMPLETED SUCCESSFULLY ===')
 
       // Mettre a jour l'etat local immediatement
       setLocalTasks(prev =>
@@ -165,25 +152,29 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
         </div>
       </CardHeader>
       <CardContent className="p-4 space-y-2">
-        {localTasks.slice(0, 5).map((task) => (
-          <div
-            key={task.task_id}
-            className={`flex items-center justify-between p-3 border-2 border-black transition-all ${
-              task.status === 'completed' ? 'bg-green/20' : 'bg-cream hover:bg-yellow/20'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">{task.category_emoji || '📋'}</span>
-              <div>
-                <p className="font-anton text-sm uppercase">{task.task_name}</p>
-                <p className="font-space-mono text-xs opacity-60">
-                  {task.duration_minutes} min - {task.points} pts
-                </p>
+        {pendingTasks.length === 0 ? (
+          <div className="text-center py-6">
+            <span className="text-4xl">🎉</span>
+            <p className="font-anton text-xl uppercase mt-2">Bravo !</p>
+            <p className="font-outfit text-sm opacity-70">
+              Toutes les taches du jour sont terminees
+            </p>
+          </div>
+        ) : (
+          pendingTasks.slice(0, 5).map((task) => (
+            <div
+              key={task.task_id}
+              className="flex items-center justify-between p-3 border-2 border-black bg-cream hover:bg-yellow/20 transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{task.category_emoji || '📋'}</span>
+                <div>
+                  <p className="font-anton text-sm uppercase">{task.task_name}</p>
+                  <p className="font-space-mono text-xs opacity-60">
+                    {task.duration_minutes} min - {task.points} pts
+                  </p>
+                </div>
               </div>
-            </div>
-            {task.status === 'completed' ? (
-              <span className="text-green text-2xl">&#x2713;</span>
-            ) : (
               <Button
                 size="sm"
                 onClick={() => handleCompleteTask(task)}
@@ -191,9 +182,9 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
               >
                 {completingTaskId === task.task_id ? '...' : 'FAIT'}
               </Button>
-            )}
-          </div>
-        ))}
+            </div>
+          ))
+        )}
         <Link href="/tasks/schedule">
           <Button variant="outline" className="w-full mt-4">
             Voir le planning complet
