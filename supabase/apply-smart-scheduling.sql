@@ -171,13 +171,11 @@ BEGIN
       COALESCE(ht.custom_points, tt.base_points) as points,
       tt.difficulty,
 
-      -- Score urgence
+      -- Score urgence: retards (1000+) > dues aujourd'hui (500)
       (CASE
         WHEN ht.next_due_at < p_target_date THEN
           1000 + LEAST((p_target_date - ht.next_due_at)::INT * 50, 500)
         WHEN ht.next_due_at = p_target_date THEN 500
-        WHEN ht.next_due_at <= p_target_date + 3 THEN
-          GREATEST(0, 200 - ((ht.next_due_at - p_target_date)::INT * 50))
         ELSE 0
       END)::INT as score_urgence,
 
@@ -214,7 +212,7 @@ BEGIN
     JOIN categories c ON tt.category_id = c.id
     WHERE ht.household_id = p_household_id
       AND ht.is_active = true
-      AND ht.next_due_at <= p_target_date + 3
+      AND ht.next_due_at <= p_target_date  -- Seulement aujourd'hui + retards (pas +3 jours)
       AND NOT EXISTS (
         SELECT 1 FROM scheduled_tasks st
         WHERE st.household_task_id = ht.id
@@ -222,20 +220,18 @@ BEGIN
           AND st.status IN ('pending', 'in_progress', 'completed')
       )
     ORDER BY
+      -- Priorité: retards (1000+) > dues aujourd'hui (500) > autres (0)
       (CASE WHEN ht.next_due_at < p_target_date THEN 1000 + LEAST((p_target_date - ht.next_due_at)::INT * 50, 500)
             WHEN ht.next_due_at = p_target_date THEN 500
-            WHEN ht.next_due_at <= p_target_date + 3 THEN GREATEST(0, 200 - ((ht.next_due_at - p_target_date)::INT * 50))
             ELSE 0 END) DESC,
-      COALESCE(ht.custom_duration_minutes, tt.duration_minutes) ASC
+      COALESCE(ht.custom_duration_minutes, tt.duration_minutes) ASC,
+      ht.id ASC  -- Tri stable
   ) LOOP
-    -- Vérifier limites
+    -- Vérifier limites: nombre de tâches
     EXIT WHEN v_selected_count >= v_max_tasks;
 
-    IF v_task.score_urgence >= 1000 THEN
-      EXIT WHEN v_total_minutes + v_task.duration > v_available_minutes * 1.20;
-    ELSE
-      EXIT WHEN v_total_minutes + v_task.duration > v_flexible_minutes;
-    END IF;
+    -- Vérifier limites: temps total (115% max pour tous)
+    EXIT WHEN v_total_minutes + v_task.duration > v_flexible_minutes;
 
     -- Équilibre catégories (max 3)
     v_cat_count := COALESCE((v_category_counts->>v_task.category_name)::INT, 0);

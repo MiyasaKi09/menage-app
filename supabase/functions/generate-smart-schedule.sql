@@ -150,9 +150,6 @@ BEGIN
           1000 + LEAST((p_target_date - ht.next_due_at)::INT * 50, 500)
         -- Due aujourd'hui: 500 base
         WHEN ht.next_due_at = p_target_date THEN 500
-        -- Future proche (1-3 jours): permet anticipation
-        WHEN ht.next_due_at <= p_target_date + 3 THEN
-          GREATEST(0, 200 - ((ht.next_due_at - p_target_date)::INT * 50))
         ELSE 0
       END)::INT as score_urgence,
 
@@ -198,7 +195,7 @@ BEGIN
     JOIN categories c ON tt.category_id = c.id
     WHERE ht.household_id = p_household_id
       AND ht.is_active = true
-      AND ht.next_due_at <= p_target_date + 3  -- Due dans 3 jours max
+      AND ht.next_due_at <= p_target_date  -- Seulement aujourd'hui + retards
       AND NOT EXISTS (
         -- Pas déjà planifié pour cette date
         SELECT 1 FROM scheduled_tasks st
@@ -207,15 +204,16 @@ BEGIN
           AND st.status IN ('pending', 'in_progress', 'completed')
       )
     ORDER BY
-      -- Score total pour priorisation
+      -- Score total pour priorisation: retards (1000+) > dues aujourd'hui (500) > autres (0)
       (
         CASE WHEN ht.next_due_at < p_target_date THEN 1000 + LEAST((p_target_date - ht.next_due_at)::INT * 50, 500)
              WHEN ht.next_due_at = p_target_date THEN 500
-             WHEN ht.next_due_at <= p_target_date + 3 THEN GREATEST(0, 200 - ((ht.next_due_at - p_target_date)::INT * 50))
              ELSE 0 END
       ) DESC,
       -- Puis par durée croissante (privilégier tâches courtes à score égal)
-      COALESCE(ht.custom_duration_minutes, tt.duration_minutes) ASC
+      COALESCE(ht.custom_duration_minutes, tt.duration_minutes) ASC,
+      -- Tri stable par ID pour résultats déterministes
+      ht.id ASC
   ) LOOP
     -- ============================================
     -- VÉRIFIER LES LIMITES
@@ -224,14 +222,8 @@ BEGIN
     -- Limite nombre total de tâches
     EXIT WHEN v_selected_count >= v_max_tasks;
 
-    -- Limite temps total (avec 20% max pour overdue)
-    IF v_task.score_urgence >= 1000 THEN
-      -- Tâches en retard: 20% overflow max
-      EXIT WHEN v_total_minutes + v_task.duration > v_available_minutes * 1.20;
-    ELSE
-      -- Autres tâches: 15% overflow
-      EXIT WHEN v_total_minutes + v_task.duration > v_flexible_minutes;
-    END IF;
+    -- Limite temps total (115% max pour toutes les tâches)
+    EXIT WHEN v_total_minutes + v_task.duration > v_flexible_minutes;
 
     -- ============================================
     -- VÉRIFIER ÉQUILIBRE CATÉGORIES
