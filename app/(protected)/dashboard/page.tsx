@@ -40,6 +40,24 @@ export default async function DashboardPage() {
   const totalHouseholds = households?.length || 0
   const householdProgress = (totalHouseholds / 5) * 100 // Progress toward 5 households
 
+  // Récupérer les tâches du jour
+  let todayTasks: any[] = []
+  if (households && households.length > 0) {
+    const householdId = (households[0].households as any)?.id
+    const today = new Date().toISOString().split('T')[0]
+
+    const { data } = await supabase.rpc('get_schedule_for_dates', {
+      p_household_id: householdId,
+      p_start_date: today,
+      p_end_date: today
+    })
+
+    todayTasks = data || []
+  }
+
+  const completedCount = todayTasks.filter((t: any) => t.status === 'completed').length
+  const totalCount = todayTasks.length
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-deep-blue to-[#0f1a40] relative overflow-hidden">
       <GrainOverlay />
@@ -84,6 +102,48 @@ export default async function DashboardPage() {
             color="green"
           />
         </div>
+
+        {/* Today's Tasks Section */}
+        {totalCount > 0 && (
+          <Card>
+            <CardHeader className="bg-orange border-b-4 border-black">
+              <div className="flex justify-between items-center">
+                <CardTitle className="font-anton text-2xl uppercase">📅 Mes tâches du jour</CardTitle>
+                <span className="font-space-mono text-sm bg-black text-cream px-3 py-1">
+                  {completedCount}/{totalCount}
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 space-y-2">
+              {todayTasks.slice(0, 5).map((task: any) => (
+                <div
+                  key={task.task_id}
+                  className={`flex items-center justify-between p-3 border-2 border-black ${
+                    task.status === 'completed' ? 'bg-green/20' : 'bg-cream'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{task.category_emoji}</span>
+                    <div>
+                      <p className="font-anton text-sm uppercase">{task.task_name}</p>
+                      <p className="font-space-mono text-xs opacity-60">
+                        {task.duration_minutes} min · {task.points} pts
+                      </p>
+                    </div>
+                  </div>
+                  {task.status === 'completed' && (
+                    <span className="text-green text-2xl">✓</span>
+                  )}
+                </div>
+              ))}
+              <Link href="/tasks/schedule">
+                <Button variant="outline" className="w-full mt-4">
+                  Voir le planning complet
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Households Section */}
         <div className="space-y-4">
