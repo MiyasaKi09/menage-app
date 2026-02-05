@@ -23,15 +23,6 @@ export default async function DashboardPage() {
     .eq('id', user?.id)
     .single()
 
-  // Vérifier si le questionnaire a été complété
-  const { data: questionnaire } = await supabase
-    .from('profile_questionnaire')
-    .select('id')
-    .eq('profile_id', user?.id)
-    .maybeSingle()
-
-  const hasCompletedQuestionnaire = !!questionnaire
-
   // Récupérer les foyers de l'utilisateur
   const { data: households } = await supabase
     .from('household_members')
@@ -68,6 +59,10 @@ export default async function DashboardPage() {
 
     todayTasks = data || []
   }
+
+  // Vérifier si le questionnaire a été complété
+  // Si l'utilisateur a des tâches planifiées, c'est que le questionnaire a été fait
+  const hasCompletedQuestionnaire = todayTasks.length > 0 || (profile?.tasks_completed && profile.tasks_completed > 0)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-deep-blue to-[#0f1a40] relative overflow-hidden">

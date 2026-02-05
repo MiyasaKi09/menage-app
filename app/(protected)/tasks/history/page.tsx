@@ -11,21 +11,15 @@ export default async function TaskHistoryPage() {
   if (!user) redirect('/login')
 
   // Récupérer l'historique des tâches de l'utilisateur
+  // On utilise task_name et category_name stockés directement dans task_history
   const { data: history } = await supabase
     .from('task_history')
     .select(`
       id,
       completed_at,
       points_earned,
-      household_tasks (
-        task_templates (
-          name,
-          categories (
-            name,
-            icon
-          )
-        )
-      ),
+      task_name,
+      category_name,
       households (
         name
       )
@@ -72,15 +66,14 @@ export default async function TaskHistoryPage() {
                   className="flex items-center justify-between p-4 hover:bg-muted/30 transition-colors"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="text-2xl">
-                      {entry.household_tasks?.task_templates?.categories?.icon || '📋'}
-                    </div>
+                    <div className="text-2xl">📋</div>
                     <div>
                       <p className="font-medium">
-                        {entry.household_tasks?.task_templates?.name || 'Tâche'}
+                        {entry.task_name || 'Tâche'}
                       </p>
                       <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-                        <span>🏠 {entry.households?.name}</span>
+                        {entry.category_name && <span>{entry.category_name}</span>}
+                        {entry.households?.name && <span>🏠 {entry.households.name}</span>}
                         <span>
                           {new Date(entry.completed_at).toLocaleDateString('fr-FR', {
                             day: 'numeric',
