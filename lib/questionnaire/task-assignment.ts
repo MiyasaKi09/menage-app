@@ -1,424 +1,358 @@
 /**
  * Logique d'assignation intelligente des tâches basée sur les réponses au questionnaire
- * Version 2.0 - Expansion massive avec ~145 tâches
+ * Version 3.0 - Utilise les condition_codes pour filtrer 227 tâches
  */
 
+import { SupabaseClient } from '@supabase/supabase-js'
 import { QuestionnaireResponses } from './schema'
+import {
+  deriveConditionCodes,
+  shouldAssignTask,
+  calculatePointsMultiplier,
+  calculateFrequencyAdjustment,
+} from './condition-mapping'
+
+export interface TaskTemplate {
+  id: string
+  name: string
+  duration_minutes: number
+  difficulty: number
+  base_points: number
+  category_id: string
+  frequency_id: string
+  condition_code: string | null
+  needs_product: boolean
+  tip: string | null
+  icon: string | null
+}
 
 export interface TaskAssignment {
+  templateId: string
   templateName: string
   shouldAssign: boolean
-  pointsMultiplier: number // Multiplicateur de points basé sur la complexité du foyer
+  pointsMultiplier: number
+  frequencyAdjustment: number
+}
+
+export interface AssignmentResult {
+  assignments: TaskAssignment[]
+  totalTasks: number
+  assignedTasks: number
+  activeConditions: string[]
+  estimatedDailyMinutes: number
 }
 
 /**
  * Détermine quelles tâches doivent être assignées au foyer
- * Utilise TOUS les champs du questionnaire enrichi pour une assignation intelligente
+ * basé sur les condition_codes des task_templates
+ */
+export async function determineTaskAssignmentsFromDB(
+  supabase: SupabaseClient,
+  responses: QuestionnaireResponses
+): Promise<AssignmentResult> {
+  // 1. Dériver toutes les conditions actives depuis le questionnaire
+  const activeConditions = deriveConditionCodes(responses)
+
+  // 2. Récupérer tous les templates de tâches
+  const { data: templates, error } = await supabase
+    .from('task_templates')
+    .select(`
+      id,
+      name,
+      duration_minutes,
+      difficulty,
+      base_points,
+      category_id,
+      frequency_id,
+      condition_code,
+      needs_product,
+      tip,
+      icon
+    `)
+    .order('category_id')
+
+  if (error) {
+    console.error('Erreur récupération task_templates:', error)
+    throw new Error(`Impossible de récupérer les tâches: ${error.message}`)
+  }
+
+  if (!templates || templates.length === 0) {
+    console.warn('Aucun template de tâche trouvé')
+    return {
+      assignments: [],
+      totalTasks: 0,
+      assignedTasks: 0,
+      activeConditions: Array.from(activeConditions),
+      estimatedDailyMinutes: 0,
+    }
+  }
+
+  // 3. Filtrer et assigner les tâches selon les conditions
+  const assignments: TaskAssignment[] = []
+  let estimatedDailyMinutes = 0
+
+  for (const template of templates) {
+    const shouldAssign = shouldAssignTask(template.condition_code, activeConditions)
+    const pointsMultiplier = shouldAssign
+      ? calculatePointsMultiplier(responses, template.difficulty)
+      : 1.0
+    const frequencyAdjustment = shouldAssign
+      ? calculateFrequencyAdjustment(responses, template.condition_code)
+      : 1.0
+
+    assignments.push({
+      templateId: template.id,
+      templateName: template.name,
+      shouldAssign,
+      pointsMultiplier,
+      frequencyAdjustment,
+    })
+
+    // Estimer le temps quotidien (approximation basée sur fréquence)
+    if (shouldAssign) {
+      // Estimation grossière: on divise la durée par la fréquence moyenne
+      estimatedDailyMinutes += template.duration_minutes / 7 // moyenne hebdo simplifiée
+    }
+  }
+
+  const assignedCount = assignments.filter(a => a.shouldAssign).length
+
+  return {
+    assignments,
+    totalTasks: templates.length,
+    assignedTasks: assignedCount,
+    activeConditions: Array.from(activeConditions),
+    estimatedDailyMinutes: Math.round(estimatedDailyMinutes),
+  }
+}
+
+/**
+ * Version synchrone pour compatibilité avec l'ancienne API
+ * Utilise des noms de tâches au lieu des IDs
+ * @deprecated Utiliser determineTaskAssignmentsFromDB à la place
  */
 export function determineTaskAssignments(
   responses: QuestionnaireResponses
 ): TaskAssignment[] {
+  const activeConditions = deriveConditionCodes(responses)
   const assignments: TaskAssignment[] = []
 
-  // ====== CALCULS DES MULTIPLICATEURS ======
-
-  // Multiplicateur de base selon la taille du foyer
-  const baseMultiplier = Math.min(1 + (responses.household_size - 1) * 0.1, 1.5)
-
-  // Multiplicateur selon le niveau d'exigence de propreté (1-5)
-  const cleanlinessLevel = responses.cleanliness_level || 3
-  const cleanlinessMultiplier = 0.6 + (cleanlinessLevel - 1) * 0.15 // 0.6 à 1.2
-
-  // Multiplicateur combiné
-  const multiplier = baseMultiplier * cleanlinessMultiplier
-
-  // Facteur de dureté de l'eau pour tâches de détartrage
-  const waterHardness = responses.water_hardness || 'medium'
-  const descalingMultiplier = waterHardness === 'hard' ? 1.3 : waterHardness === 'medium' ? 1.1 : 0.8
-
-  // Nombre de salles de bain
-  const bathroomCount = responses.bathroom_count || 1
-
-  // Facteur d'allergies (augmente fréquence des tâches anti-poussière)
-  const hasAllergies = !!(responses.allergies && responses.allergies.length > 0 && !responses.allergies.includes('none'))
-  const allergyMultiplier = hasAllergies ? 1.2 : 1.0
-
-  // ====== CUISINE (25 tâches) ======
-  if (responses.cooking_frequency !== 'never') {
-    const cookingMultiplier = responses.cooking_frequency === 'daily' ? 1.2 :
-                              responses.cooking_frequency === 'regular' ? 1.0 : 0.8
-
-    // Quotidiennes
-    assignments.push(
-      { templateName: 'Faire la vaisselle', shouldAssign: true, pointsMultiplier: multiplier * cookingMultiplier },
-      { templateName: 'Nettoyer le plan de travail', shouldAssign: true, pointsMultiplier: multiplier * cookingMultiplier },
-      { templateName: 'Sortir les poubelles', shouldAssign: true, pointsMultiplier: multiplier }
-    )
-
-    if (responses.has_dishwasher) {
-      assignments.push({ templateName: 'Vider le lave-vaisselle', shouldAssign: true, pointsMultiplier: multiplier * 0.8 })
-    }
-
-    // Hebdomadaires
-    assignments.push(
-      { templateName: 'Nettoyer la plaque de cuisson', shouldAssign: true, pointsMultiplier: multiplier * cookingMultiplier },
-      { templateName: 'Nettoyer l\'évier et robinetterie', shouldAssign: true, pointsMultiplier: multiplier },
-      { templateName: 'Vider et nettoyer la poubelle', shouldAssign: true, pointsMultiplier: multiplier },
-      { templateName: 'Nettoyer le micro-ondes', shouldAssign: true, pointsMultiplier: multiplier * cookingMultiplier }
-    )
-
-    // Mensuelles
-    if (responses.cooking_frequency === 'regular' || responses.cooking_frequency === 'daily') {
-      assignments.push(
-        { templateName: 'Nettoyer le four', shouldAssign: true, pointsMultiplier: multiplier * 1.3 },
-        { templateName: 'Nettoyer les grilles du four', shouldAssign: true, pointsMultiplier: multiplier * 1.2 },
-        { templateName: 'Dégraisser la hotte', shouldAssign: true, pointsMultiplier: multiplier * 1.2 }
-      )
-    }
-
-    assignments.push(
-      { templateName: 'Nettoyer le réfrigérateur', shouldAssign: true, pointsMultiplier: multiplier * 1.1 },
-      { templateName: 'Nettoyer les joints du réfrigérateur', shouldAssign: true, pointsMultiplier: multiplier },
-      { templateName: 'Organiser les placards', shouldAssign: true, pointsMultiplier: multiplier },
-      { templateName: 'Nettoyer les poignées de placards', shouldAssign: true, pointsMultiplier: multiplier * 0.9 },
-      { templateName: 'Nettoyer plan de travail - profond', shouldAssign: cleanlinessLevel >= 3, pointsMultiplier: multiplier }
-    )
-
-    // Détartrage si eau dure
-    if (responses.has_dishwasher) {
-      assignments.push({ templateName: 'Nettoyer le lave-vaisselle', shouldAssign: true, pointsMultiplier: multiplier })
-    }
-
-    assignments.push(
-      { templateName: 'Détartrer la cafetière/bouilloire', shouldAssign: true, pointsMultiplier: multiplier * descalingMultiplier },
-      { templateName: 'Détartrer l\'évier', shouldAssign: waterHardness !== 'soft', pointsMultiplier: multiplier * descalingMultiplier }
-    )
-
-    // VMC si équipé
-    if (responses.has_ventilation) {
-      assignments.push({ templateName: 'Nettoyer les bouches de VMC', shouldAssign: true, pointsMultiplier: multiplier })
-    }
-
-    // Trimestrielles
-    assignments.push(
-      { templateName: 'Dégivrer le congélateur', shouldAssign: true, pointsMultiplier: multiplier * 1.2 },
-      { templateName: 'Nettoyer derrière les électroménagers', shouldAssign: cleanlinessLevel >= 3, pointsMultiplier: multiplier * 1.3 }
-    )
-  } else {
-    // Même sans cuisiner, certaines tâches restent pertinentes
-    assignments.push(
-      { templateName: 'Sortir les poubelles', shouldAssign: true, pointsMultiplier: multiplier * 0.7 },
-      { templateName: 'Nettoyer le réfrigérateur', shouldAssign: true, pointsMultiplier: multiplier }
-    )
-  }
-
-  // ====== SALLE DE BAIN (18 tâches × bathroom_count) ======
-  const bathroomMultiplier = Math.min(bathroomCount * 0.8, 2.0) // Cap à 2x pour éviter surcharge
-
-  // Quotidiennes
-  assignments.push({ templateName: 'Aérer la salle de bain', shouldAssign: true, pointsMultiplier: multiplier * 0.5 })
-
-  // Hebdomadaires
-  assignments.push(
-    { templateName: 'Nettoyer les toilettes', shouldAssign: true, pointsMultiplier: multiplier * bathroomMultiplier },
-    { templateName: 'Nettoyer la salle de bain', shouldAssign: true, pointsMultiplier: multiplier * bathroomMultiplier * 1.1 },
-    { templateName: 'Nettoyer la douche', shouldAssign: true, pointsMultiplier: multiplier * bathroomMultiplier },
-    { templateName: 'Nettoyer les miroirs', shouldAssign: true, pointsMultiplier: multiplier * bathroomMultiplier * 0.7 },
-    { templateName: 'Nettoyer le meuble de salle de bain', shouldAssign: true, pointsMultiplier: multiplier },
-    { templateName: 'Laver les tapis de bain', shouldAssign: true, pointsMultiplier: multiplier },
-    { templateName: 'Désinfecter poignées et interrupteurs', shouldAssign: cleanlinessLevel >= 4, pointsMultiplier: multiplier }
-  )
-
-  // Mensuelles
-  assignments.push(
-    { templateName: 'Nettoyer les joints de carrelage', shouldAssign: cleanlinessLevel >= 3, pointsMultiplier: multiplier * 1.2 },
-    { templateName: 'Détartrer les robinets', shouldAssign: waterHardness !== 'soft', pointsMultiplier: multiplier * descalingMultiplier },
-    { templateName: 'Nettoyer le rideau de douche', shouldAssign: true, pointsMultiplier: multiplier },
-    { templateName: 'Nettoyer les canalisations', shouldAssign: true, pointsMultiplier: multiplier },
-    { templateName: 'Nettoyer le pommeau de douche', shouldAssign: true, pointsMultiplier: multiplier },
-    { templateName: 'Organiser les produits', shouldAssign: true, pointsMultiplier: multiplier * 0.8 },
-    { templateName: 'Détartrer baignoire/douche', shouldAssign: waterHardness !== 'soft', pointsMultiplier: multiplier * descalingMultiplier },
-    { templateName: 'Nettoyer sèche-serviettes/radiateur', shouldAssign: true, pointsMultiplier: multiplier }
-  )
-
-  // VMC salle de bain
-  if (responses.has_ventilation) {
-    assignments.push({ templateName: 'Nettoyer la VMC/extracteur', shouldAssign: true, pointsMultiplier: multiplier })
-  }
-
-  // Trimestrielles
-  assignments.push({ templateName: 'Nettoyer baignoire en profondeur', shouldAssign: cleanlinessLevel >= 3, pointsMultiplier: multiplier })
-
-  // ====== CHAMBRE (15 tâches) ======
-  const roomMultiplier = Math.sqrt(responses.room_count)
-
-  // Quotidiennes
-  assignments.push({ templateName: 'Aérer la chambre', shouldAssign: true, pointsMultiplier: multiplier * 0.5 })
-
-  // Hebdomadaires
-  assignments.push(
-    { templateName: 'Changer les draps', shouldAssign: true, pointsMultiplier: multiplier * roomMultiplier },
-    { templateName: 'Nettoyer miroirs de placard', shouldAssign: true, pointsMultiplier: multiplier * 0.8 },
-    { templateName: 'Dépoussiérer les étagères', shouldAssign: true, pointsMultiplier: multiplier * allergyMultiplier }
-  )
-
-  // Mensuelles
-  assignments.push(
-    { templateName: 'Passer l\'aspirateur sous le lit', shouldAssign: cleanlinessLevel >= 3 || hasAllergies, pointsMultiplier: multiplier * allergyMultiplier },
-    { templateName: 'Dépoussiérer les plinthes', shouldAssign: cleanlinessLevel >= 3 || hasAllergies, pointsMultiplier: multiplier * allergyMultiplier },
-    { templateName: 'Nettoyer interrupteurs/prises', shouldAssign: cleanlinessLevel >= 4, pointsMultiplier: multiplier },
-    { templateName: 'Aspirer le matelas', shouldAssign: cleanlinessLevel >= 3 || hasAllergies, pointsMultiplier: multiplier * allergyMultiplier * 1.2 },
-    { templateName: 'Nettoyer lampes de chevet', shouldAssign: true, pointsMultiplier: multiplier * 0.8 },
-    { templateName: 'Ranger tiroirs/placards', shouldAssign: true, pointsMultiplier: multiplier },
-    { templateName: 'Trier les vêtements', shouldAssign: true, pointsMultiplier: multiplier },
-    { templateName: 'Nettoyer volets/stores', shouldAssign: true, pointsMultiplier: multiplier }
-  )
-
-  // Trimestrielles
-  assignments.push(
-    { templateName: 'Retourner le matelas', shouldAssign: true, pointsMultiplier: multiplier },
-    { templateName: 'Laver les oreillers', shouldAssign: cleanlinessLevel >= 3 || hasAllergies, pointsMultiplier: multiplier },
-    { templateName: 'Laver couvertures/couettes', shouldAssign: cleanlinessLevel >= 3 || hasAllergies, pointsMultiplier: multiplier }
-  )
-
-  // ====== SALON (8 tâches) ======
-  const floorType = responses.floor_type || 'mixed'
-  const hasRobotVacuum = responses.has_robot_vacuum || false
-
-  // Aspirateur - ajusté si robot aspirateur
-  const vacuumMultiplier = hasRobotVacuum ? 0.5 : 1.0
-
-  assignments.push(
-    { templateName: 'Passer l\'aspirateur - salon', shouldAssign: true, pointsMultiplier: multiplier * roomMultiplier * vacuumMultiplier },
-    { templateName: 'Dépoussiérer les meubles - salon', shouldAssign: true, pointsMultiplier: multiplier * allergyMultiplier },
-    { templateName: 'Ranger le salon', shouldAssign: true, pointsMultiplier: multiplier },
-    { templateName: 'Aérer le salon', shouldAssign: true, pointsMultiplier: multiplier * 0.5 }
-  )
-
-  // Mensuelles
-  assignments.push(
-    { templateName: 'Nettoyer le canapé', shouldAssign: cleanlinessLevel >= 3, pointsMultiplier: multiplier },
-    { templateName: 'Nettoyer les coussins', shouldAssign: cleanlinessLevel >= 3, pointsMultiplier: multiplier * 0.9 }
-  )
-
-  // ====== BUANDERIE (5 tâches) ======
-  if (responses.has_washing_machine) {
-    const washingFrequency = responses.household_size >= 3 ? 1.2 : 1.0
-
-    assignments.push(
-      { templateName: 'Faire une machine de linge', shouldAssign: true, pointsMultiplier: multiplier * washingFrequency },
-      { templateName: 'Plier et ranger le linge', shouldAssign: true, pointsMultiplier: multiplier },
-      { templateName: 'Nettoyer le lave-linge', shouldAssign: true, pointsMultiplier: multiplier }
-    )
-
-    if (!responses.has_dryer) {
-      assignments.push({ templateName: 'Étendre le linge', shouldAssign: true, pointsMultiplier: multiplier })
-    }
-
-    if (cleanlinessLevel >= 4) {
-      assignments.push({ templateName: 'Repasser le linge', shouldAssign: true, pointsMultiplier: multiplier })
-    }
-  }
-
-  // ====== ENTRÉE (12 tâches) ======
-  assignments.push(
-    // Hebdomadaires
-    { templateName: 'Nettoyer le paillasson', shouldAssign: true, pointsMultiplier: multiplier * 0.7 },
-    { templateName: 'Laver les sols de l\'entrée', shouldAssign: true, pointsMultiplier: multiplier },
-    { templateName: 'Ranger les chaussures', shouldAssign: true, pointsMultiplier: multiplier * 0.8 },
-    { templateName: 'Aspirer le couloir', shouldAssign: true, pointsMultiplier: multiplier * vacuumMultiplier },
-    { templateName: 'Nettoyer poignée de porte', shouldAssign: cleanlinessLevel >= 4, pointsMultiplier: multiplier },
-    { templateName: 'Organiser accessoires', shouldAssign: true, pointsMultiplier: multiplier * 0.7 },
-    { templateName: 'Trier et jeter le courrier', shouldAssign: true, pointsMultiplier: multiplier * 0.7 },
-
-    // Mensuelles
-    { templateName: 'Nettoyer les chaussures', shouldAssign: cleanlinessLevel >= 3, pointsMultiplier: multiplier },
-    { templateName: 'Dépoussiérer porte-manteau', shouldAssign: true, pointsMultiplier: multiplier * 0.7 },
-    { templateName: 'Nettoyer la porte d\'entrée', shouldAssign: true, pointsMultiplier: multiplier },
-    { templateName: 'Nettoyer les interrupteurs', shouldAssign: cleanlinessLevel >= 3, pointsMultiplier: multiplier * 0.6 },
-    { templateName: 'Nettoyer les plinthes', shouldAssign: cleanlinessLevel >= 3, pointsMultiplier: multiplier * allergyMultiplier }
-  )
-
-  // ====== EXTÉRIEUR (4 tâches) ======
-  if (responses.has_outdoor_space) {
-    if (responses.outdoor_type === 'garden') {
-      assignments.push(
-        { templateName: 'Tondre la pelouse', shouldAssign: true, pointsMultiplier: multiplier * 1.5 },
-        { templateName: 'Désherber', shouldAssign: true, pointsMultiplier: multiplier * 1.3 }
-      )
-    }
-
-    if (responses.outdoor_type === 'balcony' || responses.outdoor_type === 'terrace' || responses.outdoor_type === 'garden') {
-      assignments.push(
-        { templateName: 'Arroser les plantes', shouldAssign: true, pointsMultiplier: multiplier * 0.7 },
-        { templateName: 'Nettoyer balcon/terrasse', shouldAssign: true, pointsMultiplier: multiplier }
-      )
-    }
-  }
-
-  // ====== GÉNÉRAL (20 tâches) ======
-  // Quotidiennes
-  assignments.push({ templateName: 'Aérer toutes les pièces', shouldAssign: true, pointsMultiplier: multiplier * 0.6 })
-
-  // Hebdomadaires
-  assignments.push(
-    { templateName: 'Passer la serpillière', shouldAssign: floorType !== 'carpet', pointsMultiplier: multiplier * roomMultiplier },
-    { templateName: 'Nettoyer poignées de porte', shouldAssign: cleanlinessLevel >= 3, pointsMultiplier: multiplier * 0.8 },
-    { templateName: 'Trier et recycler', shouldAssign: true, pointsMultiplier: multiplier * 0.8 },
-    { templateName: 'Faire les courses', shouldAssign: true, pointsMultiplier: multiplier },
-    { templateName: 'Vérifier dates de péremption', shouldAssign: true, pointsMultiplier: multiplier * 0.7 }
-  )
-
-  if (responses.cooking_frequency !== 'never') {
-    assignments.push({ templateName: 'Planifier les repas', shouldAssign: true, pointsMultiplier: multiplier })
-  }
-
-  // Bi-hebdomadaires
-  assignments.push({ templateName: 'Nettoyer les vitres', shouldAssign: true, pointsMultiplier: multiplier * roomMultiplier })
-
-  // Mensuelles
-  assignments.push(
-    { templateName: 'Nettoyer tous les interrupteurs', shouldAssign: cleanlinessLevel >= 3, pointsMultiplier: multiplier },
-    { templateName: 'Dépoussiérer toutes plinthes', shouldAssign: cleanlinessLevel >= 3 || hasAllergies, pointsMultiplier: multiplier * allergyMultiplier },
-    { templateName: 'Nettoyer les portes', shouldAssign: cleanlinessLevel >= 4, pointsMultiplier: multiplier },
-    { templateName: 'Descendre toiles d\'araignée', shouldAssign: true, pointsMultiplier: multiplier * 0.9 },
-    { templateName: 'Nettoyer les luminaires', shouldAssign: cleanlinessLevel >= 3, pointsMultiplier: multiplier },
-    { templateName: 'Organiser papiers administratifs', shouldAssign: true, pointsMultiplier: multiplier },
-    { templateName: 'Vérifier détecteurs de fumée', shouldAssign: true, pointsMultiplier: multiplier * 0.7 }
-  )
-
-  if (!hasRobotVacuum) {
-    assignments.push(
-      { templateName: 'Remplacer sacs aspirateur', shouldAssign: true, pointsMultiplier: multiplier * 0.5 },
-      { templateName: 'Nettoyer filtres aspirateur', shouldAssign: true, pointsMultiplier: multiplier * 0.8 }
-    )
-  }
-
-  // Trimestrielles
-  assignments.push(
-    { templateName: 'Nettoyer derrière les meubles', shouldAssign: cleanlinessLevel >= 3 || hasAllergies, pointsMultiplier: multiplier * allergyMultiplier },
-    { templateName: 'Remplacer les ampoules', shouldAssign: true, pointsMultiplier: multiplier * 0.6 }
-  )
-
-  // Aspirateur général si pas robot
-  if (!hasRobotVacuum && floorType !== 'tile') {
-    assignments.push({ templateName: 'Passer l\'aspirateur - général', shouldAssign: true, pointsMultiplier: multiplier * roomMultiplier })
-  }
-
-  // ====== ANIMAUX (10 tâches) - SI HAS_PETS ======
-  if (responses.has_pets && responses.pet_types && responses.pet_types.length > 0) {
-    const hasCats = responses.pet_types.includes('cat')
-    const hasDogs = responses.pet_types.includes('dog')
-    const hasOtherPets = responses.pet_types.includes('other')
-
-    // Quotidiennes
-    if (hasCats) {
-      assignments.push(
-        { templateName: 'Changer la litière du chat', shouldAssign: true, pointsMultiplier: multiplier * 1.1 },
-        { templateName: 'Nettoyer autour litière/cage', shouldAssign: true, pointsMultiplier: multiplier * 0.8 }
-      )
-    }
-
-    if (hasDogs || hasCats) {
-      assignments.push({ templateName: 'Laver les gamelles', shouldAssign: true, pointsMultiplier: multiplier * 0.7 })
-    }
-
-    // Hebdomadaires
-    if (hasCats) {
-      assignments.push({ templateName: 'Nettoyer bac à litière profond', shouldAssign: true, pointsMultiplier: multiplier })
-    }
-
-    if (hasDogs || hasCats) {
-      assignments.push(
-        { templateName: 'Laver panier/coussin animal', shouldAssign: true, pointsMultiplier: multiplier },
-        { templateName: 'Aspirer poils sur canapé', shouldAssign: true, pointsMultiplier: multiplier * 1.2 },
-        { templateName: 'Nettoyer jouets de l\'animal', shouldAssign: true, pointsMultiplier: multiplier * 0.8 },
-        { templateName: 'Laver plaids/couvertures à poils', shouldAssign: true, pointsMultiplier: multiplier },
-        { templateName: 'Brosser l\'animal', shouldAssign: true, pointsMultiplier: multiplier }
-      )
-    }
-
-    if (hasOtherPets) {
-      assignments.push({ templateName: 'Nettoyer la cage', shouldAssign: true, pointsMultiplier: multiplier })
-    }
-
-    // Ajouter la tâche générale d'enlever les poils
-    assignments.push({ templateName: 'Enlever les poils d\'animaux', shouldAssign: true, pointsMultiplier: multiplier * 1.3 })
-  }
-
-  // ====== ENFANTS (10 tâches) - SI HAS_CHILDREN ======
-  if (responses.has_children) {
-    // Quotidiennes
-    assignments.push(
-      { templateName: 'Ranger jouets dans les bacs', shouldAssign: true, pointsMultiplier: multiplier * 1.1 },
-      { templateName: 'Ranger les jouets', shouldAssign: true, pointsMultiplier: multiplier * 1.1 },
-      { templateName: 'Nettoyer la chaise haute', shouldAssign: true, pointsMultiplier: multiplier * 0.9 },
-      { templateName: 'Désinfecter table à langer', shouldAssign: true, pointsMultiplier: multiplier * 0.7 }
-    )
-
-    // 2-3x/semaine
-    assignments.push({ templateName: 'Changer linge de lit bébé', shouldAssign: true, pointsMultiplier: multiplier })
-
-    // Hebdomadaires
-    assignments.push(
-      { templateName: 'Nettoyer les jouets', shouldAssign: true, pointsMultiplier: multiplier },
-      { templateName: 'Nettoyer parc/tapis d\'éveil', shouldAssign: true, pointsMultiplier: multiplier },
-      { templateName: 'Ranger livres et jeux', shouldAssign: true, pointsMultiplier: multiplier * 0.8 }
-    )
-
-    // Mensuelles
-    assignments.push(
-      { templateName: 'Laver les peluches', shouldAssign: true, pointsMultiplier: multiplier },
-      { templateName: 'Organiser vêtements enfants', shouldAssign: true, pointsMultiplier: multiplier },
-      { templateName: 'Trier dessins et créations', shouldAssign: true, pointsMultiplier: multiplier * 0.8 }
-    )
-  }
-
-  // ====== SAISONNIER (15 tâches) ======
-  // On assigne les tâches saisonnières pour tous (elles ne reviendront que 1-4x/an)
-  assignments.push(
-    { templateName: 'Ranger vêtements hiver/été', shouldAssign: true, pointsMultiplier: multiplier * 1.2 },
-    { templateName: 'Nettoyer radiateurs avant hiver', shouldAssign: true, pointsMultiplier: multiplier },
-    { templateName: 'Vérifier joints de fenêtres', shouldAssign: responses.housing_type === 'house', pointsMultiplier: multiplier }
-  )
-
-  if (responses.has_ac) {
-    assignments.push({ templateName: 'Nettoyer ventilateurs/clim été', shouldAssign: true, pointsMultiplier: multiplier })
-  }
-
-  if (responses.housing_type === 'house') {
-    assignments.push(
-      { templateName: 'Nettoyer les gouttières', shouldAssign: true, pointsMultiplier: multiplier * 1.3 },
-      { templateName: 'Nettoyer volets extérieurs', shouldAssign: true, pointsMultiplier: multiplier }
-    )
-  }
-
-  if (responses.has_outdoor_space) {
-    if (responses.outdoor_type === 'garden') {
-      assignments.push(
-        { templateName: 'Tailler les haies', shouldAssign: true, pointsMultiplier: multiplier * 1.2 },
-        { templateName: 'Nettoyer le barbecue', shouldAssign: true, pointsMultiplier: multiplier },
-        { templateName: 'Ranger mobilier de jardin', shouldAssign: true, pointsMultiplier: multiplier },
-        { templateName: 'Préparer jardin pour hiver', shouldAssign: true, pointsMultiplier: multiplier * 1.1 },
-        { templateName: 'Nettoyer abords de la maison', shouldAssign: true, pointsMultiplier: multiplier }
-      )
-    }
-
-    assignments.push({ templateName: 'Entretien plantes intérieur', shouldAssign: true, pointsMultiplier: multiplier * 0.9 })
-
-    if (responses.outdoor_type === 'balcony' || responses.outdoor_type === 'terrace') {
-      assignments.push({ templateName: 'Nettoyer les moustiquaires', shouldAssign: true, pointsMultiplier: multiplier })
-    }
-  }
-
-  if (responses.housing_type === 'house') {
-    assignments.push(
-      { templateName: 'Vérifier l\'isolation', shouldAssign: true, pointsMultiplier: multiplier },
-      { templateName: 'Déneiger entrée/balcon', shouldAssign: true, pointsMultiplier: multiplier * 0.8 }
-    )
+  // Liste exhaustive des tâches avec leurs condition_codes
+  // Ceci est une version simplifiée - la vraie logique utilise la DB
+  const taskConditionMap: Array<{ name: string; conditionCode: string | null; difficulty: number }> = [
+    // CUISINE - Tâches universelles
+    { name: 'Faire la vaisselle', conditionCode: null, difficulty: 1 },
+    { name: 'Nettoyer le plan de travail', conditionCode: null, difficulty: 1 },
+    { name: 'Sortir les poubelles', conditionCode: null, difficulty: 1 },
+    { name: 'Nettoyer l\'évier et robinetterie', conditionCode: null, difficulty: 2 },
+    { name: 'Vider et nettoyer la poubelle', conditionCode: null, difficulty: 2 },
+    { name: 'Nettoyer le réfrigérateur', conditionCode: null, difficulty: 3 },
+    { name: 'Organiser les placards', conditionCode: null, difficulty: 2 },
+
+    // CUISINE - Conditionnelles
+    { name: 'Vider le lave-vaisselle', conditionCode: 'lave_vaisselle', difficulty: 1 },
+    { name: 'Nettoyer le lave-vaisselle', conditionCode: 'lave_vaisselle', difficulty: 2 },
+    { name: 'Nettoyer le four', conditionCode: 'four', difficulty: 3 },
+    { name: 'Dégraisser la hotte', conditionCode: 'hotte', difficulty: 3 },
+    { name: 'Nettoyer le micro-ondes', conditionCode: 'micro_ondes', difficulty: 2 },
+    { name: 'Détartrer la cafetière/bouilloire', conditionCode: 'eau_dure|eau_moyenne', difficulty: 2 },
+    { name: 'Nettoyer le grille-pain', conditionCode: 'grille_pain', difficulty: 1 },
+    { name: 'Nettoyer robot de cuisine', conditionCode: 'robot_cuisine', difficulty: 2 },
+    { name: 'Nettoyer robot cuiseur', conditionCode: 'robot_cuiseur', difficulty: 3 },
+    { name: 'Nettoyer la plancha/BBQ', conditionCode: 'plancha_bbq', difficulty: 3 },
+    { name: 'Vider le compost', conditionCode: 'compost', difficulty: 1 },
+    { name: 'Ranger le garde-manger', conditionCode: 'garde_manger', difficulty: 2 },
+    { name: 'Dégivrer le congélateur', conditionCode: 'congelateur', difficulty: 3 },
+
+    // SALLE DE BAIN - Universelles
+    { name: 'Nettoyer les toilettes', conditionCode: null, difficulty: 2 },
+    { name: 'Nettoyer la salle de bain', conditionCode: null, difficulty: 3 },
+    { name: 'Nettoyer la douche', conditionCode: null, difficulty: 2 },
+    { name: 'Nettoyer les miroirs', conditionCode: null, difficulty: 1 },
+    { name: 'Aérer la salle de bain', conditionCode: null, difficulty: 1 },
+
+    // SALLE DE BAIN - Conditionnelles
+    { name: 'Nettoyer paroi de douche', conditionCode: 'paroi_douche', difficulty: 2 },
+    { name: 'Laver rideau de douche', conditionCode: 'rideau_douche', difficulty: 2 },
+    { name: 'Nettoyer le bidet', conditionCode: 'bidet', difficulty: 2 },
+    { name: 'Laver les tapis de bain', conditionCode: 'tapis_bain', difficulty: 1 },
+    { name: 'Nettoyer la baignoire', conditionCode: 'baignoire', difficulty: 3 },
+    { name: 'Détartrer les robinets', conditionCode: 'eau_dure|eau_moyenne', difficulty: 2 },
+
+    // CHAMBRE - Universelles
+    { name: 'Changer les draps', conditionCode: null, difficulty: 2 },
+    { name: 'Aérer la chambre', conditionCode: null, difficulty: 1 },
+    { name: 'Dépoussiérer les meubles', conditionCode: null, difficulty: 1 },
+    { name: 'Passer l\'aspirateur chambre', conditionCode: 'pas_robot_aspirateur', difficulty: 2 },
+    { name: 'Aspirer le matelas', conditionCode: 'allergies|allergie_poussiere', difficulty: 3 },
+    { name: 'Retourner le matelas', conditionCode: null, difficulty: 3 },
+
+    // SALON - Universelles
+    { name: 'Ranger le salon', conditionCode: null, difficulty: 1 },
+    { name: 'Aérer le salon', conditionCode: null, difficulty: 1 },
+    { name: 'Dépoussiérer meubles salon', conditionCode: null, difficulty: 1 },
+    { name: 'Passer l\'aspirateur salon', conditionCode: 'pas_robot_aspirateur', difficulty: 2 },
+
+    // SALON - Conditionnelles
+    { name: 'Nettoyer canapé cuir', conditionCode: 'canape_cuir', difficulty: 2 },
+    { name: 'Nettoyer canapé tissu', conditionCode: 'canape_tissu', difficulty: 2 },
+    { name: 'Aspirer les tapis', conditionCode: 'tapis', difficulty: 2 },
+    { name: 'Laver les rideaux', conditionCode: 'rideaux', difficulty: 3 },
+    { name: 'Nettoyer les stores', conditionCode: 'stores', difficulty: 2 },
+    { name: 'Cirer meubles en bois', conditionCode: 'meubles_bois', difficulty: 2 },
+
+    // BUANDERIE
+    { name: 'Faire une machine de linge', conditionCode: 'lave_linge', difficulty: 1 },
+    { name: 'Plier et ranger le linge', conditionCode: 'lave_linge', difficulty: 1 },
+    { name: 'Nettoyer le lave-linge', conditionCode: 'lave_linge', difficulty: 2 },
+    { name: 'Nettoyer le sèche-linge', conditionCode: 'seche_linge', difficulty: 2 },
+    { name: 'Repasser le linge', conditionCode: 'repassage', difficulty: 2 },
+    { name: 'Entretenir vêtements outdoor', conditionCode: 'vetements_outdoor', difficulty: 3 },
+
+    // ENTRÉE - Universelles
+    { name: 'Nettoyer le paillasson', conditionCode: null, difficulty: 1 },
+    { name: 'Ranger les chaussures', conditionCode: null, difficulty: 1 },
+    { name: 'Laver sols entrée', conditionCode: null, difficulty: 2 },
+
+    // GÉNÉRAL - Universelles
+    { name: 'Aérer toutes les pièces', conditionCode: null, difficulty: 1 },
+    { name: 'Nettoyer les vitres', conditionCode: null, difficulty: 3 },
+    { name: 'Passer la serpillière', conditionCode: 'sol_carrelage|sol_mixte', difficulty: 2 },
+    { name: 'Faire les courses', conditionCode: null, difficulty: 2 },
+
+    // EXTÉRIEUR - Conditionnelles
+    { name: 'Arroser les plantes', conditionCode: 'exterieur', difficulty: 1 },
+    { name: 'Tondre la pelouse', conditionCode: 'pelouse', difficulty: 3 },
+    { name: 'Tailler les haies', conditionCode: 'haies', difficulty: 3 },
+    { name: 'Nettoyer le barbecue', conditionCode: 'barbecue', difficulty: 2 },
+    { name: 'Entretenir la piscine', conditionCode: 'piscine', difficulty: 3 },
+    { name: 'Nettoyer le jacuzzi', conditionCode: 'jacuzzi', difficulty: 3 },
+    { name: 'Nettoyer le garage', conditionCode: 'garage', difficulty: 3 },
+    { name: 'Entretenir le potager', conditionCode: 'potager', difficulty: 2 },
+    { name: 'Nettoyer mobilier jardin', conditionCode: 'mobilier_jardin', difficulty: 2 },
+    { name: 'Ranger l\'abri de jardin', conditionCode: 'abri_jardin', difficulty: 2 },
+    { name: 'Nettoyer les gouttières', conditionCode: 'gouttiere', difficulty: 4 },
+
+    // ROBOTS
+    { name: 'Vider bac robot aspirateur', conditionCode: 'robot_aspirateur', difficulty: 1 },
+    { name: 'Nettoyer brosses robot', conditionCode: 'robot_aspirateur', difficulty: 2 },
+    { name: 'Vider station auto-vidage', conditionCode: 'robot_station_autovidage', difficulty: 1 },
+    { name: 'Entretenir robot laveur', conditionCode: 'robot_laveur', difficulty: 2 },
+    { name: 'Nettoyer robot vitres', conditionCode: 'robot_vitres', difficulty: 2 },
+    { name: 'Entretenir robot tondeuse', conditionCode: 'robot_tondeuse', difficulty: 2 },
+
+    // ANIMAUX
+    { name: 'Changer la litière', conditionCode: 'chat', difficulty: 2 },
+    { name: 'Nettoyer bac à litière', conditionCode: 'chat', difficulty: 2 },
+    { name: 'Laver gamelles animaux', conditionCode: 'animaux', difficulty: 1 },
+    { name: 'Aspirer poils animaux', conditionCode: 'chat|chien', difficulty: 2 },
+    { name: 'Laver panier animal', conditionCode: 'chat|chien', difficulty: 2 },
+    { name: 'Brosser l\'animal', conditionCode: 'chat|chien', difficulty: 1 },
+    { name: 'Nettoyer l\'aquarium', conditionCode: 'aquarium', difficulty: 3 },
+    { name: 'Nettoyer la cage', conditionCode: 'rongeur_oiseau', difficulty: 2 },
+    { name: 'Nettoyer le terrarium', conditionCode: 'reptile', difficulty: 2 },
+
+    // ENFANTS
+    { name: 'Ranger les jouets', conditionCode: 'enfants', difficulty: 1 },
+    { name: 'Nettoyer les jouets', conditionCode: 'enfants', difficulty: 2 },
+    { name: 'Laver les peluches', conditionCode: 'enfants', difficulty: 2 },
+    { name: 'Stériliser biberons', conditionCode: 'bebe', difficulty: 2 },
+    { name: 'Nettoyer chaise haute', conditionCode: 'bebe', difficulty: 1 },
+    { name: 'Désinfecter table à langer', conditionCode: 'bebe', difficulty: 1 },
+    { name: 'Nettoyer jouets extérieur', conditionCode: 'enfants_exterieur', difficulty: 2 },
+
+    // BUREAU
+    { name: 'Ranger le bureau', conditionCode: 'bureau', difficulty: 1 },
+    { name: 'Nettoyer écran ordinateur', conditionCode: 'bureau', difficulty: 1 },
+    { name: 'Nettoyer clavier et souris', conditionCode: 'bureau', difficulty: 1 },
+    { name: 'Organiser les câbles', conditionCode: 'bureau', difficulty: 2 },
+    { name: 'Trier les documents', conditionCode: 'bureau', difficulty: 2 },
+
+    // COLOCATION
+    { name: 'Nettoyer espaces communs', conditionCode: 'colocation', difficulty: 2 },
+    { name: 'Organiser frigo partagé', conditionCode: 'colocation', difficulty: 2 },
+    { name: 'Vérifier produits communs', conditionCode: 'colocation', difficulty: 1 },
+
+    // DRESSING
+    { name: 'Organiser le dressing', conditionCode: 'dressing', difficulty: 2 },
+    { name: 'Dépoussiérer le dressing', conditionCode: 'dressing', difficulty: 1 },
+
+    // CHEMINÉE
+    { name: 'Nettoyer la vitre cheminée', conditionCode: 'cheminee', difficulty: 2 },
+    { name: 'Vider les cendres', conditionCode: 'cheminee', difficulty: 2 },
+    { name: 'Ramonage cheminée', conditionCode: 'cheminee', difficulty: 4 },
+
+    // ESCALIERS
+    { name: 'Aspirer les escaliers', conditionCode: 'escaliers', difficulty: 2 },
+    { name: 'Nettoyer rampe escalier', conditionCode: 'escaliers', difficulty: 1 },
+  ]
+
+  // Filtrer selon les conditions actives
+  for (const task of taskConditionMap) {
+    const shouldAssign = shouldAssignTask(task.conditionCode, activeConditions)
+    const pointsMultiplier = shouldAssign
+      ? calculatePointsMultiplier(responses, task.difficulty)
+      : 1.0
+    const frequencyAdjustment = shouldAssign
+      ? calculateFrequencyAdjustment(responses, task.conditionCode)
+      : 1.0
+
+    assignments.push({
+      templateId: '', // Non utilisé dans cette version
+      templateName: task.name,
+      shouldAssign,
+      pointsMultiplier,
+      frequencyAdjustment,
+    })
   }
 
   return assignments
+}
+
+/**
+ * Applique les assignations de tâches au foyer dans la base de données
+ */
+export async function applyTaskAssignments(
+  supabase: SupabaseClient,
+  householdId: string,
+  assignments: TaskAssignment[]
+): Promise<{ success: boolean; error?: string; count: number }> {
+  const tasksToInsert = assignments
+    .filter(a => a.shouldAssign)
+    .map(a => ({
+      household_id: householdId,
+      template_id: a.templateId,
+      is_active: true,
+      custom_points: null, // Utilise les points de base du template
+      // Les points seront calculés dynamiquement avec le multiplicateur
+    }))
+
+  if (tasksToInsert.length === 0) {
+    return { success: true, count: 0 }
+  }
+
+  // Supprimer les anciennes assignations
+  const { error: deleteError } = await supabase
+    .from('household_tasks')
+    .delete()
+    .eq('household_id', householdId)
+
+  if (deleteError) {
+    console.error('Erreur suppression anciennes tâches:', deleteError)
+    return { success: false, error: deleteError.message, count: 0 }
+  }
+
+  // Insérer les nouvelles assignations
+  const { error: insertError } = await supabase
+    .from('household_tasks')
+    .insert(tasksToInsert)
+
+  if (insertError) {
+    console.error('Erreur insertion nouvelles tâches:', insertError)
+    return { success: false, error: insertError.message, count: 0 }
+  }
+
+  return { success: true, count: tasksToInsert.length }
 }
 
 /**
@@ -429,4 +363,20 @@ export function calculateTaskPoints(
   multiplier: number
 ): number {
   return Math.round(basePoints * multiplier)
+}
+
+/**
+ * Retourne un résumé des assignations par catégorie
+ */
+export function summarizeAssignments(
+  assignments: TaskAssignment[]
+): Record<string, { total: number; assigned: number }> {
+  // Cette fonction nécessiterait les infos de catégorie
+  // Pour l'instant, retourne un résumé simplifié
+  const assigned = assignments.filter(a => a.shouldAssign).length
+  const total = assignments.length
+
+  return {
+    'Toutes catégories': { total, assigned },
+  }
 }
