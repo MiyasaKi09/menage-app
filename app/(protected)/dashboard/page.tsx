@@ -48,6 +48,8 @@ export default async function DashboardPage() {
 
   // Récupérer les tâches du jour
   let todayTasks: any[] = []
+  let householdHasTasks = false
+
   if (householdId) {
     const today = new Date().toISOString().split('T')[0]
 
@@ -58,11 +60,20 @@ export default async function DashboardPage() {
     })
 
     todayTasks = data || []
+
+    // Vérifier si le foyer a des tâches assignées (questionnaire complété)
+    const { count } = await supabase
+      .from('household_tasks')
+      .select('id', { count: 'exact', head: true })
+      .eq('household_id', householdId)
+      .eq('is_active', true)
+      .limit(1)
+
+    householdHasTasks = (count || 0) > 0
   }
 
-  // Vérifier si le questionnaire a été complété
-  // Si l'utilisateur a des tâches planifiées, c'est que le questionnaire a été fait
-  const hasCompletedQuestionnaire = todayTasks.length > 0 || (profile?.tasks_completed && profile.tasks_completed > 0)
+  // Le questionnaire est complété si le foyer a des tâches assignées
+  const hasCompletedQuestionnaire = householdHasTasks
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-deep-blue to-[#0f1a40] relative overflow-hidden">

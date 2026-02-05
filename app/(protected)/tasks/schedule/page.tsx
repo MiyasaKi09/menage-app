@@ -64,17 +64,28 @@ export default async function SchedulePage(props: {
   endDate.setDate(endDate.getDate() + 6) // +6 days = 7 days total
   const endDateStr = endDate.toISOString().split('T')[0]
 
-  // Generate planning for each of the 7 days
+  // Generate planning for each of the 7 days using SMART scheduling
   for (let i = 0; i < 7; i++) {
     const date = new Date(targetDate)
     date.setDate(date.getDate() + i)
     const dateStr = date.toISOString().split('T')[0]
 
     try {
-      await supabase.rpc('generate_daily_schedule', {
+      // Use generate_smart_schedule for intelligent task selection
+      // Falls back to generate_daily_schedule if smart function doesn't exist
+      const { error: smartError } = await supabase.rpc('generate_smart_schedule', {
         p_household_id: householdId,
         p_target_date: dateStr
       })
+
+      if (smartError) {
+        // Fallback to legacy function if smart schedule not available
+        console.log(`Smart schedule not available, using legacy for ${dateStr}`)
+        await supabase.rpc('generate_daily_schedule', {
+          p_household_id: householdId,
+          p_target_date: dateStr
+        })
+      }
     } catch (error) {
       console.error(`Error generating schedule for ${dateStr}:`, error)
       // Non-blocking - continue with other days
