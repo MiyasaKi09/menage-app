@@ -43,15 +43,21 @@ export function TaskList({ tasks, householdId, userId, onTaskCompleted }: TaskLi
     setCompletingTaskId(task.id)
 
     try {
+      const now = new Date()
+
       // 1. Créer l'entrée dans task_history
       const { error: historyError } = await supabase
         .from('task_history')
         .insert({
-          household_task_id: task.id,
-          profile_id: userId,
           household_id: householdId,
-          points_earned: task.custom_points,
-          completed_at: new Date().toISOString(),
+          profile_id: userId,
+          task_template_id: task.task_templates.id,
+          task_name: task.task_templates.name,
+          category_name: task.task_templates.categories?.name || null,
+          points_earned: task.custom_points || task.task_templates.base_points,
+          completed_at: now.toISOString(),
+          day_of_week: now.getDay(),
+          hour_of_day: now.getHours(),
         })
         .select()
         .single()
@@ -62,10 +68,12 @@ export function TaskList({ tasks, householdId, userId, onTaskCompleted }: TaskLi
         return
       }
 
+      const pointsEarned = task.custom_points || task.task_templates.base_points
+
       // 2. Mettre à jour les statistiques du profil
       const { error: profileError } = await supabase.rpc('increment_profile_stats', {
         p_profile_id: userId,
-        p_points: task.custom_points,
+        p_points: pointsEarned,
       })
 
       if (profileError) {
@@ -76,7 +84,7 @@ export function TaskList({ tasks, householdId, userId, onTaskCompleted }: TaskLi
       const { error: memberError } = await supabase.rpc('increment_household_member_stats', {
         p_profile_id: userId,
         p_household_id: householdId,
-        p_points: task.custom_points,
+        p_points: pointsEarned,
       })
 
       if (memberError) {
@@ -85,7 +93,7 @@ export function TaskList({ tasks, householdId, userId, onTaskCompleted }: TaskLi
 
       // Appeler le callback pour afficher la modal de célébration
       if (onTaskCompleted) {
-        onTaskCompleted(task, task.custom_points)
+        onTaskCompleted(task, pointsEarned)
       }
 
       // Rafraîchir la page pour afficher les nouvelles stats
