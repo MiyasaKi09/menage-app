@@ -57,7 +57,7 @@ BEGIN
         CASE
           -- Overdue: très haute priorité
           WHEN ht.next_due_at < v_date THEN
-            1000 + ((v_date - ht.next_due_at) * 50)
+            1000 + ((v_date::date - ht.next_due_at::date) * 50)
           -- Due aujourd'hui: haute priorité, ajustée par fréquence
           WHEN ht.next_due_at = v_date THEN
             500 + (
