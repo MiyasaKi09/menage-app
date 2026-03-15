@@ -1,25 +1,21 @@
-interface RainbowBarProps {
-  size?: number
-  gap?: number
-}
-
-export function RainbowBar({ size = 6, gap = 2 }: RainbowBarProps) {
-  const colors = ['#ff3b5c', '#ff6b2c', '#ffe14f', '#00e676', '#00b4ff', '#b24bff']
-
+export function RainbowBar() {
   return (
-    <div className="flex" style={{ gap }}>
-      {colors.map((color, i) => (
-        <div
-          key={i}
-          style={{
-            width: size,
-            height: size * 5,
-            backgroundColor: color,
-            transition: 'transform 0.2s ease'
-          }}
-          className="cursor-pointer hover:scale-110"
-        />
-      ))}
+    <div className="w-full h-1.5 relative overflow-hidden">
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'linear-gradient(90deg, #8B2323 0%, #D4AF37 25%, #2E8B57 50%, #385FA8 75%, #8046A8 100%)',
+        }}
+      />
+      {/* Ornamental gold dots */}
+      <div className="absolute inset-0 flex justify-between items-center px-4">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div
+            key={i}
+            className="w-1 h-1 rounded-full bg-yellow/60"
+          />
+        ))}
+      </div>
     </div>
   )
 }

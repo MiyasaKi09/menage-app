@@ -111,35 +111,35 @@ export function ScheduleTaskCard({ task, householdId, userId }: ScheduleTaskCard
   return (
     <div
       className={cn(
-        'flex items-center border-4 border-black bg-cream transition-all shadow-brutal-sm hover:shadow-brutal',
+        'flex items-center border-2 border-charcoal/15 bg-cream rounded-lg transition-all shadow-brutal-sm hover:shadow-brutal',
         isCompleted && 'opacity-60 bg-green/10',
         isSkipped && 'opacity-40 bg-charcoal/5'
       )}
     >
       {/* Category Icon */}
-      <div className="w-20 h-20 border-r-4 border-black bg-black/5 flex items-center justify-center flex-shrink-0">
+      <div className="w-20 h-20 border-r-2 border-charcoal/10 bg-charcoal/5 flex items-center justify-center flex-shrink-0 rounded-l-lg">
         <span className="text-4xl">{task.category_emoji}</span>
       </div>
 
       {/* Task Info */}
       <div className="flex-1 p-4 min-w-0">
-        <h4 className="font-anton text-lg uppercase leading-tight truncate">
+        <h4 className="font-cinzel text-lg font-semibold leading-tight truncate text-charcoal">
           {task.task_name}
         </h4>
 
         {task.task_tip && !isCompleted && (
-          <p className="font-outfit text-xs opacity-60 mt-1 line-clamp-2">
+          <p className="font-lora text-xs opacity-60 mt-1 line-clamp-2">
             💡 {task.task_tip}
           </p>
         )}
 
-        <div className="flex gap-4 mt-2 font-space-mono text-xs opacity-70 flex-wrap">
-          <span>⭐ {task.points} pts</span>
-          <span>⏱️ {task.duration_minutes} min</span>
+        <div className="flex gap-4 mt-2 font-medieval text-xs opacity-70 flex-wrap">
+          <span>💰 {task.points} or</span>
+          <span>⏳ {task.duration_minutes} min</span>
           <span className="opacity-50">{task.category_name}</span>
-          {task.assigned_to_name && <span>👤 {task.assigned_to_name}</span>}
+          {task.assigned_to_name && <span>🛡️ {task.assigned_to_name}</span>}
           {task.rollover_count > 0 && (
-            <span className="text-orange">🔄 Reporté x{task.rollover_count}</span>
+            <span className="text-orange">🔄 Reporte x{task.rollover_count}</span>
           )}
         </div>
       </div>
@@ -147,12 +147,12 @@ export function ScheduleTaskCard({ task, householdId, userId }: ScheduleTaskCard
       {/* Action Button */}
       <div className="p-4 flex-shrink-0">
         {isCompleted ? (
-          <div className="font-space-mono text-sm text-green bg-green/10 px-4 py-2 border-3 border-green">
-            ✓ FAIT
+          <div className="font-medieval text-sm text-green bg-green/10 px-4 py-2 border-2 border-green/30 rounded-md">
+            ✓ Accompli
           </div>
         ) : isSkipped ? (
-          <div className="font-space-mono text-sm text-charcoal/50 px-4 py-2">
-            SAUTÉ
+          <div className="font-medieval text-sm text-charcoal/50 px-4 py-2">
+            Passe
           </div>
         ) : (
           <Button
@@ -161,7 +161,7 @@ export function ScheduleTaskCard({ task, householdId, userId }: ScheduleTaskCard
             disabled={completing}
             className="min-w-[120px]"
           >
-            {completing ? 'EN COURS...' : 'COMPLÉTER'}
+            {completing ? 'En cours...' : 'Accomplir'}
           </Button>
         )}
       </div>

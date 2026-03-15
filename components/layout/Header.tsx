@@ -20,16 +20,16 @@ export function Header() {
 
   return (
     <>
-      <header className="bg-cream border-b-4 border-black">
+      <header className="bg-off-white border-b-2 border-charcoal/15 shadow-brutal-sm">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center gap-4 hover:opacity-80 transition-opacity">
-            <div className="w-12 h-12 bg-red border-4 border-black transform rotate-45 flex items-center justify-center shadow-brutal-sm">
-              <span className="font-anton text-2xl text-white transform -rotate-45">M</span>
+            <div className="w-12 h-12 bg-gradient-to-br from-yellow to-orange rounded-lg border-2 border-charcoal/20 flex items-center justify-center shadow-golden">
+              <span className="font-cinzel text-2xl font-bold text-black">M</span>
             </div>
             <div>
-              <h1 className="font-anton text-3xl uppercase leading-none">MÉNAGE</h1>
-              <p className="font-space-mono text-[8px] tracking-widest opacity-50">APP v1.0</p>
+              <h1 className="font-cinzel text-2xl font-bold leading-none text-charcoal tracking-wide">Menage</h1>
+              <p className="font-medieval text-[10px] tracking-widest opacity-50 text-charcoal">Quetes du Foyer</p>
             </div>
           </Link>
 
@@ -42,15 +42,15 @@ export function Header() {
               <Button variant="ghost" size="sm">Foyers</Button>
             </Link>
             <Link href="/tasks">
-              <Button variant="ghost" size="sm">Tâches</Button>
+              <Button variant="ghost" size="sm">Quetes</Button>
             </Link>
 
-            <span className="font-space-mono text-xs opacity-60 ml-2 hidden md:inline">
+            <span className="font-medieval text-xs opacity-60 ml-2 hidden md:inline text-charcoal">
               {user?.email}
             </span>
 
             <Button variant="outline" size="sm" onClick={handleSignOut}>
-              Déconnexion
+              Deconnexion
             </Button>
           </nav>
         </div>

@@ -42,7 +42,7 @@ export function DateSelector({ currentDate }: DateSelectorProps) {
   })
 
   return (
-    <div className="bg-cream border-4 border-black p-4 shadow-brutal transition-opacity duration-200" style={{ opacity: isPending ? 0.6 : 1 }}>
+    <div className="bg-cream border-2 border-charcoal/15 p-4 rounded-lg shadow-brutal transition-opacity duration-200" style={{ opacity: isPending ? 0.6 : 1 }}>
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         {/* Left: Previous Day Button */}
         <Button
@@ -53,12 +53,12 @@ export function DateSelector({ currentDate }: DateSelectorProps) {
           className="flex items-center justify-center gap-2 sm:flex-1"
         >
           <ChevronLeft className="w-4 h-4" />
-          <span className="font-space-mono text-xs">JOUR PRÉCÉDENT</span>
+          <span className="font-medieval text-xs">Jour precedent</span>
         </Button>
 
         {/* Center: Current Date Display + Today Button */}
         <div className="flex flex-col items-center gap-2 sm:flex-[2]">
-          <div className="flex items-center gap-2 font-space-mono text-sm opacity-70">
+          <div className="flex items-center gap-2 font-medieval text-sm opacity-70">
             <Calendar className="w-4 h-4" />
             <span className="capitalize">{displayDate}</span>
           </div>
@@ -68,9 +68,9 @@ export function DateSelector({ currentDate }: DateSelectorProps) {
               size="sm"
               onClick={goToToday}
               disabled={isPending}
-              className="font-space-mono text-xs"
+              className="font-medieval text-xs"
             >
-              AUJOURD'HUI
+              Aujourd&apos;hui
             </Button>
           )}
         </div>
@@ -83,7 +83,7 @@ export function DateSelector({ currentDate }: DateSelectorProps) {
           disabled={isPending}
           className="flex items-center justify-center gap-2 sm:flex-1"
         >
-          <span className="font-space-mono text-xs">JOUR SUIVANT</span>
+          <span className="font-medieval text-xs">Jour suivant</span>
           <ChevronRight className="w-4 h-4" />
         </Button>
       </div>

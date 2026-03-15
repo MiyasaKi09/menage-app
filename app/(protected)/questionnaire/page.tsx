@@ -43,35 +43,35 @@ export default async function QuestionnairePage() {
     .single()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-deep-green to-[#062818] relative overflow-hidden">
-      <GrainOverlay />
-      <DiagonalStripe position="top-right" colors={['#00e676', '#ffe14f', '#00b4ff']} />
+    <div className="min-h-screen bg-gradient-to-br from-deep-green to-deep-blue relative overflow-hidden">
+      <GrainOverlay opacity={0.08} />
+      <DiagonalStripe position="top-right" />
 
       <div className="relative z-10 p-6 max-w-3xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <div className="font-space-mono text-xs opacity-50 uppercase tracking-wider mb-1 text-cream">
+          <div className="font-medieval text-xs opacity-50 tracking-wider mb-1 text-cream">
             {householdName}
           </div>
-          <h1 className="font-anton text-4xl md:text-5xl text-cream uppercase leading-none mb-4">
-            QUESTIONNAIRE
+          <h1 className="font-cinzel text-4xl md:text-5xl text-cream font-bold leading-none mb-4">
+            Questionnaire
           </h1>
-          <p className="font-outfit text-cream opacity-80 text-lg">
+          <p className="font-lora text-cream opacity-80 text-lg">
             {existingResponse
-              ? 'Modifiez vos réponses pour ajuster les tâches de votre foyer'
-              : 'Répondez à quelques questions pour personnaliser les tâches de votre foyer'}
+              ? 'Modifiez vos reponses pour ajuster les quetes de votre foyer'
+              : 'Repondez a quelques questions pour personnaliser les quetes de votre foyer'}
           </p>
         </div>
 
         {/* Infobox */}
-        <div className="border-4 border-black bg-yellow p-6 shadow-brutal">
+        <div className="border-2 border-yellow/30 bg-yellow/15 p-6 rounded-lg shadow-golden">
           <GrainOverlay opacity={0.03} />
           <div className="relative z-10">
-            <h2 className="font-anton text-xl uppercase mb-2">💡 Comment ça marche ?</h2>
-            <ul className="font-outfit space-y-2 text-sm">
-              <li>✅ Nous créons automatiquement les tâches adaptées à votre foyer</li>
-              <li>📊 Les points sont ajustés selon la complexité de votre logement</li>
-              <li>🔄 Vous pourrez toujours modifier vos réponses plus tard</li>
+            <h2 className="font-cinzel text-xl font-bold mb-2">Comment ca marche ?</h2>
+            <ul className="font-lora space-y-2 text-sm">
+              <li>Nous creons automatiquement les quetes adaptees a votre foyer</li>
+              <li>Les pieces d&apos;or sont ajustees selon la complexite de votre logement</li>
+              <li>Vous pourrez toujours modifier vos reponses plus tard</li>
             </ul>
           </div>
         </div>

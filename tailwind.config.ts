@@ -9,9 +9,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        anton: ['var(--font-anton)', 'sans-serif'],
-        'space-mono': ['var(--font-space-mono)', 'monospace'],
-        outfit: ['var(--font-outfit)', 'sans-serif'],
+        cinzel: ['var(--font-cinzel)', 'serif'],
+        medieval: ['var(--font-medieval)', 'cursive'],
+        lora: ['var(--font-lora)', 'serif'],
       },
       colors: {
         // Deep backgrounds
@@ -19,7 +19,7 @@ const config: Config = {
         'deep-green': 'rgb(var(--deep-green) / <alpha-value>)',
         'deep-purple': 'rgb(var(--deep-purple) / <alpha-value>)',
         'deep-orange': 'rgb(var(--deep-orange) / <alpha-value>)',
-        // Vibrant accents
+        // Medieval accents
         yellow: 'rgb(var(--yellow) / <alpha-value>)',
         orange: 'rgb(var(--orange) / <alpha-value>)',
         red: 'rgb(var(--red) / <alpha-value>)',
@@ -32,7 +32,7 @@ const config: Config = {
         'off-white': 'rgb(var(--off-white) / <alpha-value>)',
         black: 'rgb(var(--black) / <alpha-value>)',
         charcoal: 'rgb(var(--charcoal) / <alpha-value>)',
-        // Semantic tokens (keeping for compatibility)
+        // Semantic tokens
         border: "rgb(var(--border))",
         input: "rgb(var(--input))",
         ring: "rgb(var(--ring))",
@@ -64,9 +64,11 @@ const config: Config = {
         },
       },
       boxShadow: {
-        'brutal': '8px 8px 0 rgb(var(--charcoal))',
-        'brutal-sm': '4px 4px 0 rgb(var(--charcoal))',
-        'brutal-lg': '12px 12px 0 rgb(var(--charcoal))',
+        'brutal': '0 4px 14px rgba(62, 48, 35, 0.25), 0 1px 3px rgba(62, 48, 35, 0.15)',
+        'brutal-sm': '0 2px 8px rgba(62, 48, 35, 0.2), 0 1px 2px rgba(62, 48, 35, 0.1)',
+        'brutal-lg': '0 8px 24px rgba(62, 48, 35, 0.3), 0 2px 6px rgba(62, 48, 35, 0.15)',
+        'golden': '0 4px 14px rgba(212, 175, 55, 0.25), 0 1px 3px rgba(212, 175, 55, 0.15)',
+        'golden-lg': '0 8px 24px rgba(212, 175, 55, 0.3), 0 2px 6px rgba(212, 175, 55, 0.2)',
       },
       borderWidth: {
         '3': '3px',
@@ -83,6 +85,8 @@ const config: Config = {
         'pulse-urgent': 'pulse-urgent 1.5s ease-in-out infinite',
         'confetti-fall': 'confetti-fall 2s ease-out infinite',
         'starburst-spin': 'starburst-spin 30s linear infinite',
+        'shimmer': 'shimmer 3s linear infinite',
+        'glow': 'glow 2s ease-in-out infinite',
       },
     },
   },

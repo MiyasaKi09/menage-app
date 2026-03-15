@@ -6,7 +6,7 @@ export default function HouseholdSetupPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold">Créer ou Rejoindre un Foyer</h1>
+        <h1 className="text-3xl font-cinzel font-bold">Creer ou Rejoindre un Foyer</h1>
         <p className="text-muted-foreground">
           Un foyer vous permet de partager les tâches ménagères avec d'autres personnes
         </p>

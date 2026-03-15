@@ -178,10 +178,10 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
           {question.options?.map((option) => (
             <label
               key={option.value}
-              className={`flex flex-col p-4 border-4 border-black cursor-pointer transition-all ${
+              className={`flex flex-col p-4 border-2 border-charcoal/20 rounded-md cursor-pointer transition-all ${
                 currentValue === option.value
-                  ? 'bg-yellow shadow-brutal'
-                  : 'bg-off-white hover:translate-x-1'
+                  ? 'bg-yellow/30 shadow-golden border-yellow/50'
+                  : 'bg-off-white hover:-translate-y-0.5 hover:shadow-brutal-sm'
               }`}
             >
               <input
@@ -192,9 +192,9 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
                 onChange={(e) => handleAnswer(question.id, e.target.value)}
                 className="sr-only"
               />
-              <span className="font-outfit font-bold">{option.label}</span>
+              <span className="font-lora font-bold">{option.label}</span>
               {option.description && (
-                <span className="font-outfit text-xs opacity-60 mt-1">
+                <span className="font-lora text-xs opacity-60 mt-1">
                   {option.description}
                 </span>
               )}
@@ -236,10 +236,10 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
             return (
               <label
                 key={option.value}
-                className={`flex flex-col p-4 border-4 border-black cursor-pointer transition-all ${
+                className={`flex flex-col p-4 border-2 border-charcoal/20 rounded-md cursor-pointer transition-all ${
                   isChecked
-                    ? 'bg-yellow shadow-brutal'
-                    : 'bg-off-white hover:translate-x-1'
+                    ? 'bg-yellow/30 shadow-golden border-yellow/50'
+                    : 'bg-off-white hover:-translate-y-0.5 hover:shadow-brutal-sm'
                 }`}
               >
                 <input
@@ -249,9 +249,9 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
                   onChange={(e) => handleMultipleChange(e.target.checked)}
                   className="sr-only"
                 />
-                <span className="font-outfit font-bold">{option.label}</span>
+                <span className="font-lora font-bold">{option.label}</span>
                 {option.description && (
-                  <span className="font-outfit text-xs opacity-60 mt-1">
+                  <span className="font-lora text-xs opacity-60 mt-1">
                     {option.description}
                   </span>
                 )}
@@ -270,7 +270,7 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
           max={question.max}
           value={currentValue || ''}
           onChange={(e) => handleAnswer(question.id, e.target.value)}
-          className="w-full h-16 px-6 font-anton text-3xl text-center border-4 border-black bg-off-white focus:bg-yellow focus:outline-none focus:ring-4 focus:ring-black transition-colors"
+          className="w-full h-16 px-6 font-cinzel text-3xl text-center border-2 border-charcoal/20 rounded-md bg-off-white focus:bg-yellow/20 focus:outline-none focus:ring-2 focus:ring-yellow focus:border-yellow/50 transition-colors"
         />
       )
     }
@@ -304,7 +304,7 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
   return (
     <div className="space-y-6">
       {/* Progress Bar */}
-      <div className="border-4 border-black bg-off-white overflow-hidden">
+      <div className="border-2 border-charcoal/20 bg-off-white rounded-md overflow-hidden">
         <div
           className="h-3 bg-yellow transition-all duration-300"
           style={{ width: `${progress}%` }}
@@ -318,18 +318,18 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
             <CardTitle>
               Question {currentStep + 1} / {visibleQuestions.length}
             </CardTitle>
-            <div className="font-space-mono text-xs opacity-60">
+            <div className="font-medieval text-xs opacity-60">
               {Math.round(progress)}%
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <h2 className="font-anton text-2xl uppercase mb-2">
+            <h2 className="font-cinzel text-2xl uppercase mb-2">
               {currentQuestion.question}
             </h2>
             {currentQuestion.description && (
-              <p className="font-outfit text-sm opacity-70">
+              <p className="font-lora text-sm opacity-70">
                 {currentQuestion.description}
               </p>
             )}
@@ -338,7 +338,7 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
           {renderQuestion(currentQuestion)}
 
           {error && (
-            <div className="p-4 border-4 border-black bg-red text-white font-outfit font-bold">
+            <div className="p-4 border-2 border-red/30 bg-red/10 text-red rounded-md font-lora font-bold">
               {error}
             </div>
           )}

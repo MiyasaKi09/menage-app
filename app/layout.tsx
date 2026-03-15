@@ -1,25 +1,25 @@
 import type { Metadata } from 'next'
-import { Anton, Space_Mono, Outfit } from 'next/font/google'
+import { Cinzel, MedievalSharp, Lora } from 'next/font/google'
 import './globals.css'
 
-const anton = Anton({
+const cinzel = Cinzel({
+  weight: ['400', '500', '600', '700', '800', '900'],
+  subsets: ['latin'],
+  variable: '--font-cinzel',
+  display: 'swap',
+})
+
+const medievalSharp = MedievalSharp({
   weight: '400',
   subsets: ['latin'],
-  variable: '--font-anton',
+  variable: '--font-medieval',
   display: 'swap',
 })
 
-const spaceMono = Space_Mono({
-  weight: ['400', '700'],
-  subsets: ['latin'],
-  variable: '--font-space-mono',
-  display: 'swap',
-})
-
-const outfit = Outfit({
+const lora = Lora({
   weight: ['400', '500', '600', '700'],
   subsets: ['latin'],
-  variable: '--font-outfit',
+  variable: '--font-lora',
   display: 'swap',
 })
 
@@ -35,7 +35,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <body className={`${anton.variable} ${spaceMono.variable} ${outfit.variable} font-outfit`}>{children}</body>
+      <body className={`${cinzel.variable} ${medievalSharp.variable} ${lora.variable} font-lora`}>{children}</body>
     </html>
   )
 }

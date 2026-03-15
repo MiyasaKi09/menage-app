@@ -81,22 +81,22 @@ export default async function TasksPage() {
   const taskCount = tasks?.length || 0
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-deep-purple to-[#1f0833] relative overflow-hidden">
-      <GrainOverlay />
-      <DiagonalStripe position="top-left" colors={['#ffe14f', '#ff6b2c', '#00b4ff']} />
+    <div className="min-h-screen bg-gradient-to-br from-deep-purple to-deep-blue relative overflow-hidden">
+      <GrainOverlay opacity={0.08} />
+      <DiagonalStripe position="top-left" />
 
       <div className="relative z-10 p-6 space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <div className="font-space-mono text-xs opacity-50 uppercase tracking-wider mb-1 text-cream">
+            <div className="font-medieval text-xs opacity-50 tracking-wider mb-1 text-cream">
               {householdName}
             </div>
-            <h1 className="font-anton text-4xl md:text-5xl text-cream uppercase leading-none">
-              TÂCHES
+            <h1 className="font-cinzel text-4xl md:text-5xl text-cream font-bold leading-none">
+              Quetes
             </h1>
-            <p className="font-space-mono text-sm text-cream opacity-60 mt-2">
-              {taskCount} tâche{taskCount > 1 ? 's' : ''} disponible{taskCount > 1 ? 's' : ''}
+            <p className="font-medieval text-sm text-cream opacity-60 mt-2">
+              {taskCount} quete{taskCount > 1 ? 's' : ''} disponible{taskCount > 1 ? 's' : ''}
             </p>
           </div>
           <div className="flex gap-2">
@@ -116,10 +116,10 @@ export default async function TasksPage() {
               <CardTitle className="text-red">Erreur de chargement</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="font-outfit opacity-70 mb-2">
-                Une erreur s'est produite lors du chargement des tâches:
+              <p className="font-lora opacity-70 mb-2">
+                Une erreur s&apos;est produite lors du chargement des quetes:
               </p>
-              <pre className="text-xs bg-black/20 p-4 rounded overflow-auto">
+              <pre className="text-xs bg-charcoal/10 p-4 rounded-md overflow-auto">
                 {JSON.stringify(tasksError, null, 2)}
               </pre>
             </CardContent>
@@ -128,15 +128,15 @@ export default async function TasksPage() {
         {!tasksError && (!tasks || tasks.length === 0) ? (
           <Card>
             <CardHeader>
-              <CardTitle>Aucune tâche disponible</CardTitle>
+              <CardTitle>Aucune quete disponible</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="font-outfit opacity-70">
-                Aucune tâche n'a été configurée pour ce foyer. Les tâches seront bientôt disponibles.
+              <p className="font-lora opacity-70">
+                Aucune quete n&apos;a ete configuree pour ce foyer. Les quetes seront bientot disponibles.
               </p>
               <details className="mt-4">
                 <summary className="cursor-pointer text-sm opacity-60">Debug info</summary>
-                <pre className="text-xs bg-black/20 p-4 rounded overflow-auto mt-2">
+                <pre className="text-xs bg-charcoal/10 p-4 rounded-md overflow-auto mt-2">
                   Household ID: {householdId}
                   {'\n'}Tasks count: {tasks?.length || 0}
                   {'\n'}Raw data: {JSON.stringify(tasks, null, 2)}

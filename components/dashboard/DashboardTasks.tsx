@@ -143,10 +143,10 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
 
   return (
     <Card>
-      <CardHeader className="bg-orange border-b-4 border-black">
+      <CardHeader className="bg-gradient-to-r from-orange/20 to-yellow/10 border-b-2 border-charcoal/15">
         <div className="flex justify-between items-center">
-          <CardTitle className="font-anton text-2xl uppercase">Mes taches du jour</CardTitle>
-          <span className="font-space-mono text-sm bg-black text-cream px-3 py-1">
+          <CardTitle className="font-cinzel text-2xl font-bold">Quetes du jour</CardTitle>
+          <span className="font-medieval text-sm bg-charcoal text-cream px-3 py-1 rounded-md">
             {completedCount}/{totalCount}
           </span>
         </div>
@@ -154,24 +154,24 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
       <CardContent className="p-4 space-y-2">
         {pendingTasks.length === 0 ? (
           <div className="text-center py-6">
-            <span className="text-4xl">🎉</span>
-            <p className="font-anton text-xl uppercase mt-2">Bravo !</p>
-            <p className="font-outfit text-sm opacity-70">
-              Toutes les taches du jour sont terminees
+            <span className="text-4xl">🏆</span>
+            <p className="font-cinzel text-xl font-bold mt-2">Victoire !</p>
+            <p className="font-lora text-sm opacity-70">
+              Toutes les quetes du jour sont accomplies
             </p>
           </div>
         ) : (
           pendingTasks.slice(0, 5).map((task) => (
             <div
               key={task.task_id}
-              className="flex items-center justify-between p-3 border-2 border-black bg-cream hover:bg-yellow/20 transition-all"
+              className="flex items-center justify-between p-3 border-2 border-charcoal/10 bg-cream rounded-md hover:bg-yellow/10 transition-all"
             >
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{task.category_emoji || '📋'}</span>
                 <div>
-                  <p className="font-anton text-sm uppercase">{task.task_name}</p>
-                  <p className="font-space-mono text-xs opacity-60">
-                    {task.duration_minutes} min - {task.points} pts
+                  <p className="font-cinzel text-sm font-semibold">{task.task_name}</p>
+                  <p className="font-medieval text-xs opacity-60">
+                    {task.duration_minutes} min - {task.points} or
                   </p>
                 </div>
               </div>
@@ -180,14 +180,14 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
                 onClick={() => handleCompleteTask(task)}
                 disabled={completingTaskId === task.task_id}
               >
-                {completingTaskId === task.task_id ? '...' : 'FAIT'}
+                {completingTaskId === task.task_id ? '...' : 'Accompli'}
               </Button>
             </div>
           ))
         )}
         <Link href="/tasks/schedule">
           <Button variant="outline" className="w-full mt-4">
-            Voir le planning complet
+            Voir le grimoire complet
           </Button>
         </Link>
       </CardContent>

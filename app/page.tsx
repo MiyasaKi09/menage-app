@@ -3,16 +3,16 @@ import { Button } from '@/components/ui/Button'
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-cream to-off-white">
+      <header className="border-b-2 border-charcoal/10">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">🏠 Ménage App</h1>
+          <h1 className="text-2xl font-cinzel font-bold text-charcoal">Menage App</h1>
           <nav className="space-x-4">
             <Link href="/login">
               <Button variant="ghost">Connexion</Button>
             </Link>
             <Link href="/signup">
-              <Button>S'inscrire</Button>
+              <Button>S&apos;inscrire</Button>
             </Link>
           </nav>
         </div>
@@ -21,49 +21,49 @@ export default function Home() {
       <main className="flex-1 container mx-auto px-4 py-16">
         <div className="max-w-3xl mx-auto text-center space-y-8">
           <div className="space-y-4">
-            <h2 className="text-5xl font-bold">
-              Transformez le ménage en jeu 🎮
+            <h2 className="text-5xl font-cinzel font-bold text-charcoal leading-tight">
+              Transformez le menage en quete heroique
             </h2>
-            <p className="text-xl text-muted-foreground">
-              Gagnez des points, accomplissez des quêtes et progressez avec votre foyer
+            <p className="text-xl text-charcoal/60 font-lora">
+              Gagnez des pieces d&apos;or, accomplissez des quetes et progressez avec votre foyer
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-            <div className="p-6 rounded-lg border bg-card">
-              <div className="text-3xl mb-2">✨</div>
-              <h3 className="font-semibold mb-2">Personnalisation</h3>
-              <p className="text-sm text-muted-foreground">
-                Un questionnaire adapte les tâches à votre foyer
+            <div className="p-6 rounded-lg border-2 border-charcoal/10 bg-off-white shadow-brutal-sm">
+              <div className="text-3xl mb-2">📜</div>
+              <h3 className="font-cinzel font-semibold mb-2 text-charcoal">Personnalisation</h3>
+              <p className="text-sm text-charcoal/60 font-lora">
+                Un questionnaire adapte les quetes a votre foyer
               </p>
             </div>
-            <div className="p-6 rounded-lg border bg-card">
-              <div className="text-3xl mb-2">🏆</div>
-              <h3 className="font-semibold mb-2">Gamification</h3>
-              <p className="text-sm text-muted-foreground">
-                Points, niveaux, badges et récompenses sociales
+            <div className="p-6 rounded-lg border-2 border-charcoal/10 bg-off-white shadow-brutal-sm">
+              <div className="text-3xl mb-2">⚔️</div>
+              <h3 className="font-cinzel font-semibold mb-2 text-charcoal">Gamification</h3>
+              <p className="text-sm text-charcoal/60 font-lora">
+                Pieces d&apos;or, niveaux, blasons et recompenses
               </p>
             </div>
-            <div className="p-6 rounded-lg border bg-card">
-              <div className="text-3xl mb-2">👥</div>
-              <h3 className="font-semibold mb-2">Mode Foyer</h3>
-              <p className="text-sm text-muted-foreground">
-                Collaborez et partagez les tâches en famille
+            <div className="p-6 rounded-lg border-2 border-charcoal/10 bg-off-white shadow-brutal-sm">
+              <div className="text-3xl mb-2">🏰</div>
+              <h3 className="font-cinzel font-semibold mb-2 text-charcoal">Mode Guilde</h3>
+              <p className="text-sm text-charcoal/60 font-lora">
+                Collaborez et partagez les quetes en famille
               </p>
             </div>
           </div>
 
           <div className="flex gap-4 justify-center">
             <Link href="/signup">
-              <Button size="lg">Commencer gratuitement</Button>
+              <Button size="lg">Commencer l&apos;aventure</Button>
             </Link>
           </div>
         </div>
       </main>
 
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-muted-foreground">
-          © 2025 Ménage App. Tous droits réservés.
+      <footer className="border-t-2 border-charcoal/10 py-8">
+        <div className="container mx-auto px-4 text-center text-charcoal/40 font-medieval text-sm">
+          &copy; 2025 Menage App. Tous droits reserves.
         </div>
       </footer>
     </div>

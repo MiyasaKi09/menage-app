@@ -65,27 +65,27 @@ export function ScheduleView({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-deep-purple to-[#1f0833] relative overflow-hidden">
-      <GrainOverlay />
-      <DiagonalStripe position="top-left" colors={['#ffe14f', '#ff6b2c', '#00b4ff']} />
+    <div className="min-h-screen bg-gradient-to-br from-deep-purple to-deep-blue relative overflow-hidden">
+      <GrainOverlay opacity={0.08} />
+      <DiagonalStripe position="top-left" />
 
       <div className="relative z-10 p-6 space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <div className="font-space-mono text-xs opacity-50 uppercase tracking-wider mb-1 text-cream">
+            <div className="font-medieval text-xs opacity-50 tracking-wider mb-1 text-cream">
               {householdName}
             </div>
-            <h1 className="font-anton text-4xl md:text-5xl text-cream uppercase leading-none">
-              PLANNING
+            <h1 className="font-cinzel text-4xl md:text-5xl text-cream font-bold leading-none">
+              Grimoire
             </h1>
-            <p className="font-space-mono text-sm text-cream opacity-60 mt-2">
+            <p className="font-medieval text-sm text-cream opacity-60 mt-2">
               Vue liste par jour
             </p>
           </div>
           <div className="flex gap-2">
             <Link href="/tasks">
-              <Button variant="outline" size="sm">Vue Catégories</Button>
+              <Button variant="outline" size="sm">Vue Categories</Button>
             </Link>
             <Link href="/tasks/history">
               <Button variant="outline" size="sm">Historique</Button>
@@ -100,38 +100,38 @@ export function ScheduleView({
         {todayTasks.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
-              <div className="text-6xl mb-4">🎉</div>
-              <h3 className="font-anton text-2xl uppercase mb-2">Aucune tâche planifiée</h3>
-              <p className="font-outfit opacity-70 mb-4">
-                Toutes vos tâches sont à jour pour ce jour ! Profitez-en pour vous reposer.
+              <div className="text-6xl mb-4">🏆</div>
+              <h3 className="font-cinzel text-2xl font-bold mb-2">Aucune quete planifiee</h3>
+              <p className="font-lora opacity-70 mb-4">
+                Toutes vos quetes sont a jour pour ce jour ! Profitez-en pour vous reposer.
               </p>
               <Link href="/tasks">
-                <Button>Voir toutes les tâches</Button>
+                <Button>Voir toutes les quetes</Button>
               </Link>
             </CardContent>
           </Card>
         ) : (
           <Card>
-            <CardHeader className={`border-b-4 border-black ${
-              isToday ? 'bg-orange' : 'bg-yellow'
+            <CardHeader className={`border-b-2 border-charcoal/15 ${
+              isToday ? 'bg-gradient-to-r from-orange/20 to-yellow/10' : 'bg-yellow/15'
             }`}>
               <div className="flex justify-between items-center flex-wrap gap-2">
                 <div>
-                  <CardTitle className="font-anton text-2xl uppercase flex items-center gap-2">
+                  <CardTitle className="font-cinzel text-2xl font-bold flex items-center gap-2">
                     {getDateLabel()}
                     {isToday && (
-                      <span className="text-sm bg-black text-cream px-2 py-1 font-space-mono">
-                        AUJOURD'HUI
+                      <span className="text-sm bg-charcoal text-cream px-2 py-1 font-medieval rounded-md">
+                        Aujourd&apos;hui
                       </span>
                     )}
                   </CardTitle>
-                  <p className="font-space-mono text-xs opacity-70 mt-1">
-                    {todayTasks.length} tâche{todayTasks.length > 1 ? 's' : ''} · {totalMinutes} min · {completedCount}/{todayTasks.length} terminée{completedCount > 1 ? 's' : ''}
+                  <p className="font-medieval text-xs opacity-70 mt-1">
+                    {todayTasks.length} quete{todayTasks.length > 1 ? 's' : ''} · {totalMinutes} min · {completedCount}/{todayTasks.length} accomplie{completedCount > 1 ? 's' : ''}
                   </p>
                 </div>
                 {completedCount === todayTasks.length && (
-                  <div className="font-space-mono text-sm text-green bg-black px-3 py-1 uppercase">
-                    ✓ JOUR TERMINÉ
+                  <div className="font-medieval text-sm text-green bg-green/10 px-3 py-1 rounded-md border border-green/20">
+                    ✓ Jour termine
                   </div>
                 )}
               </div>

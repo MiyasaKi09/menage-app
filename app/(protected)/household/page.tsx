@@ -32,7 +32,7 @@ export default async function HouseholdPage() {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Mes Foyers</h1>
+          <h1 className="text-3xl font-cinzel font-bold">Mes Foyers</h1>
           <p className="text-muted-foreground">
             Gérez vos foyers et invitez des membres
           </p>
@@ -79,7 +79,7 @@ export default async function HouseholdPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Code d'invitation</p>
-                    <p className="text-lg font-mono font-bold">{membership.households?.invite_code}</p>
+                    <p className="text-lg font-medieval font-bold">{membership.households?.invite_code}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Points</p>

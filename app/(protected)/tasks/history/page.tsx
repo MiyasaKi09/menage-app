@@ -35,7 +35,7 @@ export default async function TaskHistoryPage() {
           <Link href="/tasks" className="text-sm text-muted-foreground hover:underline mb-2 block">
             ← Retour aux tâches
           </Link>
-          <h1 className="text-3xl font-bold">Historique des Tâches</h1>
+          <h1 className="text-3xl font-cinzel font-bold">Historique des Quetes</h1>
           <p className="text-muted-foreground">
             Les 50 dernières tâches complétées
           </p>
@@ -89,7 +89,7 @@ export default async function TaskHistoryPage() {
                     <p className="text-lg font-bold text-green-600">
                       +{entry.points_earned}
                     </p>
-                    <p className="text-xs text-muted-foreground">points</p>
+                    <p className="text-xs text-muted-foreground">or</p>
                   </div>
                 </div>
               ))}

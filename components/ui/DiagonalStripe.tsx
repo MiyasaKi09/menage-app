@@ -8,8 +8,6 @@ interface DiagonalStripeProps {
 
 export function DiagonalStripe({
   position = 'top-right',
-  colors = ['#ff3b5c', '#ff6b2c', '#ffe14f', '#00e676', '#00b4ff'],
-  stripeWidth = 10
 }: DiagonalStripeProps) {
   const isTop = position.includes('top')
   const isRight = position.includes('right')
@@ -17,29 +15,41 @@ export function DiagonalStripe({
   return (
     <div
       className={cn(
-        "absolute overflow-hidden pointer-events-none",
-        isTop ? '-top-5' : '-bottom-5',
-        isRight ? '-right-10' : '-left-10'
+        "absolute overflow-hidden pointer-events-none opacity-15",
+        isTop ? '-top-8' : '-bottom-8',
+        isRight ? '-right-8' : '-left-8'
       )}
       style={{
-        width: '50%',
-        height: '30%',
-        transform: `rotate(${isRight ? '-35deg' : '35deg'})`,
-        transformOrigin: isRight ? 'top right' : 'top left'
+        width: '120px',
+        height: '120px',
       }}
     >
-      <div className="flex flex-col gap-0">
-        {colors.map((color, i) => (
-          <div
-            key={i}
-            style={{
-              height: stripeWidth,
-              backgroundColor: color,
-              transform: 'scaleX(3)'
-            }}
-          />
-        ))}
-      </div>
+      {/* Medieval corner ornament */}
+      <svg viewBox="0 0 100 100" width="120" height="120" className="opacity-60">
+        {/* Decorative scrollwork */}
+        <path
+          d="M10,90 Q10,10 90,10"
+          fill="none"
+          stroke="#D4AF37"
+          strokeWidth="2"
+        />
+        <path
+          d="M20,90 Q20,20 90,20"
+          fill="none"
+          stroke="#D4AF37"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M30,90 Q30,30 90,30"
+          fill="none"
+          stroke="#D4AF37"
+          strokeWidth="1"
+        />
+        {/* Fleur-de-lis accent */}
+        <circle cx="50" cy="50" r="3" fill="#D4AF37" opacity="0.5" />
+        <circle cx="15" cy="85" r="2" fill="#D4AF37" opacity="0.4" />
+        <circle cx="85" cy="15" r="2" fill="#D4AF37" opacity="0.4" />
+      </svg>
     </div>
   )
 }
