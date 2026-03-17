@@ -9,7 +9,7 @@ export function ProgressRing({
   progress,
   size = 60,
   strokeWidth = 6,
-  color = '#D4AF37'
+  color = '#C4A35A'
 }: ProgressRingProps) {
   const radius = (size - strokeWidth) / 2
   const circumference = radius * 2 * Math.PI
@@ -23,7 +23,7 @@ export function ProgressRing({
         cy={size / 2}
         r={radius}
         fill="none"
-        stroke="rgba(212,175,55,0.15)"
+        stroke="rgba(196,163,90,0.12)"
         strokeWidth={strokeWidth}
       />
       {/* Progress circle */}
@@ -37,6 +37,7 @@ export function ProgressRing({
         strokeDasharray={circumference}
         strokeDashoffset={offset}
         strokeLinecap="round"
+        opacity="0.7"
         style={{ transition: 'stroke-dashoffset 0.5s ease' }}
       />
     </svg>

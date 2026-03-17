@@ -5,6 +5,7 @@ import { DiagonalStripe } from '@/components/ui/DiagonalStripe'
 import { GrainOverlay } from '@/components/ui/GrainOverlay'
 import { ProgressRing } from '@/components/ui/ProgressRing'
 import { DashboardTasks } from '@/components/dashboard/DashboardTasks'
+import { WeeklyCharacterBannerWrapper } from '@/components/characters/WeeklyCharacterBannerWrapper'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 
@@ -91,7 +92,7 @@ export default async function DashboardPage() {
             </h1>
           </div>
 
-          <div className="bg-gradient-to-br from-yellow to-orange/80 p-4 border-2 border-yellow/30 rounded-lg shadow-golden-lg text-center relative">
+          <div className="bg-gradient-to-br from-yellow to-orange/80 p-4 border border-yellow/20 rounded-lg shadow-golden-lg text-center relative">
             <div className="absolute -top-1 -right-1 w-3 h-3 bg-red rounded-full animate-glow" />
             <div className="font-cinzel text-4xl font-bold text-black">{profile?.total_points || 0}</div>
             <div className="font-medieval text-xs tracking-wider text-black/70">Pieces d&apos;or</div>
@@ -119,6 +120,9 @@ export default async function DashboardPage() {
           />
         </div>
 
+        {/* Weekly Character */}
+        <WeeklyCharacterBannerWrapper />
+
         {/* Today's Tasks Section */}
         {todayTasks.length > 0 && householdId && user?.id && (
           <DashboardTasks
@@ -144,7 +148,7 @@ export default async function DashboardPage() {
             <div className="space-y-3">
               {households.map((membership: any) => (
                 <Link key={membership.id} href={`/household/${membership.households?.id}`}>
-                  <div className="flex items-stretch border-2 border-charcoal/20 rounded-lg shadow-brutal hover:shadow-brutal-lg hover:-translate-y-0.5 transition-all cursor-pointer bg-off-white overflow-hidden">
+                  <div className="flex items-stretch border border-charcoal/12 rounded-lg shadow-watercolor hover:shadow-watercolor-lg hover:-translate-y-0.5 transition-all cursor-pointer bg-off-white overflow-hidden">
                     <GrainOverlay opacity={0.03} />
                     <div className="relative z-10 flex-1 p-4 flex items-center justify-between">
                       <div>

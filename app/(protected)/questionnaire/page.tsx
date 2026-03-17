@@ -64,7 +64,7 @@ export default async function QuestionnairePage() {
         </div>
 
         {/* Infobox */}
-        <div className="border-2 border-yellow/30 bg-yellow/15 p-6 rounded-lg shadow-golden">
+        <div className="border border-yellow/20 bg-yellow/15 p-6 rounded-lg shadow-golden">
           <GrainOverlay opacity={0.03} />
           <div className="relative z-10">
             <h2 className="font-cinzel text-xl font-bold mb-2">Comment ca marche ?</h2>

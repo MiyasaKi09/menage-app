@@ -44,7 +44,7 @@ export function TaskCompletionModal({ taskName, points, onClose }: TaskCompletio
         initial={{ scale: 0, rotate: -10 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ type: 'spring', duration: 0.8 }}
-        className="relative w-[90%] max-w-md bg-gradient-to-br from-yellow to-orange/60 border-2 border-yellow/40 rounded-xl shadow-golden-lg overflow-hidden"
+        className="relative w-[90%] max-w-md bg-gradient-to-br from-yellow to-orange/60 border border-yellow/25 rounded-xl shadow-golden-lg overflow-hidden"
       >
         <GrainOverlay opacity={0.06} />
 
@@ -84,7 +84,7 @@ export function TaskCompletionModal({ taskName, points, onClose }: TaskCompletio
         </div>
 
         {/* Content */}
-        <div className="relative z-10 bg-charcoal p-8 text-cream text-center rounded-t-xl border-t-2 border-yellow/30">
+        <div className="relative z-10 bg-charcoal p-8 text-cream text-center rounded-t-xl border-t border-yellow/20">
           <p className="font-medieval text-xs opacity-50 tracking-wider mb-2">
             Quete accomplie
           </p>

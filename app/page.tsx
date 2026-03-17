@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/Button'
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-cream to-off-white">
-      <header className="border-b-2 border-charcoal/10">
+      <header className="border-b border-charcoal/8">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-cinzel font-bold text-charcoal">Menage App</h1>
           <nav className="space-x-4">
@@ -30,21 +30,21 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-            <div className="p-6 rounded-lg border-2 border-charcoal/10 bg-off-white shadow-brutal-sm">
+            <div className="p-6 rounded-lg border border-charcoal/8 bg-off-white shadow-watercolor-sm">
               <div className="text-3xl mb-2">📜</div>
               <h3 className="font-cinzel font-semibold mb-2 text-charcoal">Personnalisation</h3>
               <p className="text-sm text-charcoal/60 font-lora">
                 Un questionnaire adapte les quetes a votre foyer
               </p>
             </div>
-            <div className="p-6 rounded-lg border-2 border-charcoal/10 bg-off-white shadow-brutal-sm">
+            <div className="p-6 rounded-lg border border-charcoal/8 bg-off-white shadow-watercolor-sm">
               <div className="text-3xl mb-2">⚔️</div>
               <h3 className="font-cinzel font-semibold mb-2 text-charcoal">Gamification</h3>
               <p className="text-sm text-charcoal/60 font-lora">
                 Pieces d&apos;or, niveaux, blasons et recompenses
               </p>
             </div>
-            <div className="p-6 rounded-lg border-2 border-charcoal/10 bg-off-white shadow-brutal-sm">
+            <div className="p-6 rounded-lg border border-charcoal/8 bg-off-white shadow-watercolor-sm">
               <div className="text-3xl mb-2">🏰</div>
               <h3 className="font-cinzel font-semibold mb-2 text-charcoal">Mode Guilde</h3>
               <p className="text-sm text-charcoal/60 font-lora">
@@ -61,7 +61,7 @@ export default function Home() {
         </div>
       </main>
 
-      <footer className="border-t-2 border-charcoal/10 py-8">
+      <footer className="border-t border-charcoal/8 py-8">
         <div className="container mx-auto px-4 text-center text-charcoal/40 font-medieval text-sm">
           &copy; 2025 Menage App. Tous droits reserves.
         </div>

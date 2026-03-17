@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/Button'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils/cn'
+import { useCharacterTheme } from '@/components/providers/CharacterThemeProvider'
+import { calculateBonusPoints } from '@/lib/characters/apply-power'
 
 interface ScheduleTaskCardProps {
   task: {
@@ -28,12 +30,14 @@ export function ScheduleTaskCard({ task, householdId, userId }: ScheduleTaskCard
   const [completing, setCompleting] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+  const { power } = useCharacterTheme()
 
   const handleComplete = async () => {
     setCompleting(true)
 
     try {
       const completedAt = new Date().toISOString()
+      const { finalPoints } = calculateBonusPoints(task.points, task.category_name, power)
 
       // 1. Update scheduled_task status to 'completed'
       const { error: updateError } = await supabase
@@ -42,7 +46,7 @@ export function ScheduleTaskCard({ task, householdId, userId }: ScheduleTaskCard
           status: 'completed',
           completed_at: completedAt,
           completed_by: userId,
-          points_earned: task.points
+          points_earned: finalPoints
         })
         .eq('id', task.task_id)
 
@@ -62,7 +66,7 @@ export function ScheduleTaskCard({ task, householdId, userId }: ScheduleTaskCard
           profile_id: userId,
           task_name: task.task_name,
           category_name: task.category_name,
-          points_earned: task.points,
+          points_earned: finalPoints,
           completed_at: completedAt,
           day_of_week: new Date().getDay(),
           hour_of_day: new Date().getHours()
@@ -76,7 +80,7 @@ export function ScheduleTaskCard({ task, householdId, userId }: ScheduleTaskCard
       // 3. Update user stats (total points and tasks completed)
       const { error: statsError } = await supabase.rpc('increment_profile_stats', {
         p_profile_id: userId,
-        p_points: task.points
+        p_points: finalPoints
       })
 
       if (statsError) {
@@ -88,7 +92,7 @@ export function ScheduleTaskCard({ task, householdId, userId }: ScheduleTaskCard
       const { error: memberStatsError } = await supabase.rpc('increment_household_member_stats', {
         p_profile_id: userId,
         p_household_id: householdId,
-        p_points: task.points
+        p_points: finalPoints
       })
 
       if (memberStatsError) {
@@ -111,13 +115,13 @@ export function ScheduleTaskCard({ task, householdId, userId }: ScheduleTaskCard
   return (
     <div
       className={cn(
-        'flex items-center border-2 border-charcoal/15 bg-cream rounded-lg transition-all shadow-brutal-sm hover:shadow-brutal',
+        'flex items-center border border-charcoal/10 bg-cream rounded-lg transition-all shadow-watercolor-sm hover:shadow-watercolor',
         isCompleted && 'opacity-60 bg-green/10',
         isSkipped && 'opacity-40 bg-charcoal/5'
       )}
     >
       {/* Category Icon */}
-      <div className="w-20 h-20 border-r-2 border-charcoal/10 bg-charcoal/5 flex items-center justify-center flex-shrink-0 rounded-l-lg">
+      <div className="w-20 h-20 border-r border-charcoal/8 bg-charcoal/5 flex items-center justify-center flex-shrink-0 rounded-l-lg">
         <span className="text-4xl">{task.category_emoji}</span>
       </div>
 
@@ -147,7 +151,7 @@ export function ScheduleTaskCard({ task, householdId, userId }: ScheduleTaskCard
       {/* Action Button */}
       <div className="p-4 flex-shrink-0">
         {isCompleted ? (
-          <div className="font-medieval text-sm text-green bg-green/10 px-4 py-2 border-2 border-green/30 rounded-md">
+          <div className="font-medieval text-sm text-green bg-green/10 px-4 py-2 border border-green/20 rounded-md">
             ✓ Accompli
           </div>
         ) : isSkipped ? (

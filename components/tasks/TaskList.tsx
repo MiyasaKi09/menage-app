@@ -119,11 +119,11 @@ export function TaskList({ tasks, householdId, userId, onTaskCompleted }: TaskLi
   return (
     <div className="space-y-4">
       {Object.entries(tasksByCategory).map(([categoryName, categoryTasks]) => (
-        <div key={categoryName} className="border-2 border-charcoal/20 bg-off-white rounded-lg shadow-brutal overflow-hidden">
+        <div key={categoryName} className="border border-charcoal/12 bg-off-white rounded-lg shadow-watercolor overflow-hidden">
           <GrainOverlay />
 
           {/* Category Header */}
-          <div className="relative z-10 p-4 border-b-2 border-charcoal/15 bg-gradient-to-r from-orange/20 to-yellow/10 flex items-center gap-4">
+          <div className="relative z-10 p-4 border-b border-charcoal/10 bg-gradient-to-r from-orange/20 to-yellow/10 flex items-center gap-4">
             <CategoryIcon category={categoryName} size={48} />
             <div className="flex-1">
               <h3 className="font-cinzel text-xl font-bold">{categoryName}</h3>
@@ -141,12 +141,12 @@ export function TaskList({ tasks, householdId, userId, onTaskCompleted }: TaskLi
                 onMouseEnter={() => setHoveredId(task.id)}
                 onMouseLeave={() => setHoveredId(null)}
                 className={cn(
-                  "flex items-center border-2 border-charcoal/10 bg-cream rounded-md transition-all cursor-pointer overflow-hidden",
-                  hoveredId === task.id && "-translate-y-0.5 shadow-brutal-sm"
+                  "flex items-center border border-charcoal/8 bg-cream rounded-md transition-all cursor-pointer overflow-hidden",
+                  hoveredId === task.id && "-translate-y-0.5 shadow-watercolor-sm"
                 )}
               >
                 {/* Icon */}
-                <div className="w-20 h-20 border-r-2 border-charcoal/10 bg-charcoal/5 flex items-center justify-center flex-shrink-0 rounded-l-md">
+                <div className="w-20 h-20 border-r border-charcoal/8 bg-charcoal/5 flex items-center justify-center flex-shrink-0 rounded-l-md">
                   <CategoryIcon category={categoryName} size={40} />
                 </div>
 

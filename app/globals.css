@@ -4,26 +4,27 @@
 
 @layer base {
   :root {
-    /* Deep backgrounds - medieval castle/forest */
-    --deep-blue: 20 25 55;        /* #141937 - midnight sky */
-    --deep-green: 18 50 30;       /* #12321E - deep forest */
-    --deep-purple: 45 20 65;      /* #2D1441 - royal purple */
-    --deep-orange: 90 40 15;      /* #5A280F - dark ember */
+    /* Deep backgrounds - watercolor forest/night */
+    --deep-blue: 35 55 50;          /* #233732 - dark forest */
+    --deep-green: 43 76 63;         /* #2B4C3F - forest green */
+    --deep-purple: 60 48 72;        /* #3C3048 - muted plum */
+    --deep-orange: 107 75 42;       /* #6B4B2A - warm umber */
 
-    /* Medieval accents */
-    --yellow: 212 175 55;         /* #D4AF37 - gold */
-    --orange: 184 115 51;         /* #B87333 - copper */
-    --red: 139 35 35;             /* #8B2323 - burgundy/crimson */
-    --green: 46 139 87;           /* #2E8B57 - emerald */
-    --blue: 56 95 168;            /* #385FA8 - sapphire */
-    --purple: 128 70 168;         /* #8046A8 - amethyst */
-    --pink: 178 100 120;          /* #B26478 - dusty rose */
+    /* Watercolor accents - muted, hand-painted */
+    --yellow: 196 163 90;           /* #C4A35A - aged gold */
+    --orange: 178 112 96;           /* #B27060 - dusty terracotta */
+    --red: 176 112 96;              /* #B07060 - dusty rose-brown */
+    --green: 90 128 96;             /* #5A8060 - muted sage */
+    --blue: 74 122 115;             /* #4A7A73 - muted teal */
+    --purple: 155 140 181;          /* #9B8CB5 - soft lavender */
+    --pink: 200 139 122;            /* #C88B7A - warm coral */
 
     /* Neutrals - parchment & stone */
-    --cream: 242 230 210;         /* #F2E6D2 - parchment */
-    --off-white: 235 222 198;     /* #EBDEC6 - aged parchment */
-    --black: 40 30 20;            /* #281E14 - dark oak */
-    --charcoal: 62 48 35;         /* #3E3023 - warm brown */
+    --cream: 240 228 208;           /* #F0E4D0 - parchment */
+    --off-white: 232 220 200;       /* #E8DCC8 - aged parchment */
+    --black: 40 30 20;              /* #281E14 - dark oak */
+    --charcoal: 75 60 42;           /* #4B3C2A - softer warm brown */
+    --ink: 90 65 35;                /* #5A4123 - hand-drawn ink */
 
     /* Semantic tokens */
     --background: var(--cream);
@@ -34,7 +35,7 @@
     --primary-foreground: var(--black);
     --secondary: var(--blue);
     --secondary-foreground: 255 255 255;
-    --muted: 35 25% 80%;
+    --muted: 35 20% 78%;
     --muted-foreground: 30 15% 45%;
     --accent: var(--yellow);
     --accent-foreground: var(--black);
@@ -44,8 +45,13 @@
     --input: var(--charcoal);
     --ring: var(--yellow);
 
-    /* Soft rounded edges */
-    --radius: 0.5rem;
+    /* Character theme (overridden by CharacterThemeProvider) */
+    --character-primary: 196 163 90;
+    --character-accent: 196 163 90;
+    --character-glow: 240 224 160;
+
+    /* Softer rounded edges */
+    --radius: 0.75rem;
   }
 }
 
@@ -77,15 +83,9 @@
 }
 
 @keyframes bounce-in {
-  0% {
-    transform: scale(0);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0% { transform: scale(0); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
 @keyframes shimmer {
@@ -94,8 +94,18 @@
 }
 
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(212, 175, 55, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.6); }
+  0%, 100% { box-shadow: 0 0 6px rgba(196, 163, 90, 0.2); }
+  50% { box-shadow: 0 0 16px rgba(196, 163, 90, 0.4); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes reveal {
+  0% { opacity: 0; transform: scale(0.9) rotateY(10deg); }
+  100% { opacity: 1; transform: scale(1) rotateY(0deg); }
 }
 
 /* Staggered animations for lists */

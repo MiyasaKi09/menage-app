@@ -112,7 +112,7 @@ export function ScheduleView({
           </Card>
         ) : (
           <Card>
-            <CardHeader className={`border-b-2 border-charcoal/15 ${
+            <CardHeader className={`border-b border-charcoal/10 ${
               isToday ? 'bg-gradient-to-r from-orange/20 to-yellow/10' : 'bg-yellow/15'
             }`}>
               <div className="flex justify-between items-center flex-wrap gap-2">

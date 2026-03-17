@@ -19,7 +19,7 @@ const config: Config = {
         'deep-green': 'rgb(var(--deep-green) / <alpha-value>)',
         'deep-purple': 'rgb(var(--deep-purple) / <alpha-value>)',
         'deep-orange': 'rgb(var(--deep-orange) / <alpha-value>)',
-        // Medieval accents
+        // Watercolor accents
         yellow: 'rgb(var(--yellow) / <alpha-value>)',
         orange: 'rgb(var(--orange) / <alpha-value>)',
         red: 'rgb(var(--red) / <alpha-value>)',
@@ -27,11 +27,16 @@ const config: Config = {
         blue: 'rgb(var(--blue) / <alpha-value>)',
         purple: 'rgb(var(--purple) / <alpha-value>)',
         pink: 'rgb(var(--pink) / <alpha-value>)',
+        ink: 'rgb(var(--ink) / <alpha-value>)',
         // Neutrals
         cream: 'rgb(var(--cream) / <alpha-value>)',
         'off-white': 'rgb(var(--off-white) / <alpha-value>)',
         black: 'rgb(var(--black) / <alpha-value>)',
         charcoal: 'rgb(var(--charcoal) / <alpha-value>)',
+        // Character theme (dynamic)
+        'char-primary': 'rgb(var(--character-primary) / <alpha-value>)',
+        'char-accent': 'rgb(var(--character-accent) / <alpha-value>)',
+        'char-glow': 'rgb(var(--character-glow) / <alpha-value>)',
         // Semantic tokens
         border: "rgb(var(--border))",
         input: "rgb(var(--input))",
@@ -64,11 +69,15 @@ const config: Config = {
         },
       },
       boxShadow: {
-        'brutal': '0 4px 14px rgba(62, 48, 35, 0.25), 0 1px 3px rgba(62, 48, 35, 0.15)',
-        'brutal-sm': '0 2px 8px rgba(62, 48, 35, 0.2), 0 1px 2px rgba(62, 48, 35, 0.1)',
-        'brutal-lg': '0 8px 24px rgba(62, 48, 35, 0.3), 0 2px 6px rgba(62, 48, 35, 0.15)',
-        'golden': '0 4px 14px rgba(212, 175, 55, 0.25), 0 1px 3px rgba(212, 175, 55, 0.15)',
-        'golden-lg': '0 8px 24px rgba(212, 175, 55, 0.3), 0 2px 6px rgba(212, 175, 55, 0.2)',
+        'watercolor': '0 2px 12px rgba(75, 60, 42, 0.12), 0 1px 4px rgba(75, 60, 42, 0.08)',
+        'watercolor-sm': '0 1px 6px rgba(75, 60, 42, 0.10)',
+        'watercolor-lg': '0 4px 20px rgba(75, 60, 42, 0.15), 0 2px 8px rgba(75, 60, 42, 0.08)',
+        'golden': '0 2px 12px rgba(196, 163, 90, 0.15), 0 1px 4px rgba(196, 163, 90, 0.10)',
+        'golden-lg': '0 4px 20px rgba(196, 163, 90, 0.2), 0 2px 8px rgba(196, 163, 90, 0.12)',
+        // Keep old names as aliases for compatibility during transition
+        'brutal': '0 2px 12px rgba(75, 60, 42, 0.12), 0 1px 4px rgba(75, 60, 42, 0.08)',
+        'brutal-sm': '0 1px 6px rgba(75, 60, 42, 0.10)',
+        'brutal-lg': '0 4px 20px rgba(75, 60, 42, 0.15), 0 2px 8px rgba(75, 60, 42, 0.08)',
       },
       borderWidth: {
         '3': '3px',
@@ -87,6 +96,8 @@ const config: Config = {
         'starburst-spin': 'starburst-spin 30s linear infinite',
         'shimmer': 'shimmer 3s linear infinite',
         'glow': 'glow 2s ease-in-out infinite',
+        'float': 'float 3s ease-in-out infinite',
+        'reveal': 'reveal 0.6s ease-out',
       },
     },
   },

@@ -20,11 +20,11 @@ export function Header() {
 
   return (
     <>
-      <header className="bg-off-white border-b-2 border-charcoal/15 shadow-brutal-sm">
+      <header className="bg-off-white border-b border-charcoal/10 shadow-watercolor-sm">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center gap-4 hover:opacity-80 transition-opacity">
-            <div className="w-12 h-12 bg-gradient-to-br from-yellow to-orange rounded-lg border-2 border-charcoal/20 flex items-center justify-center shadow-golden">
+            <div className="w-12 h-12 bg-gradient-to-br from-yellow to-orange rounded-lg border border-charcoal/12 flex items-center justify-center shadow-golden">
               <span className="font-cinzel text-2xl font-bold text-black">M</span>
             </div>
             <div>
@@ -43,6 +43,9 @@ export function Header() {
             </Link>
             <Link href="/tasks">
               <Button variant="ghost" size="sm">Quetes</Button>
+            </Link>
+            <Link href="/characters">
+              <Button variant="ghost" size="sm">Personnages</Button>
             </Link>
 
             <span className="font-medieval text-xs opacity-60 ml-2 hidden md:inline text-charcoal">

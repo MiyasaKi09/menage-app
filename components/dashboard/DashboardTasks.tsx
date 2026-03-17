@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { createClient } from '@/lib/supabase/client'
+import { useCharacterTheme } from '@/components/providers/CharacterThemeProvider'
+import { calculateBonusPoints } from '@/lib/characters/apply-power'
 
 interface ScheduledTask {
   task_id: string  // This is actually scheduled_tasks.id from the RPC
@@ -27,6 +29,7 @@ interface DashboardTasksProps {
 export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksProps) {
   const router = useRouter()
   const supabase = createClient()
+  const { power } = useCharacterTheme()
   const [completingTaskId, setCompletingTaskId] = useState<string | null>(null)
   const [localTasks, setLocalTasks] = useState(tasks)
 
@@ -43,6 +46,9 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
 
     try {
       const now = new Date()
+
+      // Calculate points with character power bonus
+      const { finalPoints } = calculateBonusPoints(task.points, task.category_name, power)
 
       // 1. Mettre a jour scheduled_tasks.status
       const { data: updateData, error: scheduleError } = await supabase
@@ -75,7 +81,7 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
         profile_id: userId,
         task_name: task.task_name,
         category_name: task.category_name,
-        points_earned: task.points,
+        points_earned: finalPoints,
         completed_at: now.toISOString(),
         day_of_week: now.getDay(),
         hour_of_day: now.getHours(),
@@ -99,7 +105,7 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
       // 3. Mettre a jour les statistiques du profil
       const { error: profileError } = await supabase.rpc('increment_profile_stats', {
         p_profile_id: userId,
-        p_points: task.points,
+        p_points: finalPoints,
       })
 
       if (profileError) {
@@ -111,7 +117,7 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
       const { error: memberError } = await supabase.rpc('increment_household_member_stats', {
         p_profile_id: userId,
         p_household_id: householdId,
-        p_points: task.points,
+        p_points: finalPoints,
       })
 
       if (memberError) {
@@ -143,7 +149,7 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
 
   return (
     <Card>
-      <CardHeader className="bg-gradient-to-r from-orange/20 to-yellow/10 border-b-2 border-charcoal/15">
+      <CardHeader className="bg-gradient-to-r from-orange/20 to-yellow/10 border-b border-charcoal/10">
         <div className="flex justify-between items-center">
           <CardTitle className="font-cinzel text-2xl font-bold">Quetes du jour</CardTitle>
           <span className="font-medieval text-sm bg-charcoal text-cream px-3 py-1 rounded-md">
@@ -164,7 +170,7 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
           pendingTasks.slice(0, 5).map((task) => (
             <div
               key={task.task_id}
-              className="flex items-center justify-between p-3 border-2 border-charcoal/10 bg-cream rounded-md hover:bg-yellow/10 transition-all"
+              className="flex items-center justify-between p-3 border border-charcoal/8 bg-cream rounded-md hover:bg-yellow/10 transition-all"
             >
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{task.category_emoji || '📋'}</span>

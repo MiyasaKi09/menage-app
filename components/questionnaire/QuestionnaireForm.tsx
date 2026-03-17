@@ -178,10 +178,10 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
           {question.options?.map((option) => (
             <label
               key={option.value}
-              className={`flex flex-col p-4 border-2 border-charcoal/20 rounded-md cursor-pointer transition-all ${
+              className={`flex flex-col p-4 border border-charcoal/12 rounded-md cursor-pointer transition-all ${
                 currentValue === option.value
                   ? 'bg-yellow/30 shadow-golden border-yellow/50'
-                  : 'bg-off-white hover:-translate-y-0.5 hover:shadow-brutal-sm'
+                  : 'bg-off-white hover:-translate-y-0.5 hover:shadow-watercolor-sm'
               }`}
             >
               <input
@@ -236,10 +236,10 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
             return (
               <label
                 key={option.value}
-                className={`flex flex-col p-4 border-2 border-charcoal/20 rounded-md cursor-pointer transition-all ${
+                className={`flex flex-col p-4 border border-charcoal/12 rounded-md cursor-pointer transition-all ${
                   isChecked
                     ? 'bg-yellow/30 shadow-golden border-yellow/50'
-                    : 'bg-off-white hover:-translate-y-0.5 hover:shadow-brutal-sm'
+                    : 'bg-off-white hover:-translate-y-0.5 hover:shadow-watercolor-sm'
                 }`}
               >
                 <input
@@ -270,7 +270,7 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
           max={question.max}
           value={currentValue || ''}
           onChange={(e) => handleAnswer(question.id, e.target.value)}
-          className="w-full h-16 px-6 font-cinzel text-3xl text-center border-2 border-charcoal/20 rounded-md bg-off-white focus:bg-yellow/20 focus:outline-none focus:ring-2 focus:ring-yellow focus:border-yellow/50 transition-colors"
+          className="w-full h-16 px-6 font-cinzel text-3xl text-center border border-charcoal/12 rounded-md bg-off-white focus:bg-yellow/20 focus:outline-none focus:ring-2 focus:ring-yellow focus:border-yellow/50 transition-colors"
         />
       )
     }
@@ -304,7 +304,7 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
   return (
     <div className="space-y-6">
       {/* Progress Bar */}
-      <div className="border-2 border-charcoal/20 bg-off-white rounded-md overflow-hidden">
+      <div className="border border-charcoal/12 bg-off-white rounded-md overflow-hidden">
         <div
           className="h-3 bg-yellow transition-all duration-300"
           style={{ width: `${progress}%` }}
@@ -338,7 +338,7 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
           {renderQuestion(currentQuestion)}
 
           {error && (
-            <div className="p-4 border-2 border-red/30 bg-red/10 text-red rounded-md font-lora font-bold">
+            <div className="p-4 border border-red/20 bg-red/10 text-red rounded-md font-lora font-bold">
               {error}
             </div>
           )}
