@@ -57,7 +57,7 @@ export default async function HouseholdDetailPage({
       <div className="flex justify-between items-start">
         <div>
           <Link href="/household" className="text-sm text-muted-foreground hover:underline mb-2 block">
-            ← Retour aux foyers
+            ← Retour a la cite
           </Link>
           <h1 className="text-3xl font-cinzel font-bold">{household?.name}</h1>
           <p className="text-muted-foreground">
@@ -69,7 +69,7 @@ export default async function HouseholdDetailPage({
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Informations du foyer</CardTitle>
+            <CardTitle>Informations de la cite</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -142,7 +142,7 @@ export default async function HouseholdDetailPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Membres du foyer ({members?.length || 0})</CardTitle>
+          <CardTitle>Membres de la cite ({members?.length || 0})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">

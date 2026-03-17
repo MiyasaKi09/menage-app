@@ -56,11 +56,11 @@ export default function Home() {
         {/* Character cards */}
         <div className="max-w-2xl mx-auto px-6 pb-24">
           <div className="flex justify-center items-end gap-3 md:gap-5">
-            <CharacterPreview emoji="🧙" color="#9B8CB5" rotation={-8} size="small" />
-            <CharacterPreview emoji="🌹" color="#5A8060" rotation={-3} size="medium" />
-            <CharacterPreview emoji="👼" color="#C4A35A" rotation={0} size="large" />
-            <CharacterPreview emoji="🏰" color="#B27060" rotation={3} size="medium" />
-            <CharacterPreview emoji="🔮" color="#556F8B" rotation={8} size="small" />
+            <CharacterPreview image="/characters/wizard.webp" emoji="🧙" color="#9B8CB5" rotation={-8} size="small" />
+            <CharacterPreview image="/characters/noblewoman.webp" emoji="🌹" color="#5A8060" rotation={-3} size="medium" />
+            <CharacterPreview image="/characters/angel.webp" emoji="👼" color="#C4A35A" rotation={0} size="large" />
+            <CharacterPreview image="/characters/guardian.webp" emoji="🏰" color="#B27060" rotation={3} size="medium" />
+            <CharacterPreview image="/characters/oracle.webp" emoji="🔮" color="#556F8B" rotation={8} size="small" />
           </div>
         </div>
 
@@ -92,9 +92,9 @@ export default function Home() {
                 <div className="w-10 h-10 mx-auto mb-4 rounded-xl bg-green/10 flex items-center justify-center">
                   <span className="text-lg">👥</span>
                 </div>
-                <h3 className="font-cinzel text-[15px] font-semibold text-charcoal">Guilde</h3>
+                <h3 className="font-cinzel text-[15px] font-semibold text-charcoal">Cite</h3>
                 <p className="mt-2 font-lora text-[14px] text-charcoal/35 leading-relaxed">
-                  Formez un foyer, partagez les quetes.
+                  Rejoignez une cite, partagez les quetes.
                   Qui sera le heros de la semaine?
                 </p>
               </div>
@@ -113,11 +113,13 @@ export default function Home() {
 }
 
 function CharacterPreview({
+  image,
   emoji,
   color,
   rotation = 0,
   size = 'medium',
 }: {
+  image?: string
   emoji: string
   color: string
   rotation?: number
@@ -132,14 +134,23 @@ function CharacterPreview({
 
   return (
     <div
-      className={`${s.w} ${s.opacity} rounded-2xl flex items-center justify-center transition-transform duration-500 hover:scale-105`}
+      className={`${s.w} ${s.opacity} rounded-2xl overflow-hidden transition-transform duration-500 hover:scale-105 relative`}
       style={{
         transform: `rotate(${rotation}deg)`,
-        background: `linear-gradient(to bottom, ${color}15, ${color}05)`,
-        border: `1px solid ${color}18`,
+        border: `1px solid ${color}20`,
       }}
     >
-      <span className={s.text}>{emoji}</span>
+      {image ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+      ) : (
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ background: `linear-gradient(to bottom, ${color}15, ${color}05)` }}
+        >
+          <span className={s.text}>{emoji}</span>
+        </div>
+      )}
     </div>
   )
 }

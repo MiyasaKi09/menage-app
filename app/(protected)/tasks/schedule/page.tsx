@@ -29,7 +29,7 @@ export default async function SchedulePage(props: {
   }
 
   const householdId = memberships[0].household_id
-  const householdName = (memberships[0].households as any)?.name || 'Mon Foyer'
+  const householdName = (memberships[0].households as any)?.name || 'Ma Cite'
 
   // 3. Parse target date (defaults to today)
   const targetDateStr = searchParams.date || new Date().toISOString().split('T')[0]

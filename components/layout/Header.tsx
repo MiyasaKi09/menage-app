@@ -19,7 +19,7 @@ export function Header() {
 
   const navItems = [
     { href: '/dashboard', label: 'Dashboard' },
-    { href: '/household', label: 'Foyers' },
+    { href: '/household', label: 'Cite' },
     { href: '/tasks', label: 'Quetes' },
     { href: '/characters', label: 'Personnages' },
   ]

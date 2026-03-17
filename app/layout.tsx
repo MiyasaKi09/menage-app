@@ -25,7 +25,7 @@ const lora = Lora({
 
 export const metadata: Metadata = {
   title: 'Ménage App - Gamification du ménage',
-  description: 'Transformez le ménage en jeu avec votre foyer',
+  description: 'Transformez le menage en aventure avec votre cite',
 }
 
 export default function RootLayout({

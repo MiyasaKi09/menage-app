@@ -1,6 +1,7 @@
 'use client'
 
-import { CollectionCharacter, RARITY_COLORS, RARITY_LABELS, CLASS_EMOJIS } from '@/lib/characters/types'
+import Image from 'next/image'
+import { CollectionCharacter, RARITY_COLORS, RARITY_LABELS, CLASS_EMOJIS, CLASS_IMAGES } from '@/lib/characters/types'
 
 interface CharacterDetailModalProps {
   character: CollectionCharacter
@@ -9,6 +10,7 @@ interface CharacterDetailModalProps {
 
 export function CharacterDetailModal({ character, onClose }: CharacterDetailModalProps) {
   const emoji = CLASS_EMOJIS[character.character_class] || '👤'
+  const imageUrl = CLASS_IMAGES[character.character_class]
   const rarityColor = RARITY_COLORS[character.rarity] || RARITY_COLORS.common
   const primary = character.color_theme?.primary || '196 163 90'
 
@@ -38,8 +40,14 @@ export function CharacterDetailModal({ character, onClose }: CharacterDetailModa
             {RARITY_LABELS[character.rarity]}
           </span>
 
-          {/* Emoji */}
-          <div className="text-6xl mb-4 animate-float">{emoji}</div>
+          {/* Character image */}
+          {imageUrl ? (
+            <div className="relative w-48 h-64 rounded-2xl overflow-hidden mb-4 shadow-md">
+              <Image src={imageUrl} alt={character.avatar_name} fill className="object-cover" sizes="192px" />
+            </div>
+          ) : (
+            <div className="text-6xl mb-4 animate-float">{emoji}</div>
+          )}
 
           {/* Name */}
           <h2 className="font-cinzel text-2xl font-semibold text-charcoal">{character.avatar_name}</h2>

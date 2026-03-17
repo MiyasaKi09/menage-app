@@ -71,7 +71,7 @@ export function CreateHouseholdForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
         <label htmlFor="name" className="block text-sm font-medium mb-1">
-          Nom du foyer
+          Nom de la cite
         </label>
         <Input
           id="name"
@@ -91,7 +91,7 @@ export function CreateHouseholdForm() {
       )}
 
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? <Spinner size="sm" /> : 'Créer le foyer'}
+        {isLoading ? <Spinner size="sm" /> : 'Fonder la cite'}
       </Button>
     </form>
   )

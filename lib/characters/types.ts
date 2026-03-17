@@ -65,3 +65,21 @@ export const CLASS_EMOJIS: Record<string, string> = {
   oracle: '🔮',
   wanderer: '🪘',
 }
+
+export const CLASS_IMAGES: Record<string, string> = {
+  wizard: '/characters/wizard.webp',
+  washerwoman: '/characters/washerwoman.webp',
+  pirate: '/characters/pirate.webp',
+  knight: '/characters/knight.webp',
+  fairy: '/characters/fairy.webp',
+  alchemist: '/characters/alchemist.webp',
+  druid: '/characters/druid.webp',
+  bard: '/characters/bard.webp',
+  dragon: '/characters/dragon.webp',
+  monk: '/characters/monk.webp',
+  angel: '/characters/angel.webp',
+  guardian: '/characters/guardian.webp',
+  noblewoman: '/characters/noblewoman.webp',
+  oracle: '/characters/oracle.webp',
+  wanderer: '/characters/wanderer.webp',
+}

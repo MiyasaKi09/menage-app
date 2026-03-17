@@ -58,8 +58,8 @@ export default async function QuestionnairePage() {
           </h1>
           <p className="font-lora text-cream opacity-80 text-lg">
             {existingResponse
-              ? 'Modifiez vos reponses pour ajuster les quetes de votre foyer'
-              : 'Repondez a quelques questions pour personnaliser les quetes de votre foyer'}
+              ? 'Modifiez vos reponses pour ajuster les quetes de votre cite'
+              : 'Repondez a quelques questions pour personnaliser les quetes de votre cite'}
           </p>
         </div>
 
@@ -69,7 +69,7 @@ export default async function QuestionnairePage() {
           <div className="relative z-10">
             <h2 className="font-cinzel text-xl font-bold mb-2">Comment ca marche ?</h2>
             <ul className="font-lora space-y-2 text-sm">
-              <li>Nous creons automatiquement les quetes adaptees a votre foyer</li>
+              <li>Nous creons automatiquement les quetes adaptees a votre cite</li>
               <li>Les pieces d&apos;or sont ajustees selon la complexite de votre logement</li>
               <li>Vous pourrez toujours modifier vos reponses plus tard</li>
             </ul>

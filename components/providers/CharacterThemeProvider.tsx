@@ -53,9 +53,9 @@ export function CharacterThemeProvider({ children, initialCharacter = null }: Ch
   const [character, setCharacter] = useState<WeeklyCharacter | null>(initialCharacter)
 
   const charClass = character?.character_class || ''
-  const theme = (character?.is_revealed && CHARACTER_THEMES[charClass]) || DEFAULT_THEME
+  const theme = CHARACTER_THEMES[charClass] || DEFAULT_THEME
 
-  const power: CharacterPower | null = character?.is_revealed
+  const power: CharacterPower | null = character
     ? {
         power_type: character.power_type as CharacterPower['power_type'],
         power_value: character.power_value,

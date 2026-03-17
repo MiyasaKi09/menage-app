@@ -65,7 +65,7 @@ export function JoinHouseholdForm() {
         .single()
 
       if (existingMember) {
-        setError('Vous êtes déjà membre de ce foyer')
+        setError('Vous etes deja membre de cette cite')
         setIsLoading(false)
         return
       }
@@ -113,7 +113,7 @@ export function JoinHouseholdForm() {
           <p className="text-sm text-red-500 mt-1">{errors.inviteCode.message}</p>
         )}
         <p className="text-xs text-muted-foreground mt-1">
-          Le code vous a été communiqué par un membre du foyer
+          Le code vous a ete communique par un membre de la cite
         </p>
       </div>
 
@@ -124,7 +124,7 @@ export function JoinHouseholdForm() {
       )}
 
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? <Spinner size="sm" /> : 'Rejoindre le foyer'}
+        {isLoading ? <Spinner size="sm" /> : 'Rejoindre la cite'}
       </Button>
     </form>
   )

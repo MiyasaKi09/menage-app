@@ -10,7 +10,6 @@ export default async function HouseholdPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Récupérer les foyers de l'utilisateur
   const { data: memberships } = await supabase
     .from('household_members')
     .select(`
@@ -32,14 +31,14 @@ export default async function HouseholdPage() {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-cinzel font-bold">Mes Foyers</h1>
+          <h1 className="text-3xl font-cinzel font-bold">Ma Cite</h1>
           <p className="text-muted-foreground">
-            Gérez vos foyers et invitez des membres
+            Gerez votre cite et invitez des membres
           </p>
         </div>
         {(!memberships || memberships.length === 0) && (
           <Link href="/household/setup">
-            <Button>Créer ou rejoindre un foyer</Button>
+            <Button>Fonder ou rejoindre une cite</Button>
           </Link>
         )}
       </div>
@@ -47,11 +46,11 @@ export default async function HouseholdPage() {
       {!memberships || memberships.length === 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle>Aucun foyer</CardTitle>
+            <CardTitle>Aucune cite</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground mb-4">
-              Vous ne faites partie d'aucun foyer. Créez-en un ou rejoignez un foyer existant avec un code d'invitation.
+              Vous ne faites partie d&apos;aucune cite. Fondez-en une ou rejoignez une cite existante avec un code d&apos;invitation.
             </p>
             <Link href="/household/setup">
               <Button>Commencer</Button>
@@ -65,28 +64,28 @@ export default async function HouseholdPage() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle>{membership.households?.name || 'Foyer'}</CardTitle>
+                    <CardTitle>{membership.households?.name || 'Cite'}</CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">
                       {membership.role === 'admin' ? '👑 Administrateur' : '👤 Membre'}
                     </p>
                   </div>
                   <Link href={`/household/${membership.households?.id}`}>
-                    <Button variant="outline" size="sm">Voir les détails</Button>
+                    <Button variant="outline" size="sm">Voir les details</Button>
                   </Link>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">Code d'invitation</p>
+                    <p className="text-sm text-muted-foreground">Code d&apos;invitation</p>
                     <p className="text-lg font-medieval font-bold">{membership.households?.invite_code}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Points</p>
+                    <p className="text-sm text-muted-foreground">Or</p>
                     <p className="text-lg font-bold">{membership.points_in_household || 0}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Tâches complétées</p>
+                    <p className="text-sm text-muted-foreground">Quetes accomplies</p>
                     <p className="text-lg font-bold">{membership.tasks_completed_in_household || 0}</p>
                   </div>
                   <div>
@@ -103,10 +102,10 @@ export default async function HouseholdPage() {
           <Card className="border-dashed">
             <CardContent className="py-8 text-center">
               <p className="text-muted-foreground mb-4">
-                Vous voulez rejoindre un autre foyer ?
+                Vous voulez rejoindre une autre cite ?
               </p>
               <Link href="/household/setup">
-                <Button variant="outline">Rejoindre un foyer</Button>
+                <Button variant="outline">Rejoindre une cite</Button>
               </Link>
             </CardContent>
           </Card>
