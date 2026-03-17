@@ -1,9 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { StatCard } from '@/components/ui/StatCard'
-import { DiagonalStripe } from '@/components/ui/DiagonalStripe'
 import { GrainOverlay } from '@/components/ui/GrainOverlay'
-import { ProgressRing } from '@/components/ui/ProgressRing'
 import { DashboardTasks } from '@/components/dashboard/DashboardTasks'
 import { WeeklyCharacterBannerWrapper } from '@/components/characters/WeeklyCharacterBannerWrapper'
 import Link from 'next/link'
@@ -16,14 +13,12 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Récupérer les données du profil
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', user?.id)
     .single()
 
-  // Récupérer les foyers de l'utilisateur
   const { data: households } = await supabase
     .from('household_members')
     .select(`
@@ -38,15 +33,10 @@ export default async function DashboardPage() {
     .eq('profile_id', user?.id)
     .limit(5)
 
-  const totalHouseholds = households?.length || 0
-  const householdProgress = (totalHouseholds / 5) * 100 // Progress toward 5 households
-
-  // Extraire le household_id du premier foyer
   const householdId = households && households.length > 0
     ? (households[0].households as any)?.id
     : null
 
-  // Récupérer les tâches du jour
   let todayTasks: any[] = []
   let householdHasTasks = false
 
@@ -61,7 +51,6 @@ export default async function DashboardPage() {
 
     todayTasks = data || []
 
-    // Vérifier si le foyer a des tâches assignées (questionnaire complété)
     const { count } = await supabase
       .from('household_tasks')
       .select('id', { count: 'exact', head: true })
@@ -72,145 +61,108 @@ export default async function DashboardPage() {
     householdHasTasks = (count || 0) > 0
   }
 
-  // Le questionnaire est complété si le foyer a des tâches assignées
   const hasCompletedQuestionnaire = householdHasTasks
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-deep-green to-deep-blue relative overflow-hidden">
-      <GrainOverlay opacity={0.08} />
-      <DiagonalStripe position="top-right" />
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Full-page gradient background that changes with character theme */}
+      <div className="absolute inset-0 bg-gradient-to-br from-deep-green via-deep-blue to-deep-green/80 transition-colors duration-700" />
+      <GrainOverlay opacity={0.04} />
 
-      <div className="relative z-10 p-6 space-y-8">
-        {/* Header Section */}
+      {/* Subtle decorative orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-10 right-[20%] w-72 h-72 bg-yellow/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 left-[10%] w-56 h-56 bg-blue/4 rounded-full blur-3xl" />
+      </div>
+
+      <div className="relative z-10 p-6 md:p-8 max-w-4xl mx-auto space-y-8">
+        {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <div className="font-medieval text-xs opacity-50 tracking-wider mb-1 text-cream">
+            <p className="font-medieval text-[11px] opacity-40 tracking-widest mb-2 text-cream uppercase">
               Bienvenue, noble aventurier
-            </div>
-            <h1 className="font-cinzel text-4xl md:text-6xl text-cream font-bold leading-none tracking-wide">
+            </p>
+            <h1 className="font-cinzel text-3xl md:text-5xl text-cream font-semibold leading-none tracking-wide">
               {profile?.display_name || 'Aventurier'}
             </h1>
           </div>
 
-          <div className="bg-gradient-to-br from-yellow to-orange/80 p-4 border border-yellow/20 rounded-lg shadow-golden-lg text-center relative">
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-red rounded-full animate-glow" />
-            <div className="font-cinzel text-4xl font-bold text-black">{profile?.total_points || 0}</div>
-            <div className="font-medieval text-xs tracking-wider text-black/70">Pieces d&apos;or</div>
+          <div className="flex items-center gap-3 bg-cream/10 backdrop-blur-sm px-5 py-3 rounded-xl border border-cream/10">
+            <div className="text-right">
+              <div className="font-cinzel text-3xl font-semibold text-cream">{profile?.total_points || 0}</div>
+              <div className="font-medieval text-[10px] tracking-wider text-cream/50">Pieces d&apos;or</div>
+            </div>
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatCard
-            label="Serie"
-            value={`${profile?.current_streak || 0}J`}
-            icon="🔥"
-            color="orange"
-          />
-          <StatCard
-            label="Niveau"
-            value={profile?.current_level || 1}
-            color="yellow"
-          />
-          <StatCard
-            label="Quetes"
-            value={profile?.tasks_completed || 0}
-            icon="⚔️"
-            color="green"
-          />
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-3 md:gap-4">
+          <StatCard label="Serie" value={`${profile?.current_streak || 0}J`} icon="🔥" color="orange" />
+          <StatCard label="Niveau" value={profile?.current_level || 1} color="yellow" />
+          <StatCard label="Quetes" value={profile?.tasks_completed || 0} icon="⚔️" color="green" />
         </div>
 
         {/* Weekly Character */}
         <WeeklyCharacterBannerWrapper />
 
-        {/* Today's Tasks Section */}
+        {/* Today&apos;s Tasks */}
         {todayTasks.length > 0 && householdId && user?.id && (
-          <DashboardTasks
-            tasks={todayTasks}
-            householdId={householdId}
-            userId={user.id}
-          />
+          <DashboardTasks tasks={todayTasks} householdId={householdId} userId={user.id} />
         )}
 
-        {/* Households Section */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="font-cinzel text-xl md:text-2xl font-bold text-yellow tracking-wide">
-              Mes Foyers
+        {/* Households */}
+        {households && households.length > 0 && (
+          <div className="space-y-3">
+            <h2 className="font-cinzel text-lg font-semibold text-cream/80 tracking-wide">
+              Foyers
             </h2>
-            <div className="flex items-center gap-2">
-              <ProgressRing progress={householdProgress} size={28} strokeWidth={3} />
-              <span className="font-medieval text-xs opacity-60 text-cream">{totalHouseholds}/5</span>
-            </div>
-          </div>
-
-          {households && households.length > 0 ? (
-            <div className="space-y-3">
-              {households.map((membership: any) => (
-                <Link key={membership.id} href={`/household/${membership.households?.id}`}>
-                  <div className="flex items-stretch border border-charcoal/12 rounded-lg shadow-watercolor hover:shadow-watercolor-lg hover:-translate-y-0.5 transition-all cursor-pointer bg-off-white overflow-hidden">
-                    <GrainOverlay opacity={0.03} />
-                    <div className="relative z-10 flex-1 p-4 flex items-center justify-between">
-                      <div>
-                        <p className="font-cinzel text-lg font-semibold text-charcoal">{membership.households?.name}</p>
-                        <p className="font-medieval text-xs opacity-60 text-charcoal">
-                          {membership.tasks_completed_in_household || 0} quete{(membership.tasks_completed_in_household || 0) > 1 ? 's' : ''}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-cinzel text-2xl font-bold text-yellow">{membership.points_in_household || 0}</p>
-                        <p className="font-medieval text-xs opacity-60 text-charcoal">Or</p>
-                      </div>
-                    </div>
+            {households.map((membership: any) => (
+              <Link key={membership.id} href={`/household/${membership.households?.id}`}>
+                <div className="group flex items-center justify-between p-4 rounded-xl bg-cream/8 backdrop-blur-sm border border-cream/8 hover:bg-cream/12 hover:border-cream/15 transition-all cursor-pointer">
+                  <div>
+                    <p className="font-cinzel text-base font-semibold text-cream group-hover:text-yellow transition-colors">{membership.households?.name}</p>
+                    <p className="font-medieval text-[11px] text-cream/40">
+                      {membership.tasks_completed_in_household || 0} quetes accomplies
+                    </p>
                   </div>
-                </Link>
-              ))}
-
-              <Link href="/household">
-                <Button variant="outline" size="sm" className="w-full">
-                  Voir tous les foyers
-                </Button>
+                  <div className="text-right">
+                    <p className="font-cinzel text-xl font-semibold text-yellow">{membership.points_in_household || 0}</p>
+                    <p className="font-medieval text-[10px] text-cream/35">or</p>
+                  </div>
+                </div>
               </Link>
-            </div>
-          ) : (
-            <Card className="border-dashed">
-              <CardContent className="py-8 text-center">
-                <p className="font-cinzel text-2xl font-bold mb-2">Aucun foyer</p>
-                <p className="font-lora text-sm opacity-70 mb-6">
-                  Creez ou rejoignez un foyer pour commencer vos quetes
-                </p>
-                <Link href="/household/setup">
-                  <Button>Creer ou rejoindre un foyer</Button>
-                </Link>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
 
-        {/* Next Steps Section - Only show if there are pending steps */}
-        {((!households || households.length === 0) || !hasCompletedQuestionnaire) && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Prochaines quetes</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {(!households || households.length === 0) ? (
-                <div className="flex items-center gap-3 font-lora">
-                  <span className="text-2xl">🏰</span>
-                  <Link href="/household/setup" className="underline font-bold hover:text-yellow transition-colors">
-                    Fondez ou rejoignez un foyer
-                  </Link>
-                </div>
-              ) : !hasCompletedQuestionnaire ? (
-                <div className="flex items-center gap-3 font-lora">
-                  <span className="text-2xl">📜</span>
-                  <Link href="/questionnaire" className="underline font-bold hover:text-yellow transition-colors">
-                    Completez le questionnaire initial
-                  </Link>
-                </div>
-              ) : null}
-            </CardContent>
-          </Card>
+        {/* Empty state / Next steps */}
+        {(!households || households.length === 0) && (
+          <div className="text-center py-12 space-y-4">
+            <div className="text-5xl">🏰</div>
+            <h2 className="font-cinzel text-2xl font-semibold text-cream">Fondez votre foyer</h2>
+            <p className="font-lora text-sm text-cream/50 max-w-sm mx-auto">
+              Creez ou rejoignez un foyer pour commencer votre aventure
+            </p>
+            <Link href="/household/setup">
+              <Button className="mt-2">Commencer</Button>
+            </Link>
+          </div>
+        )}
+
+        {householdId && !hasCompletedQuestionnaire && (
+          <Link href="/questionnaire">
+            <div className="group flex items-center gap-4 p-4 rounded-xl bg-yellow/8 border border-yellow/12 hover:bg-yellow/12 hover:border-yellow/20 transition-all cursor-pointer">
+              <span className="text-2xl">📜</span>
+              <div>
+                <p className="font-cinzel text-sm font-semibold text-cream group-hover:text-yellow transition-colors">
+                  Questionnaire initial
+                </p>
+                <p className="font-lora text-xs text-cream/40">
+                  Personnalisez les quetes de votre foyer
+                </p>
+              </div>
+            </div>
+          </Link>
         )}
       </div>
     </div>

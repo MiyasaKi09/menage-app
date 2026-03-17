@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { createClient } from '@/lib/supabase/client'
 import { useCharacterTheme } from '@/components/providers/CharacterThemeProvider'
 import { calculateBonusPoints } from '@/lib/characters/apply-power'
@@ -148,36 +147,37 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
   }
 
   return (
-    <Card>
-      <CardHeader className="bg-gradient-to-r from-orange/20 to-yellow/10 border-b border-charcoal/10">
-        <div className="flex justify-between items-center">
-          <CardTitle className="font-cinzel text-2xl font-bold">Quetes du jour</CardTitle>
-          <span className="font-medieval text-sm bg-charcoal text-cream px-3 py-1 rounded-md">
-            {completedCount}/{totalCount}
-          </span>
+    <div className="space-y-3">
+      <div className="flex justify-between items-center">
+        <h2 className="font-cinzel text-lg font-semibold text-cream/80 tracking-wide">
+          Quetes du jour
+        </h2>
+        <span className="font-medieval text-[11px] text-cream/40">
+          {completedCount}/{totalCount}
+        </span>
+      </div>
+
+      {pendingTasks.length === 0 ? (
+        <div className="text-center py-8 rounded-2xl bg-cream/6 backdrop-blur-sm border border-cream/8">
+          <div className="text-4xl mb-2">🏆</div>
+          <p className="font-cinzel text-lg font-semibold text-cream">Victoire !</p>
+          <p className="font-lora text-sm text-cream/40 mt-1">
+            Toutes les quetes du jour sont accomplies
+          </p>
         </div>
-      </CardHeader>
-      <CardContent className="p-4 space-y-2">
-        {pendingTasks.length === 0 ? (
-          <div className="text-center py-6">
-            <span className="text-4xl">🏆</span>
-            <p className="font-cinzel text-xl font-bold mt-2">Victoire !</p>
-            <p className="font-lora text-sm opacity-70">
-              Toutes les quetes du jour sont accomplies
-            </p>
-          </div>
-        ) : (
-          pendingTasks.slice(0, 5).map((task) => (
+      ) : (
+        <div className="space-y-2">
+          {pendingTasks.slice(0, 5).map((task) => (
             <div
               key={task.task_id}
-              className="flex items-center justify-between p-3 border border-charcoal/8 bg-cream rounded-md hover:bg-yellow/10 transition-all"
+              className="group flex items-center justify-between p-3.5 rounded-xl bg-cream/6 backdrop-blur-sm border border-cream/8 hover:bg-cream/10 hover:border-cream/15 transition-all"
             >
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{task.category_emoji || '📋'}</span>
-                <div>
-                  <p className="font-cinzel text-sm font-semibold">{task.task_name}</p>
-                  <p className="font-medieval text-xs opacity-60">
-                    {task.duration_minutes} min - {task.points} or
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="text-xl flex-shrink-0">{task.category_emoji || '📋'}</span>
+                <div className="min-w-0">
+                  <p className="font-cinzel text-sm font-medium text-cream truncate">{task.task_name}</p>
+                  <p className="font-medieval text-[11px] text-cream/35">
+                    {task.duration_minutes} min · {task.points} or
                   </p>
                 </div>
               </div>
@@ -185,18 +185,20 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
                 size="sm"
                 onClick={() => handleCompleteTask(task)}
                 disabled={completingTaskId === task.task_id}
+                className="flex-shrink-0 ml-3"
               >
-                {completingTaskId === task.task_id ? '...' : 'Accompli'}
+                {completingTaskId === task.task_id ? '...' : 'Fait'}
               </Button>
             </div>
-          ))
-        )}
-        <Link href="/tasks/schedule">
-          <Button variant="outline" className="w-full mt-4">
-            Voir le grimoire complet
-          </Button>
-        </Link>
-      </CardContent>
-    </Card>
+          ))}
+        </div>
+      )}
+
+      <Link href="/tasks/schedule">
+        <button className="w-full py-2.5 rounded-xl text-center font-medieval text-xs text-cream/30 hover:text-cream/50 hover:bg-cream/4 transition-all">
+          Voir le planning complet
+        </button>
+      </Link>
+    </div>
   )
 }
