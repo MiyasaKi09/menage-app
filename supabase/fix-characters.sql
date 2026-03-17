@@ -153,7 +153,12 @@ INSERT INTO avatars (name, description, character_class, rarity, color_theme, po
 -- 6. Verify seed worked
 SELECT count(*) as avatar_count FROM avatars WHERE is_weekly_eligible = true;
 
--- 7. RPC: Assign weekly character
+-- 7. Drop existing functions (return type may have changed)
+DROP FUNCTION IF EXISTS assign_weekly_character(uuid, uuid);
+DROP FUNCTION IF EXISTS get_character_collection(uuid);
+DROP FUNCTION IF EXISTS reveal_weekly_character(uuid);
+
+-- 8. RPC: Assign weekly character
 CREATE OR REPLACE FUNCTION assign_weekly_character(
     p_household_id UUID,
     p_profile_id UUID
