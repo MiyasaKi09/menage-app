@@ -1,9 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { DiagonalStripe } from '@/components/ui/DiagonalStripe'
-import { GrainOverlay } from '@/components/ui/GrainOverlay'
 import Link from 'next/link'
 import { TasksPageClient } from '@/components/tasks/TasksPageClient'
 
@@ -81,69 +78,46 @@ export default async function TasksPage() {
   const taskCount = tasks?.length || 0
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-deep-purple to-deep-blue relative overflow-hidden">
-      <GrainOverlay opacity={0.08} />
-      <DiagonalStripe position="top-left" />
+    <div className="min-h-screen relative">
+      <div className="fixed inset-0 bg-gradient-to-b from-deep-purple to-deep-blue transition-colors duration-700" />
 
-      <div className="relative z-10 p-6 space-y-8">
+      <div className="relative z-10 max-w-2xl mx-auto px-6 py-10 space-y-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex items-start justify-between">
           <div>
-            <div className="font-medieval text-xs opacity-50 tracking-wider mb-1 text-cream">
+            <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase mb-1">
               {householdName}
-            </div>
-            <h1 className="font-cinzel text-4xl md:text-5xl text-cream font-bold leading-none">
+            </p>
+            <h1 className="font-cinzel text-3xl md:text-4xl text-cream font-semibold tracking-tight">
               Quetes
             </h1>
-            <p className="font-medieval text-sm text-cream opacity-60 mt-2">
-              {taskCount} quete{taskCount > 1 ? 's' : ''} disponible{taskCount > 1 ? 's' : ''}
+            <p className="font-medieval text-[12px] text-cream/30 mt-1">
+              {taskCount} disponible{taskCount > 1 ? 's' : ''}
             </p>
           </div>
           <div className="flex gap-2">
             <Link href="/tasks/schedule">
-              <Button variant="outline" size="sm">Vue Planning</Button>
+              <Button variant="ghost" size="sm" className="text-cream/30 hover:text-cream/60">Planning</Button>
             </Link>
             <Link href="/tasks/history">
-              <Button variant="outline" size="sm">Historique</Button>
+              <Button variant="ghost" size="sm" className="text-cream/30 hover:text-cream/60">Historique</Button>
             </Link>
           </div>
         </div>
 
         {/* Tasks */}
         {tasksError && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-red">Erreur de chargement</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="font-lora opacity-70 mb-2">
-                Une erreur s&apos;est produite lors du chargement des quetes:
-              </p>
-              <pre className="text-xs bg-charcoal/10 p-4 rounded-md overflow-auto">
-                {JSON.stringify(tasksError, null, 2)}
-              </pre>
-            </CardContent>
-          </Card>
+          <div className="rounded-2xl bg-red/[0.06] border border-red/10 p-6">
+            <p className="font-cinzel text-[15px] text-cream/70 mb-2">Erreur de chargement</p>
+            <pre className="text-[12px] text-cream/30 overflow-auto">{JSON.stringify(tasksError, null, 2)}</pre>
+          </div>
         )}
         {!tasksError && (!tasks || tasks.length === 0) ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>Aucune quete disponible</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="font-lora opacity-70">
-                Aucune quete n&apos;a ete configuree pour ce foyer. Les quetes seront bientot disponibles.
-              </p>
-              <details className="mt-4">
-                <summary className="cursor-pointer text-sm opacity-60">Debug info</summary>
-                <pre className="text-xs bg-charcoal/10 p-4 rounded-md overflow-auto mt-2">
-                  Household ID: {householdId}
-                  {'\n'}Tasks count: {tasks?.length || 0}
-                  {'\n'}Raw data: {JSON.stringify(tasks, null, 2)}
-                </pre>
-              </details>
-            </CardContent>
-          </Card>
+          <div className="text-center py-16">
+            <div className="text-3xl opacity-30 mb-3">📜</div>
+            <p className="font-cinzel text-[15px] text-cream/50">Aucune quete disponible</p>
+            <p className="font-lora text-[13px] text-cream/25 mt-1">Les quetes seront bientot configurees</p>
+          </div>
         ) : (
           <TasksPageClient
             tasks={tasks as any}

@@ -1,22 +1,19 @@
 import Link from 'next/link'
 import { LoginForm } from '@/components/auth/LoginForm'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 
 export default function LoginPage() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-center">Connexion</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <LoginForm />
-        <p className="text-center text-sm text-muted-foreground mt-4">
-          Pas encore de compte ?{' '}
-          <Link href="/signup" className="text-primary hover:underline font-medium">
-            S'inscrire
-          </Link>
-        </p>
-      </CardContent>
-    </Card>
+    <div>
+      <h1 className="font-cinzel text-2xl font-semibold text-charcoal text-center mb-8">
+        Connexion
+      </h1>
+      <LoginForm />
+      <p className="text-center text-[13px] text-charcoal/35 mt-8">
+        Pas encore de compte ?{' '}
+        <Link href="/signup" className="text-charcoal/60 hover:text-charcoal transition-colors duration-200">
+          S&apos;inscrire
+        </Link>
+      </p>
+    </div>
   )
 }

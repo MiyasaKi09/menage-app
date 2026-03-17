@@ -14,7 +14,7 @@ interface CharacterCardProps {
 
 export function CharacterCard({
   character,
-  isRevealed = true,
+  isRevealed: _isRevealed = true,
   isCollected = true,
   size = 'md',
   onClick,
@@ -22,126 +22,69 @@ export function CharacterCard({
 }: CharacterCardProps) {
   const rarityColor = RARITY_COLORS[character.rarity] || RARITY_COLORS.common
   const emoji = CLASS_EMOJIS[character.character_class] || '👤'
+  const primary = character.color_theme?.primary || '196 163 90'
 
-  const sizeClasses = {
-    sm: 'w-40 min-h-52',
-    md: 'w-56 min-h-72',
-    lg: 'w-72 min-h-96',
+  const sizes = {
+    sm: { card: 'aspect-[3/4]', emoji: 'text-4xl', name: 'text-[13px]', power: 'text-[10px]' },
+    md: { card: 'aspect-[3/4]', emoji: 'text-5xl', name: 'text-[15px]', power: 'text-[12px]' },
+    lg: { card: 'aspect-[3/4]', emoji: 'text-6xl', name: 'text-lg', power: 'text-[13px]' },
   }
+  const s = sizes[size]
 
-  const textSizes = {
-    sm: { name: 'text-sm', desc: 'text-[10px]', power: 'text-[10px]', emoji: 'text-4xl' },
-    md: { name: 'text-lg', desc: 'text-xs', power: 'text-xs', emoji: 'text-6xl' },
-    lg: { name: 'text-xl', desc: 'text-sm', power: 'text-sm', emoji: 'text-7xl' },
-  }
-
-  if (!isRevealed || !isCollected) {
+  if (!isCollected) {
     return (
       <div
         className={cn(
-          sizeClasses[size],
-          'relative rounded-xl overflow-hidden cursor-pointer transition-all hover:-translate-y-1',
-          'bg-gradient-to-b from-charcoal/80 to-charcoal/95 border border-charcoal/30',
-          'shadow-watercolor hover:shadow-watercolor-lg',
-          'flex flex-col items-center justify-center gap-3 p-4',
+          s.card,
+          'rounded-2xl bg-charcoal/[0.03] border border-charcoal/[0.04] flex flex-col items-center justify-center transition-all duration-300',
+          onClick && 'cursor-pointer hover:bg-charcoal/[0.05]',
           className
         )}
         onClick={onClick}
       >
-        <div className={cn(textSizes[size].emoji, 'opacity-20 grayscale')}>
-          {emoji}
-        </div>
-        <div className="font-cinzel font-semibold text-cream/30 text-center">
-          {isCollected ? 'Non revele' : '???'}
-        </div>
-        {/* Rarity stripe at bottom */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-1 opacity-40"
-          style={{ backgroundColor: rarityColor }}
-        />
+        <span className={cn(s.emoji, 'grayscale opacity-10')}>{emoji}</span>
+        <span className="font-cinzel text-[12px] text-cream/15 mt-2">???</span>
       </div>
     )
   }
 
-  // Parse theme colors for inline styles
-  const primary = character.color_theme?.primary || '196 163 90'
-
   return (
     <div
       className={cn(
-        sizeClasses[size],
-        'relative rounded-xl overflow-hidden transition-all hover:-translate-y-1',
-        'border border-charcoal/15 shadow-watercolor hover:shadow-watercolor-lg',
+        s.card,
+        'rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg',
+        'border border-charcoal/[0.06]',
         onClick && 'cursor-pointer',
         className
       )}
       onClick={onClick}
-      style={{
-        background: `linear-gradient(to bottom, rgb(${primary} / 0.15), rgb(var(--off-white)))`,
-      }}
+      style={{ background: `linear-gradient(to bottom, rgb(${primary} / 0.1), rgb(var(--off-white)))` }}
     >
-      {/* Rarity banner */}
-      <div
-        className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-white font-medieval"
-        style={{ backgroundColor: rarityColor, fontSize: '9px' }}
-      >
-        {RARITY_LABELS[character.rarity]}
-      </div>
+      <div className="h-full flex flex-col items-center justify-between p-5">
+        {/* Top: rarity */}
+        <span
+          className="self-end font-medieval text-[9px] px-2 py-0.5 rounded-full"
+          style={{ color: rarityColor, backgroundColor: rarityColor + '15' }}
+        >
+          {RARITY_LABELS[character.rarity]}
+        </span>
 
-      {/* Character illustration area */}
-      <div className="flex flex-col items-center pt-6 pb-3">
-        <div className={cn(textSizes[size].emoji, 'mb-2')}>
-          {emoji}
+        {/* Center: emoji + name */}
+        <div className="text-center">
+          <div className={s.emoji}>{emoji}</div>
+          <h3 className={cn('font-cinzel font-semibold text-charcoal mt-2 leading-tight', s.name)}>
+            {character.avatar_name}
+          </h3>
         </div>
-        <h3 className={cn('font-cinzel font-semibold text-charcoal text-center px-3 leading-tight', textSizes[size].name)}>
-          {character.avatar_name}
-        </h3>
-        <p className={cn('font-medieval opacity-50 text-charcoal mt-0.5', textSizes[size].desc)}>
-          {character.character_class}
-        </p>
-      </div>
 
-      {/* Rosette divider */}
-      <div className="flex justify-center gap-2 py-1 opacity-30">
-        <RosetteMini color={rarityColor} />
-        <RosetteMini color={rarityColor} />
-        <RosetteMini color={rarityColor} />
-      </div>
-
-      {/* Power section */}
-      <div className="px-4 py-2">
-        <div
-          className={cn('font-lora text-center italic', textSizes[size].power)}
-          style={{ color: rarityColor }}
+        {/* Bottom: power */}
+        <p
+          className={cn('font-lora italic text-center leading-snug', s.power)}
+          style={{ color: rarityColor + 'aa' }}
         >
           {character.power_description}
-        </div>
+        </p>
       </div>
-
-      {/* Lore text */}
-      {size !== 'sm' && (
-        <div className="px-4 pb-4">
-          <p className="font-lora text-[10px] text-charcoal/50 text-center leading-relaxed line-clamp-2">
-            {character.lore_text}
-          </p>
-        </div>
-      )}
-
-      {/* Bottom rarity stripe */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-1"
-        style={{ backgroundColor: rarityColor, opacity: 0.5 }}
-      />
     </div>
-  )
-}
-
-function RosetteMini({ color }: { color: string }) {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12">
-      <ellipse cx="6" cy="6" rx="2" ry="4.5" fill={color} opacity="0.5" />
-      <ellipse cx="6" cy="6" rx="2" ry="4.5" fill={color} opacity="0.5" transform="rotate(90 6 6)" />
-      <circle cx="6" cy="6" r="1.5" fill={color} opacity="0.7" />
-    </svg>
   )
 }

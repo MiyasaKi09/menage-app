@@ -10,46 +10,41 @@ interface CharacterGalleryProps {
 }
 
 export function CharacterGallery({ characters }: CharacterGalleryProps) {
-  const [selectedCharacter, setSelectedCharacter] = useState<CollectionCharacter | null>(null)
+  const [selected, setSelected] = useState<CollectionCharacter | null>(null)
 
-  const collected = characters.filter(c => c.is_collected)
+  const collected = characters.filter(c => c.is_collected).length
   const total = characters.length
 
   return (
     <>
-      {/* Stats */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="font-cinzel text-sm text-cream/70">
-          {collected.length}/{total} decouverts
-        </div>
-        <div className="flex-1 h-1 bg-cream/10 rounded-full overflow-hidden">
+      {/* Progress */}
+      <div className="flex items-center gap-3 mb-8">
+        <span className="font-medieval text-[11px] text-cream/30">
+          {collected}/{total}
+        </span>
+        <div className="flex-1 h-px bg-cream/[0.06] relative">
           <div
-            className="h-full bg-yellow/60 rounded-full transition-all duration-500"
-            style={{ width: `${(collected.length / total) * 100}%` }}
+            className="absolute top-0 left-0 h-full bg-yellow/30 rounded-full transition-all duration-700"
+            style={{ width: `${(collected / total) * 100}%` }}
           />
         </div>
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
         {characters.map((char) => (
           <CharacterCard
             key={char.avatar_id}
             character={char}
-            isRevealed={true}
             isCollected={char.is_collected}
             size="sm"
-            onClick={() => setSelectedCharacter(char)}
+            onClick={() => setSelected(char)}
           />
         ))}
       </div>
 
-      {/* Detail Modal */}
-      {selectedCharacter && (
-        <CharacterDetailModal
-          character={selectedCharacter}
-          onClose={() => setSelectedCharacter(null)}
-        />
+      {selected && (
+        <CharacterDetailModal character={selected} onClose={() => setSelected(null)} />
       )}
     </>
   )
