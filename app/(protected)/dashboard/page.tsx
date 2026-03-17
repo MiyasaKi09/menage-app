@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { StatCard } from '@/components/ui/StatCard'
 import { DashboardTasks } from '@/components/dashboard/DashboardTasks'
-import { WeeklyCharacterBannerWrapper } from '@/components/characters/WeeklyCharacterBannerWrapper'
+import { DashboardCharacterHeader } from '@/components/dashboard/DashboardCharacterHeader'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 
@@ -52,21 +52,11 @@ export default async function DashboardPage() {
 
       <div className="relative z-10 max-w-2xl mx-auto px-6 py-10 space-y-10">
 
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase mb-1">
-              Bienvenue
-            </p>
-            <h1 className="font-cinzel text-3xl md:text-4xl text-cream font-semibold tracking-tight">
-              {profile?.display_name || 'Aventurier'}
-            </h1>
-          </div>
-          <div className="text-right">
-            <div className="font-cinzel text-2xl font-semibold text-yellow">{profile?.total_points || 0}</div>
-            <div className="font-medieval text-[10px] text-cream/25 tracking-wider">or</div>
-          </div>
-        </div>
+        {/* Header with character + user name */}
+        <DashboardCharacterHeader
+          displayName={profile?.display_name || 'Aventurier'}
+          totalPoints={profile?.total_points || 0}
+        />
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3">
@@ -75,8 +65,7 @@ export default async function DashboardPage() {
           <StatCard label="Quetes" value={profile?.tasks_completed || 0} icon="⚔️" />
         </div>
 
-        {/* Character */}
-        <WeeklyCharacterBannerWrapper />
+        {/* Character banner removed - integrated into header */}
 
         {/* Tasks */}
         {todayTasks.length > 0 && householdId && user?.id && (
