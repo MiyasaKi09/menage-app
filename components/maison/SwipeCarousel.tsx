@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState, useEffect, useCallback, useImperativeHandle, forwardRef, type ReactNode } from 'react'
-import { motion, useMotionValue, useSpring, animate } from 'framer-motion'
+import { motion, useMotionValue, animate, type PanInfo } from 'framer-motion'
 
 export interface SwipeCarouselHandle {
   goToIndex: (index: number) => void
@@ -22,9 +22,8 @@ export const SwipeCarousel = forwardRef<SwipeCarouselHandle, SwipeCarouselProps>
   const [viewIndex, setViewIndex] = useState(initialIndex ?? 0)
   const hasInitialized = useRef(false)
 
+  // Use a single motion value — no spring wrapper (avoids feedback loop on over-drag)
   const x = useMotionValue(0)
-  // Smoother spring — lower stiffness, higher damping for fluid feel
-  const springX = useSpring(x, { damping: 35, stiffness: 200, mass: 0.8 })
 
   const cardWidth = wrapperWidth > 0 ? Math.floor((wrapperWidth - 2 * GAP) / 2.5) : 260
 
@@ -40,15 +39,18 @@ export const SwipeCarousel = forwardRef<SwipeCarouselHandle, SwipeCarouselProps>
   const totalWidth = children.length * cardWidth + (children.length - 1) * GAP
   const maxDrag = Math.min(0, -(totalWidth - wrapperWidth))
 
+  const computeTargetX = useCallback((index: number) => {
+    const centerOffset = -(index * (cardWidth + GAP)) + (wrapperWidth / 2 - cardWidth / 2)
+    return Math.max(maxDrag, Math.min(0, centerOffset))
+  }, [cardWidth, wrapperWidth, maxDrag])
+
   const goToIndex = useCallback((index: number) => {
     const clamped = Math.max(0, Math.min(index, children.length - 1))
-    // Center the card in the viewport
-    const centerOffset = -(clamped * (cardWidth + GAP)) + (wrapperWidth / 2 - cardWidth / 2)
-    const targetX = Math.max(maxDrag, Math.min(0, centerOffset))
+    const targetX = computeTargetX(clamped)
     setViewIndex(clamped)
     onActiveIndexChange?.(clamped)
-    animate(x, targetX, { type: 'spring', damping: 35, stiffness: 200, mass: 0.8 })
-  }, [cardWidth, wrapperWidth, maxDrag, children.length, x, onActiveIndexChange])
+    animate(x, targetX, { type: 'spring', damping: 30, stiffness: 250, mass: 0.8 })
+  }, [computeTargetX, children.length, x, onActiveIndexChange])
 
   useImperativeHandle(ref, () => ({ goToIndex }), [goToIndex])
 
@@ -56,14 +58,12 @@ export const SwipeCarousel = forwardRef<SwipeCarouselHandle, SwipeCarouselProps>
   useEffect(() => {
     if (wrapperWidth > 0 && initialIndex !== undefined && !hasInitialized.current) {
       hasInitialized.current = true
-      const centerOffset = -(initialIndex * (cardWidth + GAP)) + (wrapperWidth / 2 - cardWidth / 2)
-      const clampedX = Math.max(maxDrag, Math.min(0, centerOffset))
-      x.set(clampedX)
+      x.set(computeTargetX(initialIndex))
       setViewIndex(initialIndex)
     }
-  }, [wrapperWidth, initialIndex, cardWidth, maxDrag, x])
+  }, [wrapperWidth, initialIndex, computeTargetX, x])
 
-  const handleDragEnd = (_: any, info: { velocity: { x: number }; offset: { x: number } }) => {
+  const handleDragEnd = (_: any, info: PanInfo) => {
     const velocity = info.velocity.x
     let targetIndex = viewIndex
 
@@ -79,12 +79,11 @@ export const SwipeCarousel = forwardRef<SwipeCarouselHandle, SwipeCarouselProps>
   return (
     <div ref={wrapperRef} className={`overflow-hidden ${className}`}>
       <motion.div
-        className="flex cursor-grab active:cursor-grabbing"
-        style={{ x: springX, gap: GAP }}
+        className="flex cursor-grab active:cursor-grabbing select-none"
+        style={{ x, gap: GAP }}
         drag="x"
         dragConstraints={{ left: maxDrag, right: 0 }}
-        dragElastic={0.08}
-        dragTransition={{ bounceStiffness: 200, bounceDamping: 30 }}
+        dragElastic={0.15}
         onDragEnd={handleDragEnd}
       >
         {children.map((child, i) => (
