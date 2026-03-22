@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, Clock, Lock, Coins, Sparkles } from 'lucide-react'
+import { Check, Clock, Lock, Coins, Sparkles, Crosshair } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { SwipeCarousel, CarouselCard } from './SwipeCarousel'
+import { SwipeCarousel, CarouselCard, type SwipeCarouselHandle } from './SwipeCarousel'
 
 interface PeripetieTask {
   task_id: string
@@ -25,6 +25,41 @@ interface PeripetiesCarouselProps {
   bonusMultiplier?: number
 }
 
+function useCountdown(targetDate: string) {
+  const [remaining, setRemaining] = useState('')
+
+  useEffect(() => {
+    const target = new Date(targetDate + 'T00:00:00')
+    const update = () => {
+      const now = new Date()
+      const diff = target.getTime() - now.getTime()
+      if (diff <= 0) {
+        setRemaining('Disponible')
+        return
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+      if (days > 0) setRemaining(`${days}j ${hours}h`)
+      else {
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+        setRemaining(`${hours}h ${mins}m`)
+      }
+    }
+    update()
+    const interval = setInterval(update, 60000)
+    return () => clearInterval(interval)
+  }, [targetDate])
+
+  return remaining
+}
+
+function CountdownBadge({ date }: { date: string }) {
+  const remaining = useCountdown(date)
+  return (
+    <span className="font-lora text-[9px] text-cream/25">{remaining}</span>
+  )
+}
+
 export function PeripetiesCarousel({
   tasks,
   unlockCost = 15,
@@ -35,11 +70,12 @@ export function PeripetiesCarousel({
   const [localTasks, setLocalTasks] = useState(tasks)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [unlockedIds, setUnlockedIds] = useState<Set<string>>(new Set())
+  const [isAtActive, setIsAtActive] = useState(true)
+  const carouselRef = useRef<SwipeCarouselHandle>(null)
 
-  // Active = first non-completed task whose scheduled_date is today or past
-  const todayCheck = new Date().toISOString().split('T')[0]
+  const todayStr = new Date().toISOString().split('T')[0]
   const activeIndex = localTasks.findIndex(t =>
-    (t.status === 'pending' || t.status === 'in_progress') && t.scheduled_date <= todayCheck
+    (t.status === 'pending' || t.status === 'in_progress') && t.scheduled_date <= todayStr
   )
 
   const handleComplete = async (taskId: string) => {
@@ -56,25 +92,23 @@ export function PeripetiesCarousel({
   }
 
   const handleUnlock = (taskId: string) => {
-    // In production: deduct gold via supabase RPC
     setUnlockedIds(prev => new Set(prev).add(taskId))
+  }
+
+  const handleViewChange = (index: number) => {
+    setIsAtActive(activeIndex >= 0 && index === activeIndex)
   }
 
   if (localTasks.length === 0) return null
 
-  const todayStr = new Date().toISOString().split('T')[0]
-
   const cards = localTasks.map((task, i) => {
     const isCompleted = task.status === 'completed' || task.status === 'skipped'
-    // A task is "future" if its scheduled_date is after today (hidden calendar)
     const isScheduledFuture = task.scheduled_date > todayStr
-    const isActive = !isCompleted && !isScheduledFuture
     const isFuture = !isCompleted && isScheduledFuture
     const isUnlocked = unlockedIds.has(task.task_id)
     const isBoosted = isFuture && isUnlocked
     const isLocked = isFuture && !isUnlocked
 
-    // Completed cards (left side)
     if (isCompleted) {
       return (
         <CarouselCard key={task.task_id}>
@@ -96,12 +130,10 @@ export function PeripetiesCarousel({
       )
     }
 
-    // Locked future cards (right side)
     if (isLocked) {
       return (
         <CarouselCard key={task.task_id}>
           <div className="rounded-xl p-4 h-full bg-charcoal/60 border border-cream/[0.04] backdrop-blur-sm relative overflow-hidden">
-            {/* Blurred content hint */}
             <div className="blur-sm opacity-20 space-y-2 pointer-events-none">
               <span className="font-medieval text-[10px] text-cream/30">Peripetie</span>
               <h3 className="font-cinzel text-[12px] text-cream/40">???</h3>
@@ -111,9 +143,15 @@ export function PeripetiesCarousel({
               </div>
             </div>
 
-            {/* Lock overlay */}
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-              <Lock size={20} className="text-cream/20" />
+              <Lock size={18} className="text-cream/20" />
+
+              {/* Countdown */}
+              <div className="flex items-center gap-1">
+                <Clock size={10} className="text-cream/20" />
+                <CountdownBadge date={task.scheduled_date} />
+              </div>
+
               <button
                 onClick={() => handleUnlock(task.task_id)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow/[0.1] border border-yellow/20 text-yellow/60 font-cinzel text-[10px] hover:bg-yellow/[0.2] transition-colors"
@@ -121,30 +159,29 @@ export function PeripetiesCarousel({
                 <Coins size={10} />
                 {unlockCost} or
               </button>
-              <span className="font-lora text-[9px] text-cream/15">Bonus x{bonusMultiplier}</span>
+              <span className="font-lora text-[8px] text-cream/15">Bonus x{bonusMultiplier}</span>
             </div>
           </div>
         </CarouselCard>
       )
     }
 
-    // Active card (center) or boosted unlocked card
+    // Active or boosted card
     return (
       <CarouselCard
         key={task.task_id}
         onClick={() => setExpandedId(task.task_id)}
       >
         <div className={`rounded-xl p-4 space-y-2 h-full border ${
-          isActive
+          i === activeIndex
             ? 'bg-cream/[0.08] border-yellow/[0.2] ring-1 ring-yellow/[0.1]'
             : 'bg-cream/[0.06] border-cream/[0.08]'
         }`}>
-          {/* Status badge */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               {i === activeIndex && <div className="w-2 h-2 rounded-full bg-yellow/60 animate-pulse" />}
               <span className="font-medieval text-[10px] text-yellow/50 tracking-widest uppercase">
-                {isActive ? 'Active' : 'Peripetie'}
+                {i === activeIndex ? 'Active' : 'Peripetie'}
               </span>
               {isBoosted && (
                 <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-yellow/[0.15] border border-yellow/20">
@@ -158,10 +195,8 @@ export function PeripetiesCarousel({
             </span>
           </div>
 
-          {/* Task name */}
           <h3 className="font-cinzel text-[13px] text-cream/80 leading-tight">{task.task_name}</h3>
 
-          {/* Category + duration */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span className="text-xs">{task.category_emoji}</span>
@@ -173,7 +208,6 @@ export function PeripetiesCarousel({
             </div>
           </div>
 
-          {/* Quick validate */}
           <button
             onClick={(e) => {
               e.stopPropagation()
@@ -191,11 +225,28 @@ export function PeripetiesCarousel({
 
   return (
     <div className="space-y-3">
-      <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase px-1">
-        Peripeties
-      </p>
+      <div className="flex items-center justify-between px-1">
+        <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase">
+          Peripeties
+        </p>
 
-      <SwipeCarousel initialIndex={activeIndex >= 0 ? activeIndex : 0}>
+        {/* Back to active button */}
+        {!isAtActive && activeIndex >= 0 && (
+          <button
+            onClick={() => carouselRef.current?.goToIndex(activeIndex)}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-yellow/[0.08] border border-yellow/15 text-yellow/50 font-medieval text-[9px] hover:bg-yellow/[0.15] transition-colors"
+          >
+            <Crosshair size={10} />
+            Active
+          </button>
+        )}
+      </div>
+
+      <SwipeCarousel
+        ref={carouselRef}
+        initialIndex={activeIndex >= 0 ? activeIndex : 0}
+        onActiveIndexChange={handleViewChange}
+      >
         {cards}
       </SwipeCarousel>
 
