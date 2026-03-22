@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, Clock, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { SwipeCarousel, CarouselCard } from './SwipeCarousel'
 
 interface ConsecrationCarouselProps {
   tasks: any[]
@@ -13,7 +14,6 @@ interface ConsecrationCarouselProps {
 type Decision = 'validated' | 'adjourned' | 'refused'
 
 export function ConsecrationCarousel({ tasks, userId }: ConsecrationCarouselProps) {
-  const scrollRef = useRef<HTMLDivElement>(null)
   const [activeTask, setActiveTask] = useState<any | null>(null)
   const [processed, setProcessed] = useState<Set<string>>(new Set())
 
@@ -35,59 +35,52 @@ export function ConsecrationCarousel({ tasks, userId }: ConsecrationCarouselProp
 
   const visibleTasks = tasks.filter((t) => !processed.has(t.id))
 
+  if (visibleTasks.length === 0) {
+    return null
+  }
+
+  const cards = visibleTasks.map((task, index) => {
+    const taskData = task.household_tasks || {}
+    const category = taskData.categories || {}
+    return (
+      <CarouselCard
+        key={task.id || index}
+        className="w-[260px]"
+        onClick={() => setActiveTask(task)}
+      >
+        <div className="bg-cream/[0.04] border border-cream/[0.06] rounded-xl p-4 space-y-3">
+          {/* Checkmark */}
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded-full bg-green/[0.15] flex items-center justify-center">
+              <Check size={12} className="text-green/60" />
+            </div>
+            <span className="font-medieval text-[10px] text-green/40">Terminee</span>
+          </div>
+
+          {/* Task name */}
+          <h3 className="font-cinzel text-[14px] text-cream/80 leading-tight">
+            {taskData.name || 'Quete'}
+          </h3>
+
+          {/* Category */}
+          <div className="flex items-center gap-1.5">
+            <span>{category.emoji || '⚔️'}</span>
+            <span className="font-lora text-[12px] text-cream/30">{category.name || ''}</span>
+          </div>
+
+          <p className="font-lora text-[11px] text-cream/20">Appuyez pour valider</p>
+        </div>
+      </CarouselCard>
+    )
+  })
+
   return (
     <div className="space-y-3">
       <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase px-1">
         Consecration
       </p>
 
-      <div
-        ref={scrollRef}
-        className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {visibleTasks.map((task, index) => {
-          const taskData = task.household_tasks || {}
-          const category = taskData.categories || {}
-          return (
-            <motion.div
-              key={task.id || index}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="flex-shrink-0 w-[260px] snap-center bg-cream/[0.04] border border-cream/[0.06] rounded-xl p-4 space-y-3 cursor-pointer hover:bg-cream/[0.06] transition-colors"
-              onClick={() => setActiveTask(task)}
-            >
-              {/* Checkmark */}
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-green/[0.15] flex items-center justify-center">
-                  <Check size={14} className="text-green/70" />
-                </div>
-                <span className="font-medieval text-[10px] text-green/50">Terminee</span>
-              </div>
-
-              {/* Task name */}
-              <h3 className="font-cinzel text-[14px] text-cream/80 leading-tight">
-                {taskData.name || 'Quete'}
-              </h3>
-
-              {/* Category */}
-              <div className="flex items-center gap-1.5">
-                <span>{category.emoji || '⚔️'}</span>
-                <span className="font-lora text-[12px] text-cream/30">{category.name || ''}</span>
-              </div>
-
-              <p className="font-lora text-[11px] text-cream/20">Appuyez pour valider</p>
-            </motion.div>
-          )
-        })}
-
-        {visibleTasks.length === 0 && (
-          <div className="w-full text-center py-8">
-            <p className="font-lora text-[13px] text-cream/30">Aucune tache a confirmer</p>
-          </div>
-        )}
-      </div>
+      <SwipeCarousel>{cards}</SwipeCarousel>
 
       {/* Validation popup */}
       <AnimatePresence>

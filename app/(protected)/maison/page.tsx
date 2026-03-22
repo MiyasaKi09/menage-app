@@ -2,10 +2,14 @@ import { createClient } from '@/lib/supabase/server'
 import { StatCard } from '@/components/ui/StatCard'
 import { DashboardCharacterHeader } from '@/components/dashboard/DashboardCharacterHeader'
 import { QuickAccessBar } from '@/components/maison/QuickAccessBar'
-import { PeripetiesCarousel } from '@/components/maison/PeripetiesCarousel'
 import { ConsecrationCarousel } from '@/components/maison/ConsecrationCarousel'
+import { MaisonQuestsSection } from '@/components/maison/MaisonQuestsSection'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
+
+// Frequencies considered as "Quêtes" (repetitive, frequent)
+const QUEST_FREQUENCIES = new Set(['daily', '2-3x_week', 'weekly', 'biweekly', 'after_use'])
+// Everything else = Péripéties (rare, one-off feeling)
 
 export default async function MaisonPage() {
   const supabase = await createClient()
@@ -96,6 +100,33 @@ export default async function MaisonPage() {
       weekTasks = data || []
     } catch (error) {
       console.error('Error fetching weekly tasks:', error)
+    }
+
+    // If RPC doesn't return frequency_code (migration 011 not applied), fetch it separately
+    if (weekTasks.length > 0 && !weekTasks[0].frequency_code) {
+      try {
+        const householdTaskIds = [...new Set(weekTasks.map((t: any) => t.household_task_id).filter(Boolean))]
+        if (householdTaskIds.length > 0) {
+          const { data: htData } = await supabase
+            .from('household_tasks')
+            .select('id, template_id, task_templates(frequency_id, frequencies(code))')
+            .in('id', householdTaskIds)
+
+          const freqMap: Record<string, string> = {}
+          ;(htData || []).forEach((ht: any) => {
+            const code = (ht.task_templates as any)?.frequencies?.code || 'weekly'
+            freqMap[ht.id] = code
+          })
+
+          weekTasks = weekTasks.map((t: any) => ({
+            ...t,
+            frequency_code: freqMap[t.household_task_id] || 'weekly',
+          }))
+        }
+      } catch {
+        // Fallback: treat all as quêtes
+        weekTasks = weekTasks.map((t: any) => ({ ...t, frequency_code: 'weekly' }))
+      }
     }
 
     // Get tasks pending validation (completed by others, not yet validated)
@@ -235,9 +266,9 @@ export default async function MaisonPage() {
           <StatCard label="Quetes" value={profile?.tasks_completed || 0} icon="⚔️" />
         </div>
 
-        {/* Peripities carousel - tasks of the week */}
+        {/* Quêtes & Péripéties */}
         {weekTasks.length > 0 && (
-          <PeripetiesCarousel tasks={weekTasks} />
+          <MaisonQuestsSection tasks={weekTasks} questFrequencies={[...QUEST_FREQUENCIES]} />
         )}
 
         {/* Consecration carousel - validate others' tasks */}
