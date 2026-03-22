@@ -273,7 +273,7 @@ export default async function MaisonPage() {
           const peripetiesForCarousel = [...todayDone, ...todayPending, ...futureLocked]
 
           return (corveeData.length > 0 || peripetiesForCarousel.length > 0) ? (
-            <MaisonQuestsSection corveeData={corveeData} peripeties={peripetiesForCarousel} />
+            <MaisonQuestsSection corveeData={corveeData} peripeties={peripetiesForCarousel} userId={user?.id || ''} householdId={householdId || ''} />
           ) : null
         })()}
 

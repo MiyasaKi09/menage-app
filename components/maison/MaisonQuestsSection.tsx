@@ -5,11 +5,13 @@ import { QuestCard } from './QuestCard'
 import { PeripetiesCarousel } from './PeripetiesCarousel'
 
 interface MaisonQuestsSectionProps {
-  corveeData: any[] // from get_weekly_corvee RPC
-  peripeties: any[] // from get_schedule_for_dates (all scheduled_tasks = péripéties)
+  corveeData: any[]
+  peripeties: any[]
+  userId: string
+  householdId: string
 }
 
-export function MaisonQuestsSection({ corveeData, peripeties }: MaisonQuestsSectionProps) {
+export function MaisonQuestsSection({ corveeData, peripeties, userId, householdId }: MaisonQuestsSectionProps) {
   // Group corvee rows by corvee_id → one QuestCard per corvée
   // The RPC returns one row per step, so we group them
   const corvee = useMemo(() => {
@@ -70,7 +72,7 @@ export function MaisonQuestsSection({ corveeData, peripeties }: MaisonQuestsSect
 
       {/* Péripéties en carousel */}
       {peripeties.length > 0 && (
-        <PeripetiesCarousel tasks={peripeties} />
+        <PeripetiesCarousel tasks={peripeties} userId={userId} householdId={householdId} />
       )}
     </div>
   )

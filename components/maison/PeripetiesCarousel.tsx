@@ -24,6 +24,8 @@ interface PeripetieTask {
 
 interface PeripetiesCarouselProps {
   tasks: PeripetieTask[]
+  userId: string
+  householdId: string
   unlockCost?: number
   bonusMultiplier?: number
 }
@@ -50,6 +52,8 @@ function CountdownBadge({ date }: { date: string }) {
 
 export function PeripetiesCarousel({
   tasks,
+  userId,
+  householdId,
   unlockCost = 15,
   bonusMultiplier = 1.5,
 }: PeripetiesCarouselProps) {
@@ -58,6 +62,7 @@ export function PeripetiesCarousel({
   const [localTasks, setLocalTasks] = useState(tasks)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [isAtActive, setIsAtActive] = useState(true)
+  const [completing, setCompleting] = useState<string | null>(null)
   const carouselRef = useRef<SwipeCarouselHandle>(null)
 
   const todayStr = new Date().toISOString().split('T')[0]
@@ -68,32 +73,81 @@ export function PeripetiesCarousel({
   )
 
   const handleComplete = async (taskId: string) => {
-    await supabase
-      .from('scheduled_tasks')
-      .update({ status: 'completed', completed_at: new Date().toISOString() })
-      .eq('id', taskId)
+    const task = localTasks.find(t => t.task_id === taskId)
+    if (!task || completing) return
 
-    setLocalTasks(prev =>
-      prev.map(t => t.task_id === taskId ? { ...t, status: 'completed' } : t)
-    )
-    setExpandedId(null)
-    router.refresh()
+    setCompleting(taskId)
+    const isBoosted = task.is_boosted || false
+    const mult = task.boost_multiplier || bonusMultiplier
+    const finalPoints = isBoosted ? Math.round(task.points * mult) : task.points
+    const completedAt = new Date().toISOString()
+
+    try {
+      // 1. Update scheduled_task
+      await supabase
+        .from('scheduled_tasks')
+        .update({
+          status: 'completed',
+          completed_at: completedAt,
+          completed_by: userId,
+          points_earned: finalPoints,
+        })
+        .eq('id', taskId)
+
+      // 2. Create task_history entry
+      await supabase
+        .from('task_history')
+        .insert({
+          scheduled_task_id: taskId,
+          household_id: householdId,
+          profile_id: userId,
+          task_name: task.task_name,
+          category_name: task.category_name,
+          points_earned: finalPoints,
+          completed_at: completedAt,
+          day_of_week: new Date().getDay(),
+          hour_of_day: new Date().getHours(),
+        })
+
+      // 3. Update profile stats (total_points + tasks_completed)
+      await supabase.rpc('increment_profile_stats', {
+        p_profile_id: userId,
+        p_points: finalPoints,
+      })
+
+      // 4. Update household member stats
+      await supabase.rpc('increment_household_member_stats', {
+        p_profile_id: userId,
+        p_household_id: householdId,
+        p_points: finalPoints,
+      })
+
+      // Update local state — keep task visible but mark as completed
+      setLocalTasks(prev =>
+        prev.map(t => t.task_id === taskId ? { ...t, status: 'completed', points: finalPoints } : t)
+      )
+      setExpandedId(null)
+      router.refresh()
+    } catch (error) {
+      console.error('Error completing task:', error)
+    } finally {
+      setCompleting(null)
+    }
   }
 
   const handleUnlock = async (taskId: string) => {
-    // Persist unlock in DB
     const { error } = await supabase
       .from('scheduled_tasks')
       .update({
         is_unlocked: true,
         is_boosted: true,
         unlocked_at: new Date().toISOString(),
+        unlocked_by: userId,
         boost_multiplier: bonusMultiplier,
       })
       .eq('id', taskId)
 
     if (!error) {
-      // TODO: deduct gold via RPC (deduct_points)
       setLocalTasks(prev =>
         prev.map(t => t.task_id === taskId
           ? { ...t, is_unlocked: true, is_boosted: true, boost_multiplier: bonusMultiplier }
@@ -115,25 +169,27 @@ export function PeripetiesCarousel({
     const isUnlocked = task.is_unlocked || false
     const isBoosted = task.is_boosted || false
     const isLocked = isScheduledFuture && !isUnlocked && !isCompleted
-
     const mult = task.boost_multiplier || bonusMultiplier
+    const isBeingCompleted = completing === task.task_id
 
+    // Completed — stays visible (not yet confirmed by others)
     if (isCompleted) {
       return (
         <CarouselCard key={task.task_id}>
-          <div className="rounded-xl p-4 space-y-2 h-full bg-cream/[0.03] border border-cream/[0.04] opacity-40">
+          <div className="rounded-xl p-4 space-y-2 h-full bg-green/[0.04] border border-green/[0.1]">
             <div className="flex items-center gap-1.5">
-              <div className="w-4 h-4 rounded-full bg-green/[0.2] flex items-center justify-center">
-                <Check size={10} className="text-green/60" />
+              <div className="w-5 h-5 rounded-full bg-green/[0.2] flex items-center justify-center">
+                <Check size={12} className="text-green/70" />
               </div>
-              <span className="font-medieval text-[10px] text-green/40">Fait</span>
-              <span className="ml-auto font-cinzel text-[10px] text-yellow/30">{task.points} or</span>
+              <span className="font-medieval text-[10px] text-green/50">Termine</span>
+              <span className="ml-auto font-cinzel text-[11px] text-yellow/40">+{task.points} or</span>
             </div>
-            <h3 className="font-cinzel text-[12px] text-cream/30 leading-tight">{task.task_name}</h3>
+            <h3 className="font-cinzel text-[13px] text-cream/50 leading-tight">{task.task_name}</h3>
             <div className="flex items-center gap-1">
               <span className="text-xs">{task.category_emoji}</span>
-              <span className="font-lora text-[10px] text-cream/15">{task.category_name}</span>
+              <span className="font-lora text-[10px] text-cream/25">{task.category_name}</span>
             </div>
+            <p className="font-lora text-[9px] text-cream/15 italic">En attente de confirmation</p>
           </div>
         </CarouselCard>
       )
@@ -147,7 +203,6 @@ export function PeripetiesCarousel({
               <span className="font-medieval text-[10px] text-cream/30">Peripetie</span>
               <h3 className="font-cinzel text-[12px] text-cream/40">???</h3>
             </div>
-
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
               <Lock size={18} className="text-cream/20" />
               <div className="flex items-center gap-1">
@@ -168,7 +223,7 @@ export function PeripetiesCarousel({
       )
     }
 
-    // Active / playable card (today's task or unlocked future)
+    // Active / playable
     return (
       <CarouselCard
         key={task.task_id}
@@ -215,10 +270,11 @@ export function PeripetiesCarousel({
               e.stopPropagation()
               handleComplete(task.task_id)
             }}
-            className="w-full mt-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-green/[0.08] border border-green/15 text-green/60 font-cinzel text-[11px] hover:bg-green/[0.15] transition-colors"
+            disabled={isBeingCompleted}
+            className="w-full mt-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-green/[0.08] border border-green/15 text-green/60 font-cinzel text-[11px] hover:bg-green/[0.15] transition-colors disabled:opacity-30"
           >
             <Check size={12} />
-            Valider
+            {isBeingCompleted ? 'En cours...' : 'Valider'}
           </button>
         </div>
       </CarouselCard>
@@ -231,7 +287,6 @@ export function PeripetiesCarousel({
         <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase">
           Peripeties
         </p>
-
         {activeIndex >= 0 && (
           <button
             onClick={() => carouselRef.current?.goToIndex(activeIndex)}
@@ -255,7 +310,7 @@ export function PeripetiesCarousel({
         {cards}
       </SwipeCarousel>
 
-      {/* Expanded detail modal */}
+      {/* Detail modal */}
       <AnimatePresence>
         {expandedId && (() => {
           const task = localTasks.find(t => t.task_id === expandedId)
@@ -297,10 +352,11 @@ export function PeripetiesCarousel({
 
                 <button
                   onClick={() => handleComplete(task.task_id)}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-green/[0.15] border border-green/20 text-green/80 font-cinzel text-[14px] hover:bg-green/[0.25] transition-colors"
+                  disabled={completing === task.task_id}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-green/[0.15] border border-green/20 text-green/80 font-cinzel text-[14px] hover:bg-green/[0.25] transition-colors disabled:opacity-30"
                 >
                   <Check size={16} />
-                  Terminer
+                  {completing === task.task_id ? 'En cours...' : 'Terminer'}
                 </button>
               </motion.div>
             </motion.div>
