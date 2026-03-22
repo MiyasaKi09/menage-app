@@ -18,23 +18,22 @@ export default async function MaisonPage() {
     .eq('id', user?.id)
     .single()
 
-  // Fetch all user's households with status
+  // Fetch all user's households (sans colonne 'status' qui nécessite migration 008)
   const { data: memberships } = await supabase
     .from('household_members')
-    .select('id, role, status, points_in_household, tasks_completed_in_household, households (id, name)')
+    .select('id, role, points_in_household, tasks_completed_in_household, households (id, name)')
     .eq('profile_id', user?.id)
     .limit(10)
 
   const userHouseholds = (memberships || []).map((m: any) => ({
     id: (m.households as any)?.id,
     name: (m.households as any)?.name,
-    status: m.status || 'active',
+    status: 'active', // default until migration 008 is applied
     role: m.role,
   }))
 
-  // Use first active household, or first household
-  const activeHousehold = userHouseholds.find(h => h.status === 'active') || userHouseholds[0]
-  const householdId = activeHousehold?.id || null
+  // Use first household
+  const householdId = userHouseholds[0]?.id || null
 
   let weekTasks: any[] = []
   let pendingValidation: any[] = []
@@ -49,22 +48,29 @@ export default async function MaisonPage() {
     const endOfWeek = new Date(startOfWeek)
     endOfWeek.setDate(startOfWeek.getDate() + 6) // Sunday
 
-    const { data } = await supabase.rpc('get_schedule_for_dates', {
-      p_household_id: householdId,
-      p_start_date: startOfWeek.toISOString().split('T')[0],
-      p_end_date: endOfWeek.toISOString().split('T')[0],
-    })
-    weekTasks = data || []
+    try {
+      const { data } = await supabase.rpc('get_schedule_for_dates', {
+        p_household_id: householdId,
+        p_start_date: startOfWeek.toISOString().split('T')[0],
+        p_end_date: endOfWeek.toISOString().split('T')[0],
+      })
+      weekTasks = data || []
+    } catch (error) {
+      console.error('Error fetching weekly tasks:', error)
+    }
 
     // Get tasks pending validation (completed by others, not yet validated)
-    const { data: completedByOthers } = await supabase
-      .from('scheduled_tasks')
-      .select('*, household_tasks(name, points, category_id, categories(name, emoji))')
-      .eq('status', 'completed')
-      .neq('assigned_to', user?.id)
-      .limit(20)
-
-    pendingValidation = completedByOthers || []
+    try {
+      const { data: completedByOthers } = await supabase
+        .from('scheduled_tasks')
+        .select('*, household_tasks(name, points, category_id, categories(name, emoji))')
+        .eq('status', 'completed')
+        .neq('assigned_to', user?.id)
+        .limit(20)
+      pendingValidation = completedByOthers || []
+    } catch (error) {
+      console.error('Error fetching pending validation:', error)
+    }
 
     // Check if household has tasks
     const { count } = await supabase
@@ -85,56 +91,64 @@ export default async function MaisonPage() {
     leaderboard = members || []
   }
 
-  // Fetch shop items and purchases
-  const { data: shopCategories } = await supabase
-    .from('shop_categories')
-    .select('*')
-    .order('display_order')
+  // Fetch shop items and purchases (tables may not exist yet - migration 009)
+  let shopCategoriesData: any[] = []
+  let shopItemsData: any[] = []
+  let purchasedItemsData: any[] = []
 
-  const { data: shopItems } = await supabase
-    .from('shop_items')
-    .select('*, shop_categories(name)')
-    .eq('is_available', true)
-    .order('price')
+  try {
+    const { data: sc } = await supabase.from('shop_categories').select('*').order('display_order')
+    shopCategoriesData = sc || []
+  } catch { /* migration 009 not applied */ }
 
-  const { data: purchasedItems } = await supabase
-    .from('purchased_items')
-    .select('*, shop_items(name, price, item_type, rarity)')
-    .eq('profile_id', user?.id)
+  try {
+    const { data: si } = await supabase.from('shop_items').select('*, shop_categories(name)').eq('is_available', true).order('price')
+    shopItemsData = si || []
+  } catch { /* migration 009 not applied */ }
+
+  try {
+    const { data: pi } = await supabase.from('purchased_items').select('*, shop_items(name, price, item_type, rarity)').eq('profile_id', user?.id)
+    purchasedItemsData = pi || []
+  } catch { /* migration 009 not applied */ }
 
   // Fetch stats: tasks by category from task_history
-  const { data: tasksByCategory } = await supabase
-    .from('task_history')
-    .select('category_name')
-    .eq('profile_id', user?.id)
+  let tasksByCategoryArray: Array<{ category: string; emoji: string; count: number }> = []
+  try {
+    const { data: tasksByCategory } = await supabase
+      .from('task_history')
+      .select('category_name')
+      .eq('profile_id', user?.id)
 
-  // Aggregate tasks by category
-  const categoryMap: Record<string, number> = {}
-  ;(tasksByCategory || []).forEach((t: any) => {
-    const cat = t.category_name || 'Autre'
-    categoryMap[cat] = (categoryMap[cat] || 0) + 1
-  })
-  const tasksByCategoryArray = Object.entries(categoryMap)
-    .map(([category, count]) => ({ category, emoji: '', count }))
-    .sort((a, b) => b.count - a.count)
+    const categoryMap: Record<string, number> = {}
+    ;(tasksByCategory || []).forEach((t: any) => {
+      const cat = t.category_name || 'Autre'
+      categoryMap[cat] = (categoryMap[cat] || 0) + 1
+    })
+    tasksByCategoryArray = Object.entries(categoryMap)
+      .map(([category, count]) => ({ category, emoji: '', count }))
+      .sort((a, b) => b.count - a.count)
+  } catch { /* table may not have data */ }
 
   // Fetch favorite character (most received)
-  const { data: favoriteChars } = await supabase
-    .from('character_collection')
-    .select('times_received, avatars(name, character_class)')
-    .eq('profile_id', user?.id)
-    .order('times_received', { ascending: false })
-    .limit(1)
+  let favoriteCharacter: { name: string; class: string; timesReceived: number } | null = null
+  try {
+    const { data: favoriteChars } = await supabase
+      .from('character_collection')
+      .select('times_received, avatars(name, character_class)')
+      .eq('profile_id', user?.id)
+      .order('times_received', { ascending: false })
+      .limit(1)
 
-  const favoriteCharacter = favoriteChars?.[0]
-    ? {
+    if (favoriteChars?.[0]) {
+      favoriteCharacter = {
         name: (favoriteChars[0].avatars as any)?.name || '',
         class: (favoriteChars[0].avatars as any)?.character_class || '',
         timesReceived: favoriteChars[0].times_received,
       }
-    : null
+    }
+  } catch { /* character_collection may not exist */ }
 
-  // Build annual card title (e.g. "La Lavandière des Glaces")
+  // Build annual card title
   const topTask = tasksByCategoryArray[0]?.category || null
   const annualCard = favoriteCharacter && topTask
     ? { title: `${favoriteCharacter.name}`, subtitle: `Specialiste ${topTask}` }
@@ -158,9 +172,9 @@ export default async function MaisonPage() {
           totalPoints={profile?.total_points || 0}
           leaderboard={leaderboard}
           households={userHouseholds}
-          shopCategories={shopCategories || []}
-          shopItems={shopItems || []}
-          purchasedItems={purchasedItems || []}
+          shopCategories={shopCategoriesData}
+          shopItems={shopItemsData}
+          purchasedItems={purchasedItemsData}
           stats={{
             streak: profile?.current_streak || 0,
             level: profile?.current_level || 1,

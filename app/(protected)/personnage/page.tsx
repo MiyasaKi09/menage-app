@@ -21,27 +21,35 @@ export default async function PersonnagePage() {
   if (memberships && memberships.length > 0) {
     householdId = memberships[0].household_id
 
-    const { data } = await supabase.rpc('assign_weekly_character', {
-      p_household_id: householdId,
-      p_profile_id: user?.id,
-    })
+    try {
+      const { data, error } = await supabase.rpc('assign_weekly_character', {
+        p_household_id: householdId,
+        p_profile_id: user?.id,
+      })
 
-    if (data && data.length > 0) {
-      const d = data[0]
-      weeklyCharacter = {
-        weekly_id: d.weekly_id,
-        avatar_id: d.avatar_id,
-        avatar_name: d.avatar_name,
-        character_class: d.character_class,
-        rarity: d.rarity,
-        color_theme: d.color_theme,
-        power_type: d.power_type,
-        power_description: d.power_description,
-        power_value: d.power_value,
-        lore_text: d.lore_text,
-        is_revealed: d.is_revealed,
-        description: d.description || '',
+      if (error) {
+        console.error('Error assigning weekly character:', error)
       }
+
+      if (data && data.length > 0) {
+        const d = data[0]
+        weeklyCharacter = {
+          weekly_id: d.weekly_id,
+          avatar_id: d.avatar_id,
+          avatar_name: d.avatar_name,
+          character_class: d.character_class,
+          rarity: d.rarity,
+          color_theme: d.color_theme,
+          power_type: d.power_type,
+          power_description: d.power_description,
+          power_value: d.power_value,
+          lore_text: d.lore_text,
+          is_revealed: d.is_revealed,
+          description: d.description || '',
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching weekly character:', error)
     }
   }
 
