@@ -2,51 +2,44 @@
 
 import { useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, ContactShadows } from '@react-three/drei'
-import { EffectComposer, Noise, HueSaturation, Vignette, DotScreen } from '@react-three/postprocessing'
+import { ContactShadows } from '@react-three/drei'
+import { EffectComposer, Noise, HueSaturation, Vignette } from '@react-three/postprocessing'
 import { BlendFunction } from 'postprocessing'
 import * as THREE from 'three'
 
-// Simple wooden wall panel
-function Wall({ position, rotation, size }: { position: [number, number, number]; rotation?: [number, number, number]; size: [number, number] }) {
+function Wall({ position, rotation, size, color = '#d4be98' }: { position: [number, number, number]; rotation?: [number, number, number]; size: [number, number]; color?: string }) {
   return (
     <mesh position={position} rotation={rotation || [0, 0, 0]}>
       <planeGeometry args={size} />
-      <meshStandardMaterial color="#c4a882" roughness={0.9} metalness={0} side={THREE.DoubleSide} />
+      <meshStandardMaterial color={color} roughness={0.95} metalness={0} side={THREE.DoubleSide} />
     </mesh>
   )
 }
 
-// Wooden floor
 function Floor() {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
       <planeGeometry args={[6, 6]} />
-      <meshStandardMaterial color="#a07850" roughness={0.95} metalness={0} />
+      <meshStandardMaterial color="#b89070" roughness={0.95} metalness={0} />
     </mesh>
   )
 }
 
-// Simple bed
 function Bed({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
-      {/* Frame */}
       <mesh position={[0, 0.25, 0]} castShadow>
         <boxGeometry args={[1.4, 0.5, 2]} />
         <meshStandardMaterial color="#8b6b4a" roughness={0.85} />
       </mesh>
-      {/* Mattress */}
       <mesh position={[0, 0.55, 0]} castShadow>
         <boxGeometry args={[1.3, 0.15, 1.9]} />
-        <meshStandardMaterial color="#d4c4a8" roughness={0.9} />
+        <meshStandardMaterial color="#e8dcc0" roughness={0.9} />
       </mesh>
-      {/* Pillow */}
       <mesh position={[0, 0.7, -0.7]} castShadow>
         <boxGeometry args={[0.8, 0.12, 0.35]} />
-        <meshStandardMaterial color="#e8dcc8" roughness={0.95} />
+        <meshStandardMaterial color="#f0e8d8" roughness={0.95} />
       </mesh>
-      {/* Headboard */}
       <mesh position={[0, 0.9, -0.95]} castShadow>
         <boxGeometry args={[1.4, 1, 0.08]} />
         <meshStandardMaterial color="#7a5c3a" roughness={0.85} />
@@ -55,37 +48,31 @@ function Bed({ position }: { position: [number, number, number] }) {
   )
 }
 
-// Simple table
 function Table({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
-      {/* Top */}
       <mesh position={[0, 0.7, 0]} castShadow>
         <boxGeometry args={[1, 0.06, 0.6]} />
         <meshStandardMaterial color="#8b6b4a" roughness={0.85} />
       </mesh>
-      {/* Legs */}
       {[[-0.4, 0.35, -0.22], [0.4, 0.35, -0.22], [-0.4, 0.35, 0.22], [0.4, 0.35, 0.22]].map((pos, i) => (
         <mesh key={i} position={pos as [number, number, number]} castShadow>
           <boxGeometry args={[0.06, 0.7, 0.06]} />
           <meshStandardMaterial color="#7a5c3a" roughness={0.85} />
         </mesh>
       ))}
-      {/* Candle on table */}
       <mesh position={[0.2, 0.82, 0]} castShadow>
         <cylinderGeometry args={[0.03, 0.04, 0.15, 8]} />
         <meshStandardMaterial color="#e8d8b0" roughness={0.8} />
       </mesh>
-      {/* Flame */}
       <mesh position={[0.2, 0.95, 0]}>
         <sphereGeometry args={[0.03, 8, 6]} />
-        <meshBasicMaterial color="#ffaa33" />
+        <meshBasicMaterial color="#ffcc55" />
       </mesh>
     </group>
   )
 }
 
-// Chest/coffre
 function Chest({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
@@ -93,37 +80,32 @@ function Chest({ position }: { position: [number, number, number] }) {
         <boxGeometry args={[0.7, 0.4, 0.45]} />
         <meshStandardMaterial color="#6b4e2e" roughness={0.9} />
       </mesh>
-      {/* Lid */}
       <mesh position={[0, 0.42, 0]} castShadow>
         <boxGeometry args={[0.72, 0.06, 0.47]} />
         <meshStandardMaterial color="#5a3e20" roughness={0.9} />
       </mesh>
-      {/* Lock */}
       <mesh position={[0, 0.25, 0.23]} castShadow>
         <boxGeometry args={[0.08, 0.08, 0.02]} />
-        <meshStandardMaterial color="#b8960c" roughness={0.4} metalness={0.6} />
+        <meshStandardMaterial color="#c8a020" roughness={0.4} metalness={0.5} />
       </mesh>
     </group>
   )
 }
 
-// Bookshelf
 function Bookshelf({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
-      {/* Frame */}
       <mesh position={[0, 0.9, 0]} castShadow>
         <boxGeometry args={[0.8, 1.8, 0.3]} />
         <meshStandardMaterial color="#7a5c3a" roughness={0.9} />
       </mesh>
-      {/* Books (colored blocks on shelves) */}
       {[0.4, 0.8, 1.2].map((y, row) => (
         <group key={row} position={[0, y, 0.05]}>
           {[-0.2, -0.05, 0.1, 0.22].map((bx, j) => (
             <mesh key={j} position={[bx, 0, 0]} castShadow>
               <boxGeometry args={[0.1, 0.25, 0.18]} />
               <meshStandardMaterial
-                color={['#8b2020', '#1a4a2a', '#2a3a6a', '#6a4a1a', '#4a1a4a'][j % 5]}
+                color={['#8b3030', '#2a5a3a', '#3a4a7a', '#7a5a2a', '#5a2a5a'][j % 5]}
                 roughness={0.85}
               />
             </mesh>
@@ -134,48 +116,65 @@ function Bookshelf({ position }: { position: [number, number, number] }) {
   )
 }
 
-// Gentle floating animation for ambient feel
-function FloatingLight() {
+// Gentle candle flicker
+function CandleLight() {
   const ref = useRef<THREE.PointLight>(null)
   useFrame(({ clock }) => {
     if (ref.current) {
-      ref.current.position.y = 2.5 + Math.sin(clock.elapsedTime * 0.5) * 0.1
-      ref.current.intensity = 0.8 + Math.sin(clock.elapsedTime * 2) * 0.1
+      ref.current.intensity = 1.5 + Math.sin(clock.elapsedTime * 3) * 0.3 + Math.sin(clock.elapsedTime * 7) * 0.1
     }
   })
-  return <pointLight ref={ref} position={[0.5, 2.5, 0.5]} color="#ffcc66" intensity={0.8} distance={8} />
+  return <pointLight ref={ref} position={[1.7, 1.2, -2]} color="#ffcc66" intensity={1.5} distance={6} decay={2} />
 }
 
-// Storybook/watercolor post-processing
+// Soft watercolor post-processing (no DotScreen — it was causing the black screen)
 function WatercolorFilter() {
   return (
     <EffectComposer>
-      <HueSaturation saturation={-0.15} hue={0.05} />
-      <Noise opacity={0.08} blendFunction={BlendFunction.SOFT_LIGHT} />
-      <DotScreen scale={1.5} angle={0.5} blendFunction={BlendFunction.SOFT_LIGHT} />
-      <Vignette offset={0.3} darkness={0.6} />
+      <HueSaturation saturation={-0.1} hue={0.03} />
+      <Noise opacity={0.06} blendFunction={BlendFunction.SOFT_LIGHT} />
+      <Vignette offset={0.25} darkness={0.4} />
     </EffectComposer>
   )
 }
 
+// Isometric camera angle — fixed, no controls
+const ISO_DISTANCE = 8
+const ISO_ANGLE = Math.PI / 6 // 30 degrees
+const cameraPosition: [number, number, number] = [
+  ISO_DISTANCE * Math.cos(Math.PI / 4) * Math.cos(ISO_ANGLE),
+  ISO_DISTANCE * Math.sin(ISO_ANGLE) + 2,
+  ISO_DISTANCE * Math.sin(Math.PI / 4) * Math.cos(ISO_ANGLE),
+]
+
 export function MedievalRoom() {
   return (
-    <div className="relative aspect-square max-w-sm mx-auto rounded-2xl overflow-hidden border border-cream/[0.08]">
+    <div className="relative aspect-[4/3] max-w-md mx-auto rounded-2xl overflow-hidden border border-cream/[0.08]">
       <Canvas
         shadows
-        camera={{ position: [4, 3.5, 4], fov: 45 }}
-        gl={{ antialias: true, alpha: true }}
-        style={{ background: 'linear-gradient(180deg, #d4c4a0 0%, #c4b48a 100%)' }}
+        orthographic
+        camera={{
+          position: cameraPosition,
+          zoom: 80,
+          near: 0.1,
+          far: 100,
+        }}
+        gl={{ antialias: true }}
+        style={{ background: 'linear-gradient(180deg, #e8dcc4 0%, #d8c8a8 100%)' }}
+        onCreated={({ camera }) => {
+          camera.lookAt(0, 0.5, 0)
+        }}
       >
-        {/* Lighting */}
-        <ambientLight intensity={0.4} color="#ffe8cc" />
-        <directionalLight position={[3, 5, 2]} intensity={0.6} color="#fff5e0" castShadow shadow-mapSize={512} />
-        <FloatingLight />
+        {/* Strong ambient light — no more black */}
+        <ambientLight intensity={1.2} color="#fff5e6" />
+        <directionalLight position={[5, 8, 4]} intensity={1.0} color="#fff8ee" castShadow shadow-mapSize={1024} />
+        <directionalLight position={[-3, 4, -2]} intensity={0.3} color="#e8d8c0" />
+        <CandleLight />
 
-        {/* Room */}
+        {/* Room structure */}
         <Floor />
         <Wall position={[0, 1.5, -3]} size={[6, 3]} />
-        <Wall position={[-3, 1.5, 0]} rotation={[0, Math.PI / 2, 0]} size={[6, 3]} />
+        <Wall position={[-3, 1.5, 0]} rotation={[0, Math.PI / 2, 0]} size={[6, 3]} color="#cbb890" />
 
         {/* Furniture */}
         <Bed position={[-1.5, 0, -1.8]} />
@@ -183,21 +182,9 @@ export function MedievalRoom() {
         <Chest position={[1.8, 0, 0.5]} />
         <Bookshelf position={[-2.6, 0, 0.5]} />
 
-        {/* Contact shadows on floor */}
-        <ContactShadows position={[0, 0.01, 0]} opacity={0.3} scale={8} blur={2} far={4} />
+        <ContactShadows position={[0, 0.01, 0]} opacity={0.25} scale={8} blur={2.5} far={4} />
 
-        {/* Camera controls */}
-        <OrbitControls
-          enableZoom={false}
-          enablePan={false}
-          minPolarAngle={Math.PI / 6}
-          maxPolarAngle={Math.PI / 2.5}
-          minAzimuthAngle={-Math.PI / 4}
-          maxAzimuthAngle={Math.PI / 4}
-          target={[0, 0.8, 0]}
-        />
-
-        {/* Storybook filter */}
+        {/* Watercolor filter */}
         <WatercolorFilter />
       </Canvas>
 
