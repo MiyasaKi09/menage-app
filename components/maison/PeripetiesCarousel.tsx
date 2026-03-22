@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, Clock, Lock, Coins, Sparkles, Crosshair } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -17,6 +17,9 @@ interface PeripetieTask {
   status: string
   scheduled_date: string
   duration_minutes: number
+  is_unlocked?: boolean
+  is_boosted?: boolean
+  boost_multiplier?: number
 }
 
 interface PeripetiesCarouselProps {
@@ -52,35 +55,16 @@ export function PeripetiesCarousel({
 }: PeripetiesCarouselProps) {
   const supabase = createClient()
   const router = useRouter()
+  const [localTasks, setLocalTasks] = useState(tasks)
   const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [unlockedIds, setUnlockedIds] = useState<Set<string>>(new Set())
   const [isAtActive, setIsAtActive] = useState(true)
   const carouselRef = useRef<SwipeCarouselHandle>(null)
 
   const todayStr = new Date().toISOString().split('T')[0]
 
-  // Filter: completed today + today's pending + next 2 future days max
-  const filteredTasks = useMemo(() => {
-    const completed = tasks.filter(t =>
-      (t.status === 'completed' || t.status === 'skipped') && t.scheduled_date <= todayStr
-    )
-    const todayPending = tasks.filter(t =>
-      (t.status === 'pending' || t.status === 'in_progress') && t.scheduled_date <= todayStr
-    )
-    const future = tasks.filter(t =>
-      t.status === 'pending' && t.scheduled_date > todayStr
-    ).slice(0, 5) // max 5 future tasks visible
-
-    return [...completed, ...todayPending, ...future]
-  }, [tasks, todayStr])
-
-  const [localTasks, setLocalTasks] = useState(filteredTasks)
-
-  // Update when filteredTasks changes
-  useEffect(() => { setLocalTasks(filteredTasks) }, [filteredTasks])
-
   const activeIndex = localTasks.findIndex(t =>
-    (t.status === 'pending' || t.status === 'in_progress') && t.scheduled_date <= todayStr
+    (t.status === 'pending' || t.status === 'in_progress') &&
+    (t.scheduled_date <= todayStr || t.is_unlocked)
   )
 
   const handleComplete = async (taskId: string) => {
@@ -96,8 +80,27 @@ export function PeripetiesCarousel({
     router.refresh()
   }
 
-  const handleUnlock = (taskId: string) => {
-    setUnlockedIds(prev => new Set(prev).add(taskId))
+  const handleUnlock = async (taskId: string) => {
+    // Persist unlock in DB
+    const { error } = await supabase
+      .from('scheduled_tasks')
+      .update({
+        is_unlocked: true,
+        is_boosted: true,
+        unlocked_at: new Date().toISOString(),
+        boost_multiplier: bonusMultiplier,
+      })
+      .eq('id', taskId)
+
+    if (!error) {
+      // TODO: deduct gold via RPC (deduct_points)
+      setLocalTasks(prev =>
+        prev.map(t => t.task_id === taskId
+          ? { ...t, is_unlocked: true, is_boosted: true, boost_multiplier: bonusMultiplier }
+          : t
+        )
+      )
+    }
   }
 
   const handleViewChange = (index: number) => {
@@ -109,10 +112,11 @@ export function PeripetiesCarousel({
   const cards = localTasks.map((task, i) => {
     const isCompleted = task.status === 'completed' || task.status === 'skipped'
     const isScheduledFuture = task.scheduled_date > todayStr
-    const isFuture = !isCompleted && isScheduledFuture
-    const isUnlocked = unlockedIds.has(task.task_id)
-    const isBoosted = isFuture && isUnlocked
-    const isLocked = isFuture && !isUnlocked
+    const isUnlocked = task.is_unlocked || false
+    const isBoosted = task.is_boosted || false
+    const isLocked = isScheduledFuture && !isUnlocked && !isCompleted
+
+    const mult = task.boost_multiplier || bonusMultiplier
 
     if (isCompleted) {
       return (
@@ -164,7 +168,7 @@ export function PeripetiesCarousel({
       )
     }
 
-    // Active or boosted card
+    // Active / playable card (today's task or unlocked future)
     return (
       <CarouselCard
         key={task.task_id}
@@ -184,12 +188,12 @@ export function PeripetiesCarousel({
               {isBoosted && (
                 <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-yellow/[0.15] border border-yellow/20">
                   <Sparkles size={8} className="text-yellow/60" />
-                  <span className="font-medieval text-[8px] text-yellow/60">x{bonusMultiplier}</span>
+                  <span className="font-medieval text-[8px] text-yellow/60">x{mult}</span>
                 </span>
               )}
             </div>
             <span className="font-cinzel text-[11px] text-yellow/60">
-              {isBoosted ? Math.round(task.points * bonusMultiplier) : task.points} or
+              {isBoosted ? Math.round(task.points * mult) : task.points} or
             </span>
           </div>
 
@@ -256,8 +260,9 @@ export function PeripetiesCarousel({
         {expandedId && (() => {
           const task = localTasks.find(t => t.task_id === expandedId)
           if (!task) return null
-          const isBoosted = unlockedIds.has(task.task_id)
-          const displayPoints = isBoosted ? Math.round(task.points * bonusMultiplier) : task.points
+          const isBoosted = task.is_boosted || false
+          const mult = task.boost_multiplier || bonusMultiplier
+          const displayPoints = isBoosted ? Math.round(task.points * mult) : task.points
 
           return (
             <motion.div

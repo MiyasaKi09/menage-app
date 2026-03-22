@@ -258,9 +258,24 @@ export default async function MaisonPage() {
         </div>
 
         {/* Corvée (carte au trésor) + Péripéties (carousel) */}
-        {(corveeData.length > 0 || weekTasks.length > 0) && (
-          <MaisonQuestsSection corveeData={corveeData} peripeties={weekTasks} />
-        )}
+        {(() => {
+          // Filter péripéties: today's completed + today's pending + 5 next future
+          const todayDate = new Date().toISOString().split('T')[0]
+          const todayDone = weekTasks.filter((t: any) =>
+            (t.status === 'completed' || t.status === 'skipped') && t.scheduled_date <= todayDate
+          )
+          const todayPending = weekTasks.filter((t: any) =>
+            (t.status === 'pending' || t.status === 'in_progress') && t.scheduled_date <= todayDate
+          )
+          const futureLocked = weekTasks
+            .filter((t: any) => t.status === 'pending' && t.scheduled_date > todayDate)
+            .slice(0, 5)
+          const peripetiesForCarousel = [...todayDone, ...todayPending, ...futureLocked]
+
+          return (corveeData.length > 0 || peripetiesForCarousel.length > 0) ? (
+            <MaisonQuestsSection corveeData={corveeData} peripeties={peripetiesForCarousel} />
+          ) : null
+        })()}
 
         {/* Consecration carousel - validate others' tasks */}
         {pendingValidation.length > 0 && user?.id && (
