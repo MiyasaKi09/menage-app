@@ -1,151 +1,212 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { ContactShadows } from '@react-three/drei'
 import { EffectComposer, Noise, HueSaturation, Vignette } from '@react-three/postprocessing'
 import { BlendFunction } from 'postprocessing'
 import * as THREE from 'three'
 
-function Wall({ position, rotation, size, color = '#d4be98' }: { position: [number, number, number]; rotation?: [number, number, number]; size: [number, number]; color?: string }) {
+// Gothic arch window shape (2D)
+function GothicWindow({ position }: { position: [number, number, number] }) {
+  const shape = useMemo(() => {
+    const s = new THREE.Shape()
+    const w = 0.5
+    const h = 1.0
+    const archH = 0.3
+    // Rectangle base
+    s.moveTo(-w, 0)
+    s.lineTo(-w, h)
+    // Gothic arch top
+    s.quadraticCurveTo(-w, h + archH, 0, h + archH + 0.15)
+    s.quadraticCurveTo(w, h + archH, w, h)
+    s.lineTo(w, 0)
+    s.lineTo(-w, 0)
+    return s
+  }, [])
+
+  // Window hole (inner, slightly smaller)
+  const innerShape = useMemo(() => {
+    const s = new THREE.Shape()
+    const w = 0.38
+    const h = 0.9
+    const archH = 0.22
+    s.moveTo(-w, 0)
+    s.lineTo(-w, h)
+    s.quadraticCurveTo(-w, h + archH, 0, h + archH + 0.12)
+    s.quadraticCurveTo(w, h + archH, w, h)
+    s.lineTo(w, 0)
+    s.lineTo(-w, 0)
+    return s
+  }, [])
+
+  return (
+    <group position={position}>
+      {/* Window frame (stone) */}
+      <mesh>
+        <shapeGeometry args={[shape]} />
+        <meshStandardMaterial color="#a09080" roughness={0.95} side={THREE.DoubleSide} />
+      </mesh>
+      {/* Window glass (light blue, emissive for glow) */}
+      <mesh position={[0, 0, 0.01]}>
+        <shapeGeometry args={[innerShape]} />
+        <meshStandardMaterial
+          color="#c8dde8"
+          roughness={0.3}
+          metalness={0.1}
+          emissive="#aaccdd"
+          emissiveIntensity={0.3}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      {/* Window divider (vertical) */}
+      <mesh position={[0, 0.55, 0.02]}>
+        <boxGeometry args={[0.04, 1.15, 0.03]} />
+        <meshStandardMaterial color="#807060" roughness={0.9} />
+      </mesh>
+      {/* Window divider (horizontal) */}
+      <mesh position={[0, 0.5, 0.02]}>
+        <boxGeometry args={[0.78, 0.04, 0.03]} />
+        <meshStandardMaterial color="#807060" roughness={0.9} />
+      </mesh>
+    </group>
+  )
+}
+
+// Stone wall
+function Wall({ position, rotation, size, color = '#c8b898' }: {
+  position: [number, number, number]
+  rotation?: [number, number, number]
+  size: [number, number]
+  color?: string
+}) {
   return (
     <mesh position={position} rotation={rotation || [0, 0, 0]}>
       <planeGeometry args={size} />
-      <meshStandardMaterial color={color} roughness={0.95} metalness={0} side={THREE.DoubleSide} />
+      <meshStandardMaterial color={color} roughness={0.95} side={THREE.DoubleSide} />
     </mesh>
   )
 }
 
+// Wooden floor with planks feel
 function Floor() {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
-      <planeGeometry args={[6, 6]} />
-      <meshStandardMaterial color="#b89070" roughness={0.95} metalness={0} />
+      <planeGeometry args={[4, 4]} />
+      <meshStandardMaterial color="#a08060" roughness={0.92} />
     </mesh>
   )
 }
 
-function Bed({ position }: { position: [number, number, number] }) {
+// Sloped roof
+function Roof() {
   return (
-    <group position={position}>
-      <mesh position={[0, 0.25, 0]} castShadow>
-        <boxGeometry args={[1.4, 0.5, 2]} />
-        <meshStandardMaterial color="#8b6b4a" roughness={0.85} />
+    <group position={[0, 2.8, 0]}>
+      {/* Back slope */}
+      <mesh position={[0, 0.4, -1.2]} rotation={[-0.4, 0, 0]}>
+        <planeGeometry args={[4.2, 2]} />
+        <meshStandardMaterial color="#8b7355" roughness={0.95} side={THREE.DoubleSide} />
       </mesh>
-      <mesh position={[0, 0.55, 0]} castShadow>
-        <boxGeometry args={[1.3, 0.15, 1.9]} />
-        <meshStandardMaterial color="#e8dcc0" roughness={0.9} />
+      {/* Left slope */}
+      <mesh position={[-1.6, 0.3, 0]} rotation={[-0.3, Math.PI / 2, 0]}>
+        <planeGeometry args={[4.2, 1.8]} />
+        <meshStandardMaterial color="#7a6548" roughness={0.95} side={THREE.DoubleSide} />
       </mesh>
-      <mesh position={[0, 0.7, -0.7]} castShadow>
-        <boxGeometry args={[0.8, 0.12, 0.35]} />
+      {/* Beam */}
+      <mesh position={[0, -0.1, 0]}>
+        <boxGeometry args={[4.2, 0.08, 0.08]} />
+        <meshStandardMaterial color="#6a5030" roughness={0.9} />
+      </mesh>
+    </group>
+  )
+}
+
+// Cozy bed — big, takes left side
+function Bed() {
+  return (
+    <group position={[-0.8, 0, 0.4]}>
+      {/* Frame */}
+      <mesh position={[0, 0.2, 0]} castShadow>
+        <boxGeometry args={[1.6, 0.4, 2.2]} />
+        <meshStandardMaterial color="#7a5a38" roughness={0.88} />
+      </mesh>
+      {/* Mattress */}
+      <mesh position={[0, 0.45, 0]} castShadow>
+        <boxGeometry args={[1.5, 0.12, 2.1]} />
+        <meshStandardMaterial color="#e8dcc8" roughness={0.92} />
+      </mesh>
+      {/* Blanket (draped) */}
+      <mesh position={[0, 0.52, 0.3]} castShadow>
+        <boxGeometry args={[1.5, 0.06, 1.4]} />
+        <meshStandardMaterial color="#8b4040" roughness={0.9} />
+      </mesh>
+      {/* Pillow */}
+      <mesh position={[0, 0.58, -0.8]} castShadow>
+        <boxGeometry args={[1.0, 0.1, 0.35]} />
         <meshStandardMaterial color="#f0e8d8" roughness={0.95} />
       </mesh>
-      <mesh position={[0, 0.9, -0.95]} castShadow>
-        <boxGeometry args={[1.4, 1, 0.08]} />
-        <meshStandardMaterial color="#7a5c3a" roughness={0.85} />
+      {/* Headboard */}
+      <mesh position={[0, 0.8, -1.05]} castShadow>
+        <boxGeometry args={[1.6, 0.8, 0.08]} />
+        <meshStandardMaterial color="#6a4828" roughness={0.88} />
       </mesh>
     </group>
   )
 }
 
-function Table({ position }: { position: [number, number, number] }) {
+// Small bedside table with plant/vase
+function Nightstand() {
   return (
-    <group position={position}>
-      <mesh position={[0, 0.7, 0]} castShadow>
-        <boxGeometry args={[1, 0.06, 0.6]} />
-        <meshStandardMaterial color="#8b6b4a" roughness={0.85} />
+    <group position={[1.2, 0, -0.8]}>
+      {/* Table */}
+      <mesh position={[0, 0.35, 0]} castShadow>
+        <boxGeometry args={[0.5, 0.7, 0.4]} />
+        <meshStandardMaterial color="#7a5a38" roughness={0.88} />
       </mesh>
-      {[[-0.4, 0.35, -0.22], [0.4, 0.35, -0.22], [-0.4, 0.35, 0.22], [0.4, 0.35, 0.22]].map((pos, i) => (
-        <mesh key={i} position={pos as [number, number, number]} castShadow>
-          <boxGeometry args={[0.06, 0.7, 0.06]} />
-          <meshStandardMaterial color="#7a5c3a" roughness={0.85} />
+      {/* Vase */}
+      <mesh position={[0, 0.78, 0]} castShadow>
+        <cylinderGeometry args={[0.06, 0.08, 0.2, 8]} />
+        <meshStandardMaterial color="#906040" roughness={0.7} />
+      </mesh>
+      {/* Plant stems */}
+      {[-0.03, 0.02, 0].map((xOff, i) => (
+        <mesh key={i} position={[xOff, 1.0, i * 0.02]} castShadow>
+          <cylinderGeometry args={[0.008, 0.008, 0.3, 4]} />
+          <meshStandardMaterial color="#4a7a3a" roughness={0.9} />
         </mesh>
       ))}
-      <mesh position={[0.2, 0.82, 0]} castShadow>
-        <cylinderGeometry args={[0.03, 0.04, 0.15, 8]} />
-        <meshStandardMaterial color="#e8d8b0" roughness={0.8} />
-      </mesh>
-      <mesh position={[0.2, 0.95, 0]}>
-        <sphereGeometry args={[0.03, 8, 6]} />
-        <meshBasicMaterial color="#ffcc55" />
-      </mesh>
-    </group>
-  )
-}
-
-function Chest({ position }: { position: [number, number, number] }) {
-  return (
-    <group position={position}>
-      <mesh position={[0, 0.2, 0]} castShadow>
-        <boxGeometry args={[0.7, 0.4, 0.45]} />
-        <meshStandardMaterial color="#6b4e2e" roughness={0.9} />
-      </mesh>
-      <mesh position={[0, 0.42, 0]} castShadow>
-        <boxGeometry args={[0.72, 0.06, 0.47]} />
-        <meshStandardMaterial color="#5a3e20" roughness={0.9} />
-      </mesh>
-      <mesh position={[0, 0.25, 0.23]} castShadow>
-        <boxGeometry args={[0.08, 0.08, 0.02]} />
-        <meshStandardMaterial color="#c8a020" roughness={0.4} metalness={0.5} />
-      </mesh>
-    </group>
-  )
-}
-
-function Bookshelf({ position }: { position: [number, number, number] }) {
-  return (
-    <group position={position}>
-      <mesh position={[0, 0.9, 0]} castShadow>
-        <boxGeometry args={[0.8, 1.8, 0.3]} />
-        <meshStandardMaterial color="#7a5c3a" roughness={0.9} />
-      </mesh>
-      {[0.4, 0.8, 1.2].map((y, row) => (
-        <group key={row} position={[0, y, 0.05]}>
-          {[-0.2, -0.05, 0.1, 0.22].map((bx, j) => (
-            <mesh key={j} position={[bx, 0, 0]} castShadow>
-              <boxGeometry args={[0.1, 0.25, 0.18]} />
-              <meshStandardMaterial
-                color={['#8b3030', '#2a5a3a', '#3a4a7a', '#7a5a2a', '#5a2a5a'][j % 5]}
-                roughness={0.85}
-              />
-            </mesh>
-          ))}
-        </group>
+      {/* Leaves */}
+      {[[-0.05, 1.1, 0.02], [0.04, 1.08, -0.03], [0, 1.15, 0]].map((pos, i) => (
+        <mesh key={i} position={pos as [number, number, number]} rotation={[0.3 * i, 0.5 * i, 0.2]}>
+          <sphereGeometry args={[0.04, 6, 4]} />
+          <meshStandardMaterial color="#5a8a4a" roughness={0.9} />
+        </mesh>
       ))}
     </group>
   )
 }
 
-// Gentle candle flicker
+// Candle flicker light
 function CandleLight() {
   const ref = useRef<THREE.PointLight>(null)
   useFrame(({ clock }) => {
     if (ref.current) {
-      ref.current.intensity = 1.5 + Math.sin(clock.elapsedTime * 3) * 0.3 + Math.sin(clock.elapsedTime * 7) * 0.1
+      ref.current.intensity = 1.2 + Math.sin(clock.elapsedTime * 4) * 0.2 + Math.sin(clock.elapsedTime * 9) * 0.08
     }
   })
-  return <pointLight ref={ref} position={[1.7, 1.2, -2]} color="#ffcc66" intensity={1.5} distance={6} decay={2} />
+  return <pointLight ref={ref} position={[1.2, 1.2, -0.8]} color="#ffcc66" intensity={1.2} distance={5} decay={2} />
 }
 
-// Soft watercolor post-processing (no DotScreen — it was causing the black screen)
+// Watercolor post-processing
 function WatercolorFilter() {
   return (
     <EffectComposer>
-      <HueSaturation saturation={-0.1} hue={0.03} />
-      <Noise opacity={0.06} blendFunction={BlendFunction.SOFT_LIGHT} />
-      <Vignette offset={0.25} darkness={0.4} />
+      <HueSaturation saturation={-0.08} hue={0.02} />
+      <Noise opacity={0.05} blendFunction={BlendFunction.SOFT_LIGHT} />
+      <Vignette offset={0.2} darkness={0.35} />
     </EffectComposer>
   )
 }
-
-// Isometric camera angle — fixed, no controls
-const ISO_DISTANCE = 8
-const ISO_ANGLE = Math.PI / 6 // 30 degrees
-const cameraPosition: [number, number, number] = [
-  ISO_DISTANCE * Math.cos(Math.PI / 4) * Math.cos(ISO_ANGLE),
-  ISO_DISTANCE * Math.sin(ISO_ANGLE) + 2,
-  ISO_DISTANCE * Math.sin(Math.PI / 4) * Math.cos(ISO_ANGLE),
-]
 
 export function MedievalRoom() {
   return (
@@ -154,37 +215,44 @@ export function MedievalRoom() {
         shadows
         orthographic
         camera={{
-          position: cameraPosition,
-          zoom: 80,
+          position: [5, 5, 5],
+          zoom: 100,
           near: 0.1,
-          far: 100,
+          far: 50,
         }}
         gl={{ antialias: true }}
         style={{ background: 'linear-gradient(180deg, #e8dcc4 0%, #d8c8a8 100%)' }}
         onCreated={({ camera }) => {
-          camera.lookAt(0, 0.5, 0)
+          camera.lookAt(0, 0.8, 0)
         }}
       >
-        {/* Strong ambient light — no more black */}
-        <ambientLight intensity={1.2} color="#fff5e6" />
-        <directionalLight position={[5, 8, 4]} intensity={1.0} color="#fff8ee" castShadow shadow-mapSize={1024} />
-        <directionalLight position={[-3, 4, -2]} intensity={0.3} color="#e8d8c0" />
+        {/* Lighting — warm and bright */}
+        <ambientLight intensity={1.0} color="#fff5e8" />
+        <directionalLight position={[4, 6, 3]} intensity={0.8} color="#fff8ee" castShadow shadow-mapSize={1024} />
+        <directionalLight position={[-2, 3, -1]} intensity={0.25} color="#e8d8c8" />
+        {/* Window light coming in */}
+        <directionalLight position={[0, 3, -3]} intensity={0.4} color="#c8dde8" />
         <CandleLight />
 
-        {/* Room structure */}
+        {/* Room — compact cozy space */}
         <Floor />
-        <Wall position={[0, 1.5, -3]} size={[6, 3]} />
-        <Wall position={[-3, 1.5, 0]} rotation={[0, Math.PI / 2, 0]} size={[6, 3]} color="#cbb890" />
+        {/* Back wall with window */}
+        <Wall position={[0, 1.4, -2]} size={[4, 2.8]} />
+        {/* Left wall */}
+        <Wall position={[-2, 1.4, 0]} rotation={[0, Math.PI / 2, 0]} size={[4, 2.8]} color="#bfab88" />
+
+        {/* Gothic window on back wall */}
+        <GothicWindow position={[0.3, 0.8, -1.98]} />
+
+        {/* Roof beams */}
+        <Roof />
 
         {/* Furniture */}
-        <Bed position={[-1.5, 0, -1.8]} />
-        <Table position={[1.5, 0, -2]} />
-        <Chest position={[1.8, 0, 0.5]} />
-        <Bookshelf position={[-2.6, 0, 0.5]} />
+        <Bed />
+        <Nightstand />
 
-        <ContactShadows position={[0, 0.01, 0]} opacity={0.25} scale={8} blur={2.5} far={4} />
+        <ContactShadows position={[0, 0.01, 0]} opacity={0.2} scale={6} blur={2} far={3} />
 
-        {/* Watercolor filter */}
         <WatercolorFilter />
       </Canvas>
 
