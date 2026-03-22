@@ -8,65 +8,78 @@ interface SwipeCarouselProps {
   className?: string
 }
 
+const GAP = 12 // gap-3 = 12px
+
 export function SwipeCarousel({ children, className = '' }: SwipeCarouselProps) {
+  const wrapperRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const [containerWidth, setContainerWidth] = useState(0)
-  const [scrollWidth, setScrollWidth] = useState(0)
+  const [wrapperWidth, setWrapperWidth] = useState(0)
   const [activeIndex, setActiveIndex] = useState(0)
+  const isDragging = useRef(false)
 
   const x = useMotionValue(0)
   const springX = useSpring(x, { damping: 30, stiffness: 300 })
 
+  // Card width: show 2 full cards + 2 half cards on edges
+  // containerWidth = 2 * cardW + 3 * gap + 2 * (cardW / 2)  → but we keep it simple:
+  // 2.5 cards visible means cardW = (containerWidth - 2 * gap) / 2.5
+  const cardWidth = wrapperWidth > 0 ? Math.floor((wrapperWidth - 2 * GAP) / 2.5) : 260
+
   useEffect(() => {
     const measure = () => {
-      if (containerRef.current) {
-        setContainerWidth(containerRef.current.offsetWidth)
-        setScrollWidth(containerRef.current.scrollWidth)
+      if (wrapperRef.current) {
+        setWrapperWidth(wrapperRef.current.offsetWidth)
       }
     }
     measure()
     window.addEventListener('resize', measure)
     return () => window.removeEventListener('resize', measure)
-  }, [children.length])
+  }, [])
 
-  const maxDrag = Math.min(0, -(scrollWidth - containerWidth))
+  const totalWidth = children.length * cardWidth + (children.length - 1) * GAP
+  const maxDrag = Math.min(0, -(totalWidth - wrapperWidth))
+
+  const handleDragStart = () => {
+    isDragging.current = true
+  }
 
   const handleDragEnd = (_: any, info: { velocity: { x: number }; offset: { x: number } }) => {
+    // Keep isDragging true briefly so click handlers can check it
+    setTimeout(() => { isDragging.current = false }, 50)
+
     const velocity = info.velocity.x
+    let targetIndex = activeIndex
 
-    // Snap to nearest card
-    if (containerRef.current) {
-      const cards = containerRef.current.querySelectorAll('[data-carousel-item]')
-      if (cards.length === 0) return
-
-      let targetIndex = activeIndex
-      if (velocity < -200 || info.offset.x < -50) {
-        targetIndex = Math.min(activeIndex + 1, cards.length - 1)
-      } else if (velocity > 200 || info.offset.x > 50) {
-        targetIndex = Math.max(activeIndex - 1, 0)
-      }
-
-      const card = cards[targetIndex] as HTMLElement
-      const targetX = Math.max(maxDrag, Math.min(0, -card.offsetLeft + 16))
-
-      setActiveIndex(targetIndex)
-      animate(x, targetX, { type: 'spring', damping: 30, stiffness: 300 })
+    if (velocity < -200 || info.offset.x < -50) {
+      targetIndex = Math.min(activeIndex + 1, children.length - 1)
+    } else if (velocity > 200 || info.offset.x > 50) {
+      targetIndex = Math.max(activeIndex - 1, 0)
     }
+
+    const targetX = Math.max(maxDrag, Math.min(0, -(targetIndex * (cardWidth + GAP))))
+    setActiveIndex(targetIndex)
+    animate(x, targetX, { type: 'spring', damping: 30, stiffness: 300 })
   }
 
   return (
-    <div className={`overflow-hidden ${className}`}>
+    <div ref={wrapperRef} className={`overflow-hidden ${className}`}>
       <motion.div
         ref={containerRef}
-        className="flex gap-3 cursor-grab active:cursor-grabbing"
-        style={{ x: springX }}
+        className="flex cursor-grab active:cursor-grabbing"
+        style={{ x: springX, gap: GAP }}
         drag="x"
         dragConstraints={{ left: maxDrag, right: 0 }}
         dragElastic={0.1}
+        onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
         {children.map((child, i) => (
-          <div key={i} data-carousel-item className="flex-shrink-0">
+          <div
+            key={i}
+            data-carousel-item
+            className="flex-shrink-0"
+            style={{ width: cardWidth }}
+          >
             {child}
           </div>
         ))}
@@ -90,6 +103,7 @@ export function SwipeCarousel({ children, className = '' }: SwipeCarouselProps) 
 }
 
 // Wrapper for individual cards with click-to-zoom
+// Uses pointer events to distinguish drag from tap (fixes Framer Motion drag/tap conflict)
 export function CarouselCard({
   children,
   className = '',
@@ -99,25 +113,37 @@ export function CarouselCard({
   className?: string
   onClick?: () => void
 }) {
-  const scale = useSpring(1, { damping: 20, stiffness: 300 })
+  const pointerStart = useRef<{ x: number; y: number } | null>(null)
+  const [isZooming, setIsZooming] = useState(false)
 
-  const handleClick = () => {
-    if (onClick) {
-      scale.set(1.05)
+  const handlePointerDown = (e: React.PointerEvent) => {
+    pointerStart.current = { x: e.clientX, y: e.clientY }
+  }
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!onClick || !pointerStart.current) return
+
+    const dx = Math.abs(e.clientX - pointerStart.current.x)
+    const dy = Math.abs(e.clientY - pointerStart.current.y)
+    pointerStart.current = null
+
+    // If pointer moved less than 8px → it's a tap, not a drag
+    if (dx < 8 && dy < 8) {
+      setIsZooming(true)
       setTimeout(() => {
-        scale.set(1)
+        setIsZooming(false)
         onClick()
-      }, 150)
+      }, 180)
     }
   }
 
   return (
     <motion.div
-      className={`${className} ${onClick ? 'cursor-pointer' : ''}`}
-      style={{ scale }}
-      onTap={handleClick}
-      whileHover={onClick ? { scale: 1.02 } : undefined}
+      className={`${className} ${onClick ? 'cursor-pointer' : ''} w-full`}
+      animate={{ scale: isZooming ? 1.05 : 1 }}
       transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
     >
       {children}
     </motion.div>

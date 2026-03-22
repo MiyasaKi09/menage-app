@@ -1,9 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
-import { QuestPostIt } from './QuestPostIt'
+import { QuestPath } from './QuestPath'
 import { PeripetiesCarousel } from './PeripetiesCarousel'
-import { SwipeCarousel } from './SwipeCarousel'
 
 interface MaisonQuestsSectionProps {
   tasks: any[]
@@ -30,7 +29,7 @@ export function MaisonQuestsSection({ tasks, questFrequencies }: MaisonQuestsSec
     return { quests: questTasks, peripeties: peripetieTasks }
   }, [tasks, questFreqSet])
 
-  // Group quest tasks by household_task_id (same recurring task = one post-it with multiple steps)
+  // Group quest tasks by household_task_id (same recurring task = one path)
   const groupedQuests = useMemo(() => {
     const groups: Record<string, any[]> = {}
 
@@ -46,17 +45,14 @@ export function MaisonQuestsSection({ tasks, questFrequencies }: MaisonQuestsSec
         householdTaskId: htId,
         questName: first.task_name || 'Quete',
         categoryEmoji: first.category_emoji || '⚔️',
-        categoryName: first.category_name || '',
-        steps: steps.map((s: any) => ({
-          task_id: s.task_id,
-          task_name: s.task_name,
-          category_emoji: s.category_emoji,
-          category_name: s.category_name,
-          points: s.points,
-          status: s.status,
-          scheduled_date: s.scheduled_date,
-          household_task_id: s.household_task_id,
-        })),
+        steps: steps
+          .sort((a: any, b: any) => a.scheduled_date.localeCompare(b.scheduled_date))
+          .map((s: any) => ({
+            task_id: s.task_id,
+            points: s.points,
+            status: s.status,
+            scheduled_date: s.scheduled_date,
+          })),
         totalPoints: steps.reduce((sum: number, s: any) => sum + (s.points || 0), 0),
       }
     })
@@ -71,39 +67,29 @@ export function MaisonQuestsSection({ tasks, questFrequencies }: MaisonQuestsSec
 
   return (
     <div className="space-y-6">
-      {/* Combined carousel: Quêtes post-its on left + regular flow */}
+      {/* Au-dessus : Quêtes en chemin d'étapes */}
       {hasQuests && (
         <div className="space-y-3">
           <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase px-1">
             Quetes de la semaine
           </p>
-          <SwipeCarousel>
+          <div className="space-y-2">
             {groupedQuests.map((quest) => (
-              <QuestPostIt
+              <QuestPath
                 key={quest.householdTaskId}
                 questName={quest.questName}
                 categoryEmoji={quest.categoryEmoji}
-                categoryName={quest.categoryName}
                 steps={quest.steps}
                 totalPoints={quest.totalPoints}
               />
             ))}
-          </SwipeCarousel>
+          </div>
         </div>
       )}
 
-      {/* Péripéties section */}
+      {/* En-dessous : Carousel péripéties (2 + 2 demi) */}
       {hasPeripeties && (
         <PeripetiesCarousel tasks={peripeties} />
-      )}
-
-      {/* If all tasks are quêtes, show a subtle empty state for péripéties */}
-      {hasQuests && !hasPeripeties && (
-        <div className="text-center py-4">
-          <p className="font-lora text-[12px] text-cream/15 italic">
-            Pas de peripetie en cours
-          </p>
-        </div>
       )}
     </div>
   )
