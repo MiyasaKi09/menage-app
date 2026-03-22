@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, Clock, Lock, Coins, Sparkles, Crosshair } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -25,39 +25,24 @@ interface PeripetiesCarouselProps {
   bonusMultiplier?: number
 }
 
-function useCountdown(targetDate: string) {
+function CountdownBadge({ date }: { date: string }) {
   const [remaining, setRemaining] = useState('')
 
   useEffect(() => {
-    const target = new Date(targetDate + 'T00:00:00')
+    const target = new Date(date + 'T00:00:00')
     const update = () => {
-      const now = new Date()
-      const diff = target.getTime() - now.getTime()
-      if (diff <= 0) {
-        setRemaining('Disponible')
-        return
-      }
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-      if (days > 0) setRemaining(`${days}j ${hours}h`)
-      else {
-        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-        setRemaining(`${hours}h ${mins}m`)
-      }
+      const diff = target.getTime() - Date.now()
+      if (diff <= 0) { setRemaining('Disponible'); return }
+      const days = Math.floor(diff / 86400000)
+      const hours = Math.floor((diff % 86400000) / 3600000)
+      setRemaining(days > 0 ? `${days}j ${hours}h` : `${hours}h`)
     }
     update()
     const interval = setInterval(update, 60000)
     return () => clearInterval(interval)
-  }, [targetDate])
+  }, [date])
 
-  return remaining
-}
-
-function CountdownBadge({ date }: { date: string }) {
-  const remaining = useCountdown(date)
-  return (
-    <span className="font-lora text-[9px] text-cream/25">{remaining}</span>
-  )
+  return <span className="font-lora text-[9px] text-cream/25">{remaining}</span>
 }
 
 export function PeripetiesCarousel({
@@ -67,13 +52,33 @@ export function PeripetiesCarousel({
 }: PeripetiesCarouselProps) {
   const supabase = createClient()
   const router = useRouter()
-  const [localTasks, setLocalTasks] = useState(tasks)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [unlockedIds, setUnlockedIds] = useState<Set<string>>(new Set())
   const [isAtActive, setIsAtActive] = useState(true)
   const carouselRef = useRef<SwipeCarouselHandle>(null)
 
   const todayStr = new Date().toISOString().split('T')[0]
+
+  // Filter: completed today + today's pending + next 2 future days max
+  const filteredTasks = useMemo(() => {
+    const completed = tasks.filter(t =>
+      (t.status === 'completed' || t.status === 'skipped') && t.scheduled_date <= todayStr
+    )
+    const todayPending = tasks.filter(t =>
+      (t.status === 'pending' || t.status === 'in_progress') && t.scheduled_date <= todayStr
+    )
+    const future = tasks.filter(t =>
+      t.status === 'pending' && t.scheduled_date > todayStr
+    ).slice(0, 5) // max 5 future tasks visible
+
+    return [...completed, ...todayPending, ...future]
+  }, [tasks, todayStr])
+
+  const [localTasks, setLocalTasks] = useState(filteredTasks)
+
+  // Update when filteredTasks changes
+  useEffect(() => { setLocalTasks(filteredTasks) }, [filteredTasks])
+
   const activeIndex = localTasks.findIndex(t =>
     (t.status === 'pending' || t.status === 'in_progress') && t.scheduled_date <= todayStr
   )
@@ -137,21 +142,14 @@ export function PeripetiesCarousel({
             <div className="blur-sm opacity-20 space-y-2 pointer-events-none">
               <span className="font-medieval text-[10px] text-cream/30">Peripetie</span>
               <h3 className="font-cinzel text-[12px] text-cream/40">???</h3>
-              <div className="flex items-center gap-1">
-                <span className="text-xs">{task.category_emoji}</span>
-                <span className="font-lora text-[10px] text-cream/20">{task.category_name}</span>
-              </div>
             </div>
 
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
               <Lock size={18} className="text-cream/20" />
-
-              {/* Countdown */}
               <div className="flex items-center gap-1">
                 <Clock size={10} className="text-cream/20" />
                 <CountdownBadge date={task.scheduled_date} />
               </div>
-
               <button
                 onClick={() => handleUnlock(task.task_id)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow/[0.1] border border-yellow/20 text-yellow/60 font-cinzel text-[10px] hover:bg-yellow/[0.2] transition-colors"
@@ -230,7 +228,6 @@ export function PeripetiesCarousel({
           Peripeties
         </p>
 
-        {/* Back to active button — always visible */}
         {activeIndex >= 0 && (
           <button
             onClick={() => carouselRef.current?.goToIndex(activeIndex)}

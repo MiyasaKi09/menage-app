@@ -107,18 +107,24 @@ export const SwipeCarousel = forwardRef<SwipeCarouselHandle, SwipeCarouselProps>
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 1.5L3.5 5L6.5 8.5" /></svg>
           </button>
 
-          {/* Dots */}
-          <div className="flex items-center gap-1.5">
-            {children.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => goToIndex(i)}
-                className={`w-1.5 h-1.5 rounded-full transition-colors duration-200 ${
-                  i === viewIndex ? 'bg-cream/40' : 'bg-cream/10'
-                }`}
-              />
-            ))}
-          </div>
+          {/* Dots or counter */}
+          {children.length <= 8 ? (
+            <div className="flex items-center gap-1.5">
+              {children.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => goToIndex(i)}
+                  className={`w-1.5 h-1.5 rounded-full transition-colors duration-200 ${
+                    i === viewIndex ? 'bg-cream/40' : 'bg-cream/10'
+                  }`}
+                />
+              ))}
+            </div>
+          ) : (
+            <span className="font-medieval text-[10px] text-cream/25 tabular-nums">
+              {viewIndex + 1}/{children.length}
+            </span>
+          )}
 
           {/* Right arrow */}
           <button

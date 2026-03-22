@@ -58,31 +58,32 @@ export function QuestCard({ questName, categoryEmoji, steps, totalPoints }: Ques
       </div>
 
       {/* Horizontal step dots with connecting lines */}
-      <div className="flex items-center w-full px-2">
+      <div className="flex items-center w-full px-1">
         {localSteps.map((step, i) => {
           const isCompleted = step.status === 'completed' || step.status === 'skipped'
           const isCurrent = i === firstPendingIndex
-          const label = step.step_number ? `${step.step_number}` : `${i + 1}`
+          // Adapt size based on number of steps
+          const isCompact = localSteps.length > 8
+          const dotSize = isCompact ? 'w-5 h-5' : 'w-7 h-7'
+          const iconSize = isCompact ? 10 : 12
 
           return (
             <div key={step.task_id} className="flex items-center flex-1 last:flex-none">
-              {/* Step dot */}
-              <div className="flex flex-col items-center gap-1.5">
+              <div className="flex flex-col items-center">
                 <button
                   onClick={() => isCurrent && handleComplete(step.task_id)}
                   disabled={!isCurrent}
                   className="relative"
                 >
-                  {/* Pulse for current */}
                   {isCurrent && (
                     <motion.div
                       className="absolute inset-0 rounded-full bg-yellow/30"
-                      animate={{ scale: [1, 1.6, 1], opacity: [0.3, 0, 0.3] }}
+                      animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0, 0.3] }}
                       transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
-                      style={{ margin: -4 }}
+                      style={{ margin: isCompact ? -3 : -4 }}
                     />
                   )}
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all ${
+                  <div className={`${dotSize} rounded-full flex items-center justify-center border-2 transition-all ${
                     isCompleted
                       ? 'bg-green/20 border-green/40'
                       : isCurrent
@@ -90,21 +91,18 @@ export function QuestCard({ questName, categoryEmoji, steps, totalPoints }: Ques
                         : 'bg-cream/[0.03] border-cream/[0.08]'
                   }`}>
                     {isCompleted ? (
-                      <Check size={12} className="text-green/70" />
+                      <Check size={iconSize} className="text-green/70" />
+                    ) : isCurrent ? (
+                      <div className={`${isCompact ? 'w-1.5 h-1.5' : 'w-2 h-2'} rounded-full bg-yellow/60`} />
                     ) : (
-                      <span className={`font-cinzel text-[9px] ${
-                        isCurrent ? 'text-yellow/70' : 'text-cream/15'
-                      }`}>
-                        {label}
-                      </span>
+                      <div className={`${isCompact ? 'w-1 h-1' : 'w-1.5 h-1.5'} rounded-full bg-cream/10`} />
                     )}
                   </div>
                 </button>
               </div>
 
-              {/* Connecting line */}
               {i < localSteps.length - 1 && (
-                <div className="flex-1 mx-1.5">
+                <div className={`flex-1 ${isCompact ? 'mx-0.5' : 'mx-1'}`}>
                   <div className={`h-0.5 w-full rounded-full transition-colors ${
                     isCompleted ? 'bg-green/30' : 'bg-cream/[0.06]'
                   }`} />
@@ -114,9 +112,8 @@ export function QuestCard({ questName, categoryEmoji, steps, totalPoints }: Ques
           )
         })}
 
-        {/* Treasure at the end */}
-        <div className="ml-2 flex-shrink-0">
-          <span className={`text-lg transition-opacity ${allDone ? 'opacity-80' : 'opacity-20'}`}>
+        <div className="ml-1.5 flex-shrink-0">
+          <span className={`${localSteps.length > 8 ? 'text-sm' : 'text-lg'} transition-opacity ${allDone ? 'opacity-80' : 'opacity-20'}`}>
             💰
           </span>
         </div>
