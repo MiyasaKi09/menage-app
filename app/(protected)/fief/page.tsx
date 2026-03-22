@@ -49,6 +49,7 @@ export default async function FiefPage() {
         <FiefPageClient
           householdId={householdId}
           householdName={householdName}
+          userId={user?.id || ''}
           isAdmin={isAdmin}
           tasks={tasks || []}
           members={members || []}

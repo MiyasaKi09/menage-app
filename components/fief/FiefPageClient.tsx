@@ -10,6 +10,7 @@ import { Crown, Globe, Settings } from 'lucide-react'
 interface FiefPageClientProps {
   householdId: string
   householdName: string
+  userId: string
   isAdmin: boolean
   tasks: any[]
   members: any[]
@@ -27,6 +28,7 @@ const tabs = [
 export function FiefPageClient({
   householdId,
   householdName,
+  userId,
   isAdmin,
   tasks,
   members,
@@ -82,7 +84,7 @@ export function FiefPageClient({
               householdId={householdId}
             />
           )}
-          {activeTab === 'quartier' && <QuartierTab />}
+          {activeTab === 'quartier' && <QuartierTab householdId={householdId} userId={userId} />}
           {activeTab === 'parametres' && <ParametresTab householdId={householdId} />}
         </motion.div>
       </AnimatePresence>

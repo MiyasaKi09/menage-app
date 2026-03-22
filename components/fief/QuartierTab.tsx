@@ -1,15 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
-import { Camera, Box } from 'lucide-react'
+import { Pencil, Save, Trash2, RotateCw, Plus, Coins } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
+import type { RoomFurnitureData } from './RoomScene'
 
-const MedievalRoom = dynamic(
-  () => import('./MedievalRoom').then(mod => ({ default: mod.MedievalRoom })),
+const RoomScene = dynamic(
+  () => import('./RoomScene').then(mod => ({ default: mod.RoomScene })),
   {
     ssr: false,
     loading: () => (
-      <div className="aspect-square max-w-sm mx-auto bg-cream/[0.03] rounded-2xl border border-cream/[0.06] flex items-center justify-center">
+      <div className="aspect-square max-w-md mx-auto bg-cream/[0.03] rounded-2xl border border-cream/[0.06] flex items-center justify-center">
         <div className="text-center space-y-2">
           <div className="w-8 h-8 border-2 border-cream/20 border-t-cream/50 rounded-full animate-spin mx-auto" />
           <p className="font-lora text-[12px] text-cream/25">Chargement de la chambre...</p>
@@ -19,68 +22,276 @@ const MedievalRoom = dynamic(
   }
 )
 
-export function QuartierTab() {
-  const [viewMode, setViewMode] = useState<'3d' | 'photo'>('3d')
+interface CatalogItem {
+  id: string
+  name: string
+  category: string
+  price: number
+  is_default: boolean
+}
+
+interface QuartierTabProps {
+  householdId?: string
+  userId?: string
+}
+
+const CATEGORIES = [
+  { key: 'meubles', label: 'Meubles' },
+  { key: 'luminaire', label: 'Luminaire' },
+  { key: 'fenetres', label: 'Fenetres' },
+  { key: 'deco', label: 'Deco' },
+  { key: 'sols-murs', label: 'Sols-Murs' },
+]
+
+export function QuartierTab({ householdId, userId }: QuartierTabProps) {
+  const supabase = createClient()
+  const router = useRouter()
+
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [furniture, setFurniture] = useState<RoomFurnitureData[]>([])
+  const [catalog, setCatalog] = useState<CatalogItem[]>([])
+  const [activeCategory, setActiveCategory] = useState('meubles')
+  const [saving, setSaving] = useState(false)
+
+  // Fetch furniture + catalog
+  useEffect(() => {
+    if (!householdId || !userId) return
+
+    const fetchData = async () => {
+      // Fetch placed furniture
+      const { data: placed } = await supabase
+        .from('room_furniture')
+        .select('id, catalog_id, position_x, position_y, position_z, rotation_y, scale')
+        .eq('household_id', householdId)
+        .eq('profile_id', userId)
+
+      if (placed) {
+        setFurniture(placed.map((f: any) => ({
+          id: f.id,
+          catalog_id: f.catalog_id,
+          position_x: Number(f.position_x),
+          position_y: Number(f.position_y),
+          position_z: Number(f.position_z),
+          rotation_y: Number(f.rotation_y),
+          scale: Number(f.scale),
+        })))
+      }
+
+      // Fetch catalog
+      const { data: cat } = await supabase
+        .from('furniture_catalog')
+        .select('id, name, category, price, is_default')
+        .order('price')
+
+      if (cat) setCatalog(cat)
+    }
+
+    fetchData()
+  }, [householdId, userId, supabase])
+
+  // If no furniture loaded and we have defaults, seed with defaults
+  useEffect(() => {
+    if (furniture.length === 0 && catalog.length > 0 && householdId && userId) {
+      const defaults = catalog.filter(c => c.is_default)
+      if (defaults.length > 0) {
+        // Default layout positions
+        const defaultPositions: Record<string, [number, number, number]> = {
+          'bed_default': [-0.6, 0, 0.4],
+          'table_default': [1.0, 0, -0.8],
+          'lamp_default': [1.0, 0.56, -0.8],
+          'shelf_default': [-1.7, 1.8, -0.3],
+          'ceiling_light': [0, 2.7, -0.2],
+          'window_gothic': [0.3, 0.8, -1.73],
+        }
+
+        const seeded = defaults
+          .filter(d => defaultPositions[d.id])
+          .map(d => ({
+            id: `default-${d.id}`,
+            catalog_id: d.id,
+            position_x: defaultPositions[d.id][0],
+            position_y: defaultPositions[d.id][1],
+            position_z: defaultPositions[d.id][2],
+            rotation_y: 0,
+            scale: 1,
+          }))
+
+        setFurniture(seeded)
+      }
+    }
+  }, [furniture.length, catalog, householdId, userId])
+
+  const handleSelect = useCallback((id: string) => {
+    setSelectedId(id || null)
+  }, [])
+
+  const handleMove = useCallback((id: string, pos: [number, number, number]) => {
+    setFurniture(prev => prev.map(f =>
+      f.id === id ? { ...f, position_x: pos[0], position_y: pos[1], position_z: pos[2] } : f
+    ))
+  }, [])
+
+  const handleRotate = () => {
+    if (!selectedId) return
+    setFurniture(prev => prev.map(f =>
+      f.id === selectedId ? { ...f, rotation_y: f.rotation_y + Math.PI / 4 } : f
+    ))
+  }
+
+  const handleDelete = () => {
+    if (!selectedId) return
+    setFurniture(prev => prev.filter(f => f.id !== selectedId))
+    setSelectedId(null)
+  }
+
+  const handleAddItem = (catalogId: string) => {
+    const newItem: RoomFurnitureData = {
+      id: `new-${Date.now()}`,
+      catalog_id: catalogId,
+      position_x: 0,
+      position_y: 0,
+      position_z: 0,
+      rotation_y: 0,
+      scale: 1,
+    }
+    setFurniture(prev => [...prev, newItem])
+    setSelectedId(newItem.id)
+  }
+
+  const handleSave = async () => {
+    if (!householdId || !userId) return
+    setSaving(true)
+
+    // Delete all existing and re-insert
+    await supabase
+      .from('room_furniture')
+      .delete()
+      .eq('household_id', householdId)
+      .eq('profile_id', userId)
+
+    if (furniture.length > 0) {
+      await supabase.from('room_furniture').insert(
+        furniture.map(f => ({
+          household_id: householdId,
+          profile_id: userId,
+          catalog_id: f.catalog_id,
+          position_x: f.position_x,
+          position_y: f.position_y,
+          position_z: f.position_z,
+          rotation_y: f.rotation_y,
+          scale: f.scale,
+        }))
+      )
+    }
+
+    setSaving(false)
+    setIsEditMode(false)
+    router.refresh()
+  }
+
+  const filteredCatalog = catalog.filter(c => c.category === activeCategory)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* 3D Room */}
-      <MedievalRoom />
+      <RoomScene
+        furniture={furniture}
+        isEditMode={isEditMode}
+        selectedId={selectedId}
+        onSelect={handleSelect}
+        onMove={handleMove}
+      />
 
-      {/* View mode toggles */}
-      <div className="flex items-center justify-center gap-3">
-        <button
-          onClick={() => setViewMode('photo')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg font-medieval text-[12px] transition-colors ${
-            viewMode === 'photo'
-              ? 'bg-cream/[0.08] border border-cream/[0.1] text-cream/60'
-              : 'bg-cream/[0.04] border border-cream/[0.04] text-cream/25'
-          }`}
-        >
-          <Camera size={14} />
-          Photo
-        </button>
-        <button
-          onClick={() => setViewMode('3d')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg font-medieval text-[12px] transition-colors ${
-            viewMode === '3d'
-              ? 'bg-cream/[0.08] border border-cream/[0.1] text-cream/60'
-              : 'bg-cream/[0.04] border border-cream/[0.04] text-cream/25'
-          }`}
-        >
-          <Box size={14} />
-          Vue 3D
-        </button>
-      </div>
-
-      {/* Configuration categories */}
-      <div className="space-y-3">
-        <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase">
-          Configurer
-        </p>
-        <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-          {['Fenetres', 'Meubles', 'Luminaire', 'Sols-Murs'].map((cat) => (
+      {/* Edit toolbar */}
+      <div className="flex items-center justify-center gap-2">
+        {!isEditMode ? (
+          <button
+            onClick={() => setIsEditMode(true)}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-cream/[0.06] border border-cream/[0.08] text-cream/50 font-medieval text-[12px] hover:bg-cream/[0.1] transition-colors"
+          >
+            <Pencil size={14} />
+            Editer
+          </button>
+        ) : (
+          <>
+            {selectedId && (
+              <>
+                <button
+                  onClick={handleRotate}
+                  className="flex items-center gap-1 px-3 py-2 rounded-lg bg-cream/[0.06] border border-cream/[0.06] text-cream/40 font-medieval text-[11px] hover:bg-cream/[0.1] transition-colors"
+                >
+                  <RotateCw size={12} />
+                  Tourner
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex items-center gap-1 px-3 py-2 rounded-lg bg-red/[0.08] border border-red/15 text-red/50 font-medieval text-[11px] hover:bg-red/[0.15] transition-colors"
+                >
+                  <Trash2 size={12} />
+                </button>
+              </>
+            )}
             <button
-              key={cat}
-              className="flex-shrink-0 px-3 py-2 rounded-lg bg-cream/[0.04] border border-cream/[0.06] text-cream/40 font-lora text-[12px] hover:bg-cream/[0.08] transition-colors"
+              onClick={handleSave}
+              disabled={saving}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-green/[0.1] border border-green/20 text-green/60 font-medieval text-[12px] hover:bg-green/[0.2] transition-colors disabled:opacity-30"
             >
-              {cat}
+              <Save size={14} />
+              {saving ? 'Sauvegarde...' : 'Sauvegarder'}
             </button>
-          ))}
-        </div>
-
-        {/* Item cards placeholder */}
-        <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div
-              key={i}
-              className="flex-shrink-0 w-20 h-24 rounded-xl bg-cream/[0.03] border border-cream/[0.06] flex items-center justify-center"
-            >
-              <div className="w-10 h-10 rounded-lg bg-cream/[0.04]" />
-            </div>
-          ))}
-        </div>
+          </>
+        )}
       </div>
+
+      {/* Catalog (visible in edit mode) */}
+      {isEditMode && (
+        <div className="space-y-3">
+          <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase">
+            Ajouter
+          </p>
+
+          {/* Category tabs */}
+          <div className="flex gap-1.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat.key}
+                onClick={() => setActiveCategory(cat.key)}
+                className={`flex-shrink-0 px-3 py-1.5 rounded-lg font-medieval text-[10px] transition-colors ${
+                  activeCategory === cat.key
+                    ? 'bg-yellow/[0.12] border border-yellow/20 text-yellow/60'
+                    : 'bg-cream/[0.04] border border-cream/[0.06] text-cream/30'
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Items grid */}
+          <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
+            {filteredCatalog.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => handleAddItem(item.id)}
+                className="flex-shrink-0 w-20 h-24 rounded-xl bg-cream/[0.04] border border-cream/[0.06] flex flex-col items-center justify-center gap-1.5 hover:bg-cream/[0.08] transition-colors"
+              >
+                <Plus size={14} className="text-cream/20" />
+                <span className="font-lora text-[9px] text-cream/35 text-center leading-tight px-1">{item.name}</span>
+                {item.price > 0 && (
+                  <span className="flex items-center gap-0.5 font-cinzel text-[8px] text-yellow/40">
+                    <Coins size={8} />
+                    {item.price}
+                  </span>
+                )}
+              </button>
+            ))}
+            {filteredCatalog.length === 0 && (
+              <p className="font-lora text-[11px] text-cream/20 py-4 px-2">Aucun objet dans cette categorie</p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
