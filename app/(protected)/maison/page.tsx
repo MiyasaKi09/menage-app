@@ -18,13 +18,23 @@ export default async function MaisonPage() {
     .eq('id', user?.id)
     .single()
 
-  const { data: households } = await supabase
+  // Fetch all user's households with status
+  const { data: memberships } = await supabase
     .from('household_members')
-    .select('id, points_in_household, tasks_completed_in_household, households (id, name)')
+    .select('id, role, status, points_in_household, tasks_completed_in_household, households (id, name)')
     .eq('profile_id', user?.id)
-    .limit(5)
+    .limit(10)
 
-  const householdId = households?.[0] ? (households[0].households as any)?.id : null
+  const userHouseholds = (memberships || []).map((m: any) => ({
+    id: (m.households as any)?.id,
+    name: (m.households as any)?.name,
+    status: m.status || 'active',
+    role: m.role,
+  }))
+
+  // Use first active household, or first household
+  const activeHousehold = userHouseholds.find(h => h.status === 'active') || userHouseholds[0]
+  const householdId = activeHousehold?.id || null
 
   let weekTasks: any[] = []
   let pendingValidation: any[] = []
@@ -75,6 +85,61 @@ export default async function MaisonPage() {
     leaderboard = members || []
   }
 
+  // Fetch shop items and purchases
+  const { data: shopCategories } = await supabase
+    .from('shop_categories')
+    .select('*')
+    .order('display_order')
+
+  const { data: shopItems } = await supabase
+    .from('shop_items')
+    .select('*, shop_categories(name)')
+    .eq('is_available', true)
+    .order('price')
+
+  const { data: purchasedItems } = await supabase
+    .from('purchased_items')
+    .select('*, shop_items(name, price, item_type, rarity)')
+    .eq('profile_id', user?.id)
+
+  // Fetch stats: tasks by category from task_history
+  const { data: tasksByCategory } = await supabase
+    .from('task_history')
+    .select('category_name')
+    .eq('profile_id', user?.id)
+
+  // Aggregate tasks by category
+  const categoryMap: Record<string, number> = {}
+  ;(tasksByCategory || []).forEach((t: any) => {
+    const cat = t.category_name || 'Autre'
+    categoryMap[cat] = (categoryMap[cat] || 0) + 1
+  })
+  const tasksByCategoryArray = Object.entries(categoryMap)
+    .map(([category, count]) => ({ category, emoji: '', count }))
+    .sort((a, b) => b.count - a.count)
+
+  // Fetch favorite character (most received)
+  const { data: favoriteChars } = await supabase
+    .from('character_collection')
+    .select('times_received, avatars(name, character_class)')
+    .eq('profile_id', user?.id)
+    .order('times_received', { ascending: false })
+    .limit(1)
+
+  const favoriteCharacter = favoriteChars?.[0]
+    ? {
+        name: (favoriteChars[0].avatars as any)?.name || '',
+        class: (favoriteChars[0].avatars as any)?.character_class || '',
+        timesReceived: favoriteChars[0].times_received,
+      }
+    : null
+
+  // Build annual card title (e.g. "La Lavandière des Glaces")
+  const topTask = tasksByCategoryArray[0]?.category || null
+  const annualCard = favoriteCharacter && topTask
+    ? { title: `${favoriteCharacter.name}`, subtitle: `Specialiste ${topTask}` }
+    : null
+
   return (
     <div className="min-h-screen relative">
       {/* Background */}
@@ -92,10 +157,20 @@ export default async function MaisonPage() {
         <QuickAccessBar
           totalPoints={profile?.total_points || 0}
           leaderboard={leaderboard}
+          households={userHouseholds}
+          shopCategories={shopCategories || []}
+          shopItems={shopItems || []}
+          purchasedItems={purchasedItems || []}
           stats={{
             streak: profile?.current_streak || 0,
             level: profile?.current_level || 1,
             tasksCompleted: profile?.tasks_completed || 0,
+            timesFirst: 0,
+            timesSecond: 0,
+            timesThird: 0,
+            tasksByCategory: tasksByCategoryArray,
+            favoriteCharacter,
+            annualCard,
           }}
         />
 
@@ -117,7 +192,7 @@ export default async function MaisonPage() {
         )}
 
         {/* Empty / onboarding */}
-        {(!households || households.length === 0) && (
+        {(!memberships || memberships.length === 0) && (
           <div className="text-center py-16 space-y-4">
             <div className="text-4xl opacity-40">🏰</div>
             <h2 className="font-cinzel text-xl text-cream font-semibold">Fondez votre cite</h2>
