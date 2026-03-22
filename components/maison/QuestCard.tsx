@@ -10,7 +10,8 @@ interface QuestStep {
   task_id: string
   points: number
   status: string
-  scheduled_date: string
+  scheduled_date?: string
+  step_number?: number
 }
 
 interface QuestCardProps {
@@ -77,10 +78,19 @@ export function QuestCard({ questName, categoryEmoji, steps, totalPoints }: Ques
   const pathD = buildSmoothPath(stepPositions)
 
   const handleComplete = async (taskId: string) => {
-    await supabase
-      .from('scheduled_tasks')
-      .update({ status: 'completed', completed_at: new Date().toISOString() })
+    // Try corvee_steps first, fallback to scheduled_tasks
+    const { error } = await supabase
+      .from('corvee_steps')
+      .update({ status: 'completed', completed_at: new Date().toISOString(), completed_by: undefined })
       .eq('id', taskId)
+
+    if (error) {
+      // Fallback for scheduled_tasks
+      await supabase
+        .from('scheduled_tasks')
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
+        .eq('id', taskId)
+    }
 
     setLocalSteps(prev =>
       prev.map(s => s.task_id === taskId ? { ...s, status: 'completed' } : s)
@@ -165,7 +175,11 @@ export function QuestCard({ questName, categoryEmoji, steps, totalPoints }: Ques
             const step = localSteps[i]
             const isCompleted = step.status === 'completed' || step.status === 'skipped'
             const isCurrent = i === firstPendingIndex
-            const dayLabel = new Date(step.scheduled_date).toLocaleDateString('fr-FR', { weekday: 'short' })
+            const dayLabel = step.step_number
+              ? `${step.step_number}`
+              : step.scheduled_date
+                ? new Date(step.scheduled_date).toLocaleDateString('fr-FR', { weekday: 'short' })
+                : `${i + 1}`
 
             return (
               <g key={step.task_id}>

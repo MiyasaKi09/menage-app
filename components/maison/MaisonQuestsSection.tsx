@@ -5,87 +5,65 @@ import { QuestCard } from './QuestCard'
 import { PeripetiesCarousel } from './PeripetiesCarousel'
 
 interface MaisonQuestsSectionProps {
-  tasks: any[]
-  questFrequencies: string[]
+  corveeData: any[] // from get_weekly_corvee RPC
+  peripeties: any[] // from get_schedule_for_dates (all scheduled_tasks = péripéties)
 }
 
-export function MaisonQuestsSection({ tasks, questFrequencies }: MaisonQuestsSectionProps) {
-  const questFreqSet = useMemo(() => new Set(questFrequencies), [questFrequencies])
+export function MaisonQuestsSection({ corveeData, peripeties }: MaisonQuestsSectionProps) {
+  // Group corvee rows by corvee_id → one QuestCard per corvée
+  // The RPC returns one row per step, so we group them
+  const corvee = useMemo(() => {
+    if (corveeData.length === 0) return null
 
-  // Split: pick the ONE recurring task with the most steps as THE quest
-  // Everything else (including other recurring tasks) → péripéties
-  const { mainQuest, peripeties } = useMemo(() => {
-    // Group recurring tasks by household_task_id
-    const recurringGroups: Record<string, any[]> = {}
-    const nonRecurring: any[] = []
-
-    tasks.forEach((task) => {
-      const freq = task.frequency_code || 'weekly'
-      if (questFreqSet.has(freq)) {
-        const key = task.household_task_id || task.task_id
-        if (!recurringGroups[key]) recurringGroups[key] = []
-        recurringGroups[key].push(task)
-      } else {
-        nonRecurring.push(task)
-      }
+    // Group by corvee_id, take the first one (only one corvée displayed)
+    const groups: Record<string, any[]> = {}
+    corveeData.forEach((row: any) => {
+      const key = row.corvee_id
+      if (!groups[key]) groups[key] = []
+      groups[key].push(row)
     })
 
-    // Pick the group with the most steps as the main quest
-    const groups = Object.entries(recurringGroups)
-      .map(([htId, steps]) => ({ htId, steps }))
-      .sort((a, b) => b.steps.length - a.steps.length)
+    // Pick the first corvée (most steps)
+    const entries = Object.entries(groups).sort((a, b) => b[1].length - a[1].length)
+    if (entries.length === 0) return null
 
-    let quest = null
-    const extraPeripeties: any[] = []
-
-    if (groups.length > 0) {
-      // First group = the main quest
-      const main = groups[0]
-      const first = main.steps[0]
-      quest = {
-        householdTaskId: main.htId,
-        questName: first.task_name || 'Quete',
-        categoryEmoji: first.category_emoji || '⚔️',
-        steps: main.steps
-          .sort((a: any, b: any) => a.scheduled_date.localeCompare(b.scheduled_date))
-          .map((s: any) => ({
-            task_id: s.task_id,
-            points: s.points,
-            status: s.status,
-            scheduled_date: s.scheduled_date,
-          })),
-        totalPoints: main.steps.reduce((sum: number, s: any) => sum + (s.points || 0), 0),
-      }
-
-      // Other recurring groups → flatten into péripéties
-      for (let i = 1; i < groups.length; i++) {
-        extraPeripeties.push(...groups[i].steps)
-      }
-    }
+    const [, rows] = entries[0]
+    const first = rows[0]
 
     return {
-      mainQuest: quest,
-      peripeties: [...extraPeripeties, ...nonRecurring],
+      questName: first.corvee_name || 'Corvee',
+      categoryEmoji: first.corvee_emoji || '🧹',
+      steps: rows
+        .filter((r: any) => r.step_id) // exclude rows without steps (not yet generated)
+        .sort((a: any, b: any) => a.step_number - b.step_number)
+        .map((r: any) => ({
+          task_id: r.step_id,
+          points: r.step_points_earned || r.points_per_step || 10,
+          status: r.step_status || 'pending',
+          scheduled_date: '', // corvee steps don't have individual dates, use step_number as label
+          step_number: r.step_number,
+        })),
+      totalPoints: rows.reduce((sum: number, r: any) => sum + (r.step_points_earned || r.points_per_step || 10), 0),
     }
-  }, [tasks, questFreqSet])
+  }, [corveeData])
 
-  if (!mainQuest && peripeties.length === 0) {
+  if (!corvee && peripeties.length === 0) {
     return null
   }
 
   return (
     <div className="space-y-6">
-      {/* La quête — carte au trésor unique */}
-      {mainQuest && (
+      {/* La corvée — carte au trésor unique */}
+      {corvee && corvee.steps.length > 0 && (
         <div className="space-y-3">
           <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase px-1">
-            Quete de la semaine
+            Corvee de la semaine
           </p>
           <QuestCard
-            questName={mainQuest.questName}
-            categoryEmoji={mainQuest.categoryEmoji}
-            steps={mainQuest.steps}
-            totalPoints={mainQuest.totalPoints}
+            questName={corvee.questName}
+            categoryEmoji={corvee.categoryEmoji}
+            steps={corvee.steps}
+            totalPoints={corvee.totalPoints}
           />
         </div>
       )}

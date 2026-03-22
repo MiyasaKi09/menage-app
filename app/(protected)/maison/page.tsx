@@ -7,9 +7,7 @@ import { MaisonQuestsSection } from '@/components/maison/MaisonQuestsSection'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 
-// Frequencies considered as "Quêtes" (repetitive, frequent)
-const QUEST_FREQUENCIES = new Set(['daily', '2-3x_week', 'weekly', 'biweekly', 'after_use'])
-// Everything else = Péripéties (rare, one-off feeling)
+// Corvées are a separate table (migration 012), péripéties = all scheduled_tasks
 
 export default async function MaisonPage() {
   const supabase = await createClient()
@@ -43,6 +41,7 @@ export default async function MaisonPage() {
   let pendingValidation: any[] = []
   let householdHasTasks = false
   let leaderboard: any[] = []
+  let corveeData: any[] = []
 
   if (householdId) {
     // Get this week's tasks
@@ -102,31 +101,23 @@ export default async function MaisonPage() {
       console.error('Error fetching weekly tasks:', error)
     }
 
-    // If RPC doesn't return frequency_code (migration 011 not applied), fetch it separately
-    if (weekTasks.length > 0 && !weekTasks[0].frequency_code) {
-      try {
-        const householdTaskIds = [...new Set(weekTasks.map((t: any) => t.household_task_id).filter(Boolean))]
-        if (householdTaskIds.length > 0) {
-          const { data: htData } = await supabase
-            .from('household_tasks')
-            .select('id, template_id, task_templates(frequency_id, frequencies(code))')
-            .in('id', householdTaskIds)
+    // Fetch corvées (separate from péripéties) — migration 012
+    try {
+      // Generate steps for this week
+      const weekStart = startStr
+      await supabase.rpc('generate_corvee_steps', {
+        p_household_id: householdId,
+        p_week_start: weekStart,
+      })
 
-          const freqMap: Record<string, string> = {}
-          ;(htData || []).forEach((ht: any) => {
-            const code = (ht.task_templates as any)?.frequencies?.code || 'weekly'
-            freqMap[ht.id] = code
-          })
-
-          weekTasks = weekTasks.map((t: any) => ({
-            ...t,
-            frequency_code: freqMap[t.household_task_id] || 'weekly',
-          }))
-        }
-      } catch {
-        // Fallback: treat all as quêtes
-        weekTasks = weekTasks.map((t: any) => ({ ...t, frequency_code: 'weekly' }))
-      }
+      // Fetch corvée data with steps
+      const { data: corvees } = await supabase.rpc('get_weekly_corvee', {
+        p_household_id: householdId,
+        p_week_start: weekStart,
+      })
+      corveeData = corvees || []
+    } catch {
+      // Migration 012 not applied yet — corvées unavailable
     }
 
     // Get tasks pending validation (completed by others, not yet validated)
@@ -266,9 +257,9 @@ export default async function MaisonPage() {
           <StatCard label="Quetes" value={profile?.tasks_completed || 0} icon="⚔️" />
         </div>
 
-        {/* Quêtes & Péripéties */}
-        {weekTasks.length > 0 && (
-          <MaisonQuestsSection tasks={weekTasks} questFrequencies={[...QUEST_FREQUENCIES]} />
+        {/* Corvée (carte au trésor) + Péripéties (carousel) */}
+        {(corveeData.length > 0 || weekTasks.length > 0) && (
+          <MaisonQuestsSection corveeData={corveeData} peripeties={weekTasks} />
         )}
 
         {/* Consecration carousel - validate others' tasks */}
