@@ -43,16 +43,55 @@ export default async function MaisonPage() {
   if (householdId) {
     // Get this week's tasks
     const today = new Date()
+    const todayStr = today.toISOString().split('T')[0]
     const startOfWeek = new Date(today)
     startOfWeek.setDate(today.getDate() - today.getDay() + 1) // Monday
     const endOfWeek = new Date(startOfWeek)
     endOfWeek.setDate(startOfWeek.getDate() + 6) // Sunday
+    const startStr = startOfWeek.toISOString().split('T')[0]
+    const endStr = endOfWeek.toISOString().split('T')[0]
 
+    // Handle late tasks from yesterday
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+    try {
+      await supabase.rpc('handle_late_tasks', {
+        p_household_id: householdId,
+        p_current_date: yesterday.toISOString().split('T')[0],
+      })
+    } catch (error) {
+      console.error('Error handling late tasks:', error)
+    }
+
+    // Generate schedule for each day of the week (same pattern as schedule page)
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek)
+      date.setDate(date.getDate() + i)
+      const dateStr = date.toISOString().split('T')[0]
+      if (dateStr < todayStr) continue // skip past days
+
+      try {
+        const { error: smartError } = await supabase.rpc('generate_smart_schedule', {
+          p_household_id: householdId,
+          p_target_date: dateStr,
+        })
+        if (smartError) {
+          await supabase.rpc('generate_daily_schedule', {
+            p_household_id: householdId,
+            p_target_date: dateStr,
+          })
+        }
+      } catch (error) {
+        console.error(`Error generating schedule for ${dateStr}:`, error)
+      }
+    }
+
+    // Fetch schedule for the week
     try {
       const { data } = await supabase.rpc('get_schedule_for_dates', {
         p_household_id: householdId,
-        p_start_date: startOfWeek.toISOString().split('T')[0],
-        p_end_date: endOfWeek.toISOString().split('T')[0],
+        p_start_date: startStr,
+        p_end_date: endStr,
       })
       weekTasks = data || []
     } catch (error) {
@@ -169,6 +208,7 @@ export default async function MaisonPage() {
 
         {/* Quick access buttons */}
         <QuickAccessBar
+          userId={user?.id || ''}
           totalPoints={profile?.total_points || 0}
           leaderboard={leaderboard}
           households={userHouseholds}

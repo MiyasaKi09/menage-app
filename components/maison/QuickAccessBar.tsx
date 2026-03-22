@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Bell, Coins, Swords, BarChart3, X, Plus, Users, Moon, Sun, ShoppingBag, Shield } from 'lucide-react'
+import { Bell, Coins, Swords, BarChart3, X, Plus, Users, Moon, Sun, ShoppingBag, Shield, LogOut, Trash2, AlertTriangle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { CLASS_EMOJIS, CLASS_IMAGES } from '@/lib/characters/types'
 
 interface QuickAccessBarProps {
+  userId: string
   totalPoints: number
   leaderboard: any[]
   households: Array<{ id: string; name: string; status: string; role: string }>
@@ -30,6 +31,7 @@ interface QuickAccessBarProps {
 type OverlayType = 'fief' | 'negoce' | 'tournoi' | 'stats' | null
 
 export function QuickAccessBar({
+  userId,
   totalPoints,
   leaderboard,
   households,
@@ -100,7 +102,7 @@ export function QuickAccessBar({
 
               {/* Content */}
               <div className="p-5 overflow-y-auto max-h-[65vh]">
-                {activeOverlay === 'fief' && <FiefOverlayContent households={households} />}
+                {activeOverlay === 'fief' && <FiefOverlayContent households={households} userId={userId} />}
                 {activeOverlay === 'negoce' && (
                   <NegoceOverlayContent
                     totalPoints={totalPoints}
@@ -122,10 +124,11 @@ export function QuickAccessBar({
 
 // ─── FIEF OVERLAY ──────────────────────────────────────────────────────────────
 
-function FiefOverlayContent({ households }: { households: Array<{ id: string; name: string; status: string; role: string }> }) {
+function FiefOverlayContent({ households, userId }: { households: Array<{ id: string; name: string; status: string; role: string }>; userId: string }) {
   const supabase = createClient()
   const router = useRouter()
   const [localHouseholds, setLocalHouseholds] = useState(households)
+  const [confirmAction, setConfirmAction] = useState<{ type: 'leave' | 'delete'; householdId: string; name: string } | null>(null)
 
   const toggleStatus = async (householdId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'dormant' : 'active'
@@ -139,52 +142,107 @@ function FiefOverlayContent({ households }: { households: Array<{ id: string; na
     )
   }
 
-  const activeFiefs = localHouseholds.filter((h) => h.status === 'active')
-  const dormantFiefs = localHouseholds.filter((h) => h.status === 'dormant')
+  const handleLeave = async (householdId: string) => {
+    await supabase
+      .from('household_members')
+      .delete()
+      .eq('household_id', householdId)
+      .eq('profile_id', userId)
+
+    setLocalHouseholds((prev) => prev.filter((h) => h.id !== householdId))
+    setConfirmAction(null)
+    router.refresh()
+  }
+
+  const handleDelete = async (householdId: string) => {
+    await supabase
+      .from('households')
+      .delete()
+      .eq('id', householdId)
+
+    setLocalHouseholds((prev) => prev.filter((h) => h.id !== householdId))
+    setConfirmAction(null)
+    router.refresh()
+  }
+
+  const renderFiefCard = (h: typeof households[0]) => (
+    <div key={h.id} className={`py-3 px-3 rounded-xl border ${h.status === 'active' ? 'bg-cream/[0.04] border-cream/[0.06]' : 'bg-cream/[0.02] border-cream/[0.04]'}`}>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className={`font-cinzel text-[14px] ${h.status === 'active' ? 'text-cream/70' : 'text-cream/30'}`}>{h.name}</p>
+          <p className={`font-lora text-[11px] ${h.status === 'active' ? 'text-cream/25' : 'text-cream/15'}`}>{h.role}</p>
+        </div>
+        <button
+          onClick={() => toggleStatus(h.id, h.status)}
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medieval text-[10px] transition-colors ${
+            h.status === 'active'
+              ? 'bg-cream/[0.04] border border-cream/[0.06] text-cream/30 hover:bg-cream/[0.08]'
+              : 'bg-yellow/[0.08] border border-yellow/20 text-yellow/60 hover:bg-yellow/[0.15]'
+          }`}
+        >
+          {h.status === 'active' ? <Moon size={12} /> : <Sun size={12} />}
+          {h.status === 'active' ? 'Dormant' : 'Activer'}
+        </button>
+      </div>
+      {/* Quitter / Supprimer */}
+      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-cream/[0.04]">
+        <button
+          onClick={() => setConfirmAction({ type: 'leave', householdId: h.id, name: h.name })}
+          className="flex items-center gap-1 px-2 py-0.5 rounded text-red/40 font-medieval text-[10px] hover:text-red/60 hover:bg-red/[0.05] transition-colors"
+        >
+          <LogOut size={10} />
+          Quitter
+        </button>
+        {h.role === 'admin' && (
+          <button
+            onClick={() => setConfirmAction({ type: 'delete', householdId: h.id, name: h.name })}
+            className="flex items-center gap-1 px-2 py-0.5 rounded text-red/40 font-medieval text-[10px] hover:text-red/60 hover:bg-red/[0.05] transition-colors"
+          >
+            <Trash2 size={10} />
+            Supprimer
+          </button>
+        )}
+      </div>
+    </div>
+  )
 
   return (
     <div className="space-y-6">
-      {/* Active fiefs */}
-      {activeFiefs.length > 0 && (
-        <div className="space-y-2">
-          <p className="font-medieval text-[10px] text-green/50 tracking-widest uppercase">Actif</p>
-          {activeFiefs.map((h) => (
-            <div key={h.id} className="flex items-center justify-between py-3 px-3 rounded-xl bg-cream/[0.04] border border-cream/[0.06]">
-              <div>
-                <p className="font-cinzel text-[14px] text-cream/70">{h.name}</p>
-                <p className="font-lora text-[11px] text-cream/25">{h.role}</p>
-              </div>
-              <button
-                onClick={() => toggleStatus(h.id, h.status)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cream/[0.04] border border-cream/[0.06] text-cream/30 font-medieval text-[10px] hover:bg-cream/[0.08] transition-colors"
-              >
-                <Moon size={12} />
-                Mode dormant
-              </button>
-            </div>
-          ))}
+      {/* Confirmation dialog */}
+      {confirmAction && (
+        <div className="bg-red/[0.06] border border-red/20 rounded-xl p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <AlertTriangle size={16} className="text-red/60" />
+            <p className="font-cinzel text-[13px] text-red/70">
+              {confirmAction.type === 'delete' ? 'Supprimer' : 'Quitter'} &laquo;{confirmAction.name}&raquo; ?
+            </p>
+          </div>
+          <p className="font-lora text-[12px] text-cream/30">
+            {confirmAction.type === 'delete'
+              ? 'Cela supprimera le fief et toutes ses donnees pour tous les membres.'
+              : 'Vous perdrez votre progression dans ce fief.'}
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => confirmAction.type === 'delete' ? handleDelete(confirmAction.householdId) : handleLeave(confirmAction.householdId)}
+              className="flex-1 py-2 rounded-lg bg-red/[0.15] border border-red/20 text-red/70 font-cinzel text-[12px] hover:bg-red/[0.25] transition-colors"
+            >
+              Confirmer
+            </button>
+            <button
+              onClick={() => setConfirmAction(null)}
+              className="flex-1 py-2 rounded-lg bg-cream/[0.04] border border-cream/[0.06] text-cream/40 font-cinzel text-[12px] hover:bg-cream/[0.08] transition-colors"
+            >
+              Annuler
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Dormant fiefs */}
-      {dormantFiefs.length > 0 && (
+      {/* Fiefs list */}
+      {localHouseholds.length > 0 && (
         <div className="space-y-2">
-          <p className="font-medieval text-[10px] text-cream/25 tracking-widest uppercase">Dormant</p>
-          {dormantFiefs.map((h) => (
-            <div key={h.id} className="flex items-center justify-between py-3 px-3 rounded-xl bg-cream/[0.02] border border-cream/[0.04]">
-              <div>
-                <p className="font-cinzel text-[14px] text-cream/30">{h.name}</p>
-                <p className="font-lora text-[11px] text-cream/15">{h.role}</p>
-              </div>
-              <button
-                onClick={() => toggleStatus(h.id, h.status)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-yellow/[0.08] border border-yellow/20 text-yellow/60 font-medieval text-[10px] hover:bg-yellow/[0.15] transition-colors"
-              >
-                <Sun size={12} />
-                Activer
-              </button>
-            </div>
-          ))}
+          {localHouseholds.map(renderFiefCard)}
         </div>
       )}
 
