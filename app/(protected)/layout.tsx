@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { Header } from '@/components/layout/Header'
+import { BottomTabBar } from '@/components/layout/BottomTabBar'
 import { CharacterThemeProvider } from '@/components/providers/CharacterThemeProvider'
 
 export default async function ProtectedLayout({
@@ -59,10 +59,10 @@ export default async function ProtectedLayout({
   return (
     <CharacterThemeProvider initialCharacter={weeklyCharacter}>
       <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-8">
+        <main className="flex-1 pb-20">
           {children}
         </main>
+        <BottomTabBar />
       </div>
     </CharacterThemeProvider>
   )

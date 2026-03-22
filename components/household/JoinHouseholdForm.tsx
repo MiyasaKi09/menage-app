@@ -86,7 +86,7 @@ export function JoinHouseholdForm() {
         return
       }
 
-      router.push('/household')
+      router.push('/fief')
       router.refresh()
     } catch (err) {
       console.error('Unexpected error:', err)

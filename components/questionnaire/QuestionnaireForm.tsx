@@ -156,7 +156,7 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
       )
 
       if (result.success) {
-        router.push(`/tasks?success=true&created=${result.tasksCreated}`)
+        router.push(`/maison?success=true&created=${result.tasksCreated}`)
         router.refresh()
       } else {
         setError(result.error || 'Une erreur est survenue')
