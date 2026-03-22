@@ -6,23 +6,23 @@ import { motion, useMotionValue, useSpring, animate } from 'framer-motion'
 interface SwipeCarouselProps {
   children: ReactNode[]
   className?: string
+  initialIndex?: number // Center on this card index at mount
 }
 
 const GAP = 12 // gap-3 = 12px
 
-export function SwipeCarousel({ children, className = '' }: SwipeCarouselProps) {
+export function SwipeCarousel({ children, className = '', initialIndex }: SwipeCarouselProps) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [wrapperWidth, setWrapperWidth] = useState(0)
-  const [activeIndex, setActiveIndex] = useState(0)
+  const [activeIndex, setActiveIndex] = useState(initialIndex ?? 0)
   const isDragging = useRef(false)
+  const hasInitialized = useRef(false)
 
   const x = useMotionValue(0)
   const springX = useSpring(x, { damping: 30, stiffness: 300 })
 
   // Card width: show 2 full cards + 2 half cards on edges
-  // containerWidth = 2 * cardW + 3 * gap + 2 * (cardW / 2)  → but we keep it simple:
-  // 2.5 cards visible means cardW = (containerWidth - 2 * gap) / 2.5
   const cardWidth = wrapperWidth > 0 ? Math.floor((wrapperWidth - 2 * GAP) / 2.5) : 260
 
   useEffect(() => {
@@ -35,6 +35,18 @@ export function SwipeCarousel({ children, className = '' }: SwipeCarouselProps) 
     window.addEventListener('resize', measure)
     return () => window.removeEventListener('resize', measure)
   }, [])
+
+  // Center on initialIndex once we have dimensions
+  useEffect(() => {
+    if (wrapperWidth > 0 && initialIndex !== undefined && !hasInitialized.current) {
+      hasInitialized.current = true
+      const centerOffset = -(initialIndex * (cardWidth + GAP)) + (wrapperWidth / 2 - cardWidth / 2)
+      const totalW = children.length * cardWidth + (children.length - 1) * GAP
+      const maxD = Math.min(0, -(totalW - wrapperWidth))
+      const clampedX = Math.max(maxD, Math.min(0, centerOffset))
+      x.set(clampedX)
+    }
+  }, [wrapperWidth, initialIndex, cardWidth, children.length, x])
 
   const totalWidth = children.length * cardWidth + (children.length - 1) * GAP
   const maxDrag = Math.min(0, -(totalWidth - wrapperWidth))

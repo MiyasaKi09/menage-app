@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { QuestPath } from './QuestPath'
+import { QuestCard } from './QuestCard'
 import { PeripetiesCarousel } from './PeripetiesCarousel'
 
 interface MaisonQuestsSectionProps {
@@ -75,7 +75,7 @@ export function MaisonQuestsSection({ tasks, questFrequencies }: MaisonQuestsSec
           </p>
           <div className="space-y-2">
             {groupedQuests.map((quest) => (
-              <QuestPath
+              <QuestCard
                 key={quest.householdTaskId}
                 questName={quest.questName}
                 categoryEmoji={quest.categoryEmoji}
