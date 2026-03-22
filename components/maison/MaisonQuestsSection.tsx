@@ -12,40 +12,41 @@ interface MaisonQuestsSectionProps {
 export function MaisonQuestsSection({ tasks, questFrequencies }: MaisonQuestsSectionProps) {
   const questFreqSet = useMemo(() => new Set(questFrequencies), [questFrequencies])
 
-  // Split tasks by type
-  const { quests, peripeties } = useMemo(() => {
-    const questTasks: any[] = []
-    const peripetieTasks: any[] = []
+  // Split: pick the ONE recurring task with the most steps as THE quest
+  // Everything else (including other recurring tasks) → péripéties
+  const { mainQuest, peripeties } = useMemo(() => {
+    // Group recurring tasks by household_task_id
+    const recurringGroups: Record<string, any[]> = {}
+    const nonRecurring: any[] = []
 
     tasks.forEach((task) => {
       const freq = task.frequency_code || 'weekly'
       if (questFreqSet.has(freq)) {
-        questTasks.push(task)
+        const key = task.household_task_id || task.task_id
+        if (!recurringGroups[key]) recurringGroups[key] = []
+        recurringGroups[key].push(task)
       } else {
-        peripetieTasks.push(task)
+        nonRecurring.push(task)
       }
     })
 
-    return { quests: questTasks, peripeties: peripetieTasks }
-  }, [tasks, questFreqSet])
+    // Pick the group with the most steps as the main quest
+    const groups = Object.entries(recurringGroups)
+      .map(([htId, steps]) => ({ htId, steps }))
+      .sort((a, b) => b.steps.length - a.steps.length)
 
-  // Group quest tasks by household_task_id (same recurring task = one path)
-  const groupedQuests = useMemo(() => {
-    const groups: Record<string, any[]> = {}
+    let quest = null
+    const extraPeripeties: any[] = []
 
-    quests.forEach((task) => {
-      const key = task.household_task_id || task.task_id
-      if (!groups[key]) groups[key] = []
-      groups[key].push(task)
-    })
-
-    return Object.entries(groups).map(([htId, steps]) => {
-      const first = steps[0]
-      return {
-        householdTaskId: htId,
+    if (groups.length > 0) {
+      // First group = the main quest
+      const main = groups[0]
+      const first = main.steps[0]
+      quest = {
+        householdTaskId: main.htId,
         questName: first.task_name || 'Quete',
         categoryEmoji: first.category_emoji || '⚔️',
-        steps: steps
+        steps: main.steps
           .sort((a: any, b: any) => a.scheduled_date.localeCompare(b.scheduled_date))
           .map((s: any) => ({
             task_id: s.task_id,
@@ -53,42 +54,44 @@ export function MaisonQuestsSection({ tasks, questFrequencies }: MaisonQuestsSec
             status: s.status,
             scheduled_date: s.scheduled_date,
           })),
-        totalPoints: steps.reduce((sum: number, s: any) => sum + (s.points || 0), 0),
+        totalPoints: main.steps.reduce((sum: number, s: any) => sum + (s.points || 0), 0),
       }
-    })
-  }, [quests])
 
-  const hasQuests = groupedQuests.length > 0
-  const hasPeripeties = peripeties.length > 0
+      // Other recurring groups → flatten into péripéties
+      for (let i = 1; i < groups.length; i++) {
+        extraPeripeties.push(...groups[i].steps)
+      }
+    }
 
-  if (!hasQuests && !hasPeripeties) {
+    return {
+      mainQuest: quest,
+      peripeties: [...extraPeripeties, ...nonRecurring],
+    }
+  }, [tasks, questFreqSet])
+
+  if (!mainQuest && peripeties.length === 0) {
     return null
   }
 
   return (
     <div className="space-y-6">
-      {/* Au-dessus : Quêtes en chemin d'étapes */}
-      {hasQuests && (
+      {/* La quête — carte au trésor unique */}
+      {mainQuest && (
         <div className="space-y-3">
           <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase px-1">
-            Quetes de la semaine
+            Quete de la semaine
           </p>
-          <div className="space-y-2">
-            {groupedQuests.map((quest) => (
-              <QuestCard
-                key={quest.householdTaskId}
-                questName={quest.questName}
-                categoryEmoji={quest.categoryEmoji}
-                steps={quest.steps}
-                totalPoints={quest.totalPoints}
-              />
-            ))}
-          </div>
+          <QuestCard
+            questName={mainQuest.questName}
+            categoryEmoji={mainQuest.categoryEmoji}
+            steps={mainQuest.steps}
+            totalPoints={mainQuest.totalPoints}
+          />
         </div>
       )}
 
-      {/* En-dessous : Carousel péripéties (2 + 2 demi) */}
-      {hasPeripeties && (
+      {/* Péripéties en carousel */}
+      {peripeties.length > 0 && (
         <PeripetiesCarousel tasks={peripeties} />
       )}
     </div>
