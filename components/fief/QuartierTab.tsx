@@ -1,34 +1,53 @@
 'use client'
 
+import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import { Camera, Box } from 'lucide-react'
 
-export function QuartierTab() {
-  return (
-    <div className="space-y-6">
-      {/* Room illustration placeholder */}
-      <div className="relative aspect-square max-w-sm mx-auto bg-cream/[0.03] rounded-2xl border border-cream/[0.06] overflow-hidden">
-        {/* Placeholder medieval room */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
-          <div className="text-6xl mb-4 opacity-30">🏠</div>
-          <h3 className="font-cinzel text-[16px] text-cream/50 mb-2">Votre quartier</h3>
-          <p className="font-lora text-[13px] text-cream/25 max-w-[200px]">
-            La vue 3D de votre chambre medievale sera bientot disponible
-          </p>
-        </div>
-
-        {/* Room state overlay */}
-        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-green/[0.15] border border-green/20">
-          <span className="font-medieval text-[10px] text-green/60">Propre</span>
+const MedievalRoom = dynamic(
+  () => import('./MedievalRoom').then(mod => ({ default: mod.MedievalRoom })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="aspect-square max-w-sm mx-auto bg-cream/[0.03] rounded-2xl border border-cream/[0.06] flex items-center justify-center">
+        <div className="text-center space-y-2">
+          <div className="w-8 h-8 border-2 border-cream/20 border-t-cream/50 rounded-full animate-spin mx-auto" />
+          <p className="font-lora text-[12px] text-cream/25">Chargement de la chambre...</p>
         </div>
       </div>
+    ),
+  }
+)
+
+export function QuartierTab() {
+  const [viewMode, setViewMode] = useState<'3d' | 'photo'>('3d')
+
+  return (
+    <div className="space-y-6">
+      {/* 3D Room */}
+      <MedievalRoom />
 
       {/* View mode toggles */}
       <div className="flex items-center justify-center gap-3">
-        <button className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-cream/[0.06] border border-cream/[0.06] text-cream/50 font-medieval text-[12px]">
+        <button
+          onClick={() => setViewMode('photo')}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg font-medieval text-[12px] transition-colors ${
+            viewMode === 'photo'
+              ? 'bg-cream/[0.08] border border-cream/[0.1] text-cream/60'
+              : 'bg-cream/[0.04] border border-cream/[0.04] text-cream/25'
+          }`}
+        >
           <Camera size={14} />
           Photo
         </button>
-        <button className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-cream/[0.04] border border-cream/[0.04] text-cream/25 font-medieval text-[12px]">
+        <button
+          onClick={() => setViewMode('3d')}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg font-medieval text-[12px] transition-colors ${
+            viewMode === '3d'
+              ? 'bg-cream/[0.08] border border-cream/[0.1] text-cream/60'
+              : 'bg-cream/[0.04] border border-cream/[0.04] text-cream/25'
+          }`}
+        >
           <Box size={14} />
           Vue 3D
         </button>
