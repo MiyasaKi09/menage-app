@@ -230,11 +230,15 @@ export function PeripetiesCarousel({
           Peripeties
         </p>
 
-        {/* Back to active button */}
-        {!isAtActive && activeIndex >= 0 && (
+        {/* Back to active button — always visible */}
+        {activeIndex >= 0 && (
           <button
             onClick={() => carouselRef.current?.goToIndex(activeIndex)}
-            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-yellow/[0.08] border border-yellow/15 text-yellow/50 font-medieval text-[9px] hover:bg-yellow/[0.15] transition-colors"
+            className={`flex items-center gap-1 px-2 py-1 rounded-lg border font-medieval text-[9px] transition-colors ${
+              isAtActive
+                ? 'bg-yellow/[0.05] border-yellow/10 text-yellow/30'
+                : 'bg-yellow/[0.12] border-yellow/20 text-yellow/60 hover:bg-yellow/[0.2]'
+            }`}
           >
             <Crosshair size={10} />
             Active
