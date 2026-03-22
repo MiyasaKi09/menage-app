@@ -103,21 +103,21 @@ export default async function MaisonPage() {
 
     // Fetch corvées (separate from péripéties) — migration 012
     try {
-      // Generate steps for this week
       const weekStart = startStr
-      await supabase.rpc('generate_corvee_steps', {
+      const { error: genError } = await supabase.rpc('generate_corvee_steps', {
         p_household_id: householdId,
         p_week_start: weekStart,
       })
+      if (genError) console.error('generate_corvee_steps error:', genError)
 
-      // Fetch corvée data with steps
-      const { data: corvees } = await supabase.rpc('get_weekly_corvee', {
+      const { data: corvees, error: fetchError } = await supabase.rpc('get_weekly_corvee', {
         p_household_id: householdId,
         p_week_start: weekStart,
       })
+      if (fetchError) console.error('get_weekly_corvee error:', fetchError)
       corveeData = corvees || []
-    } catch {
-      // Migration 012 not applied yet — corvées unavailable
+    } catch (error) {
+      console.error('Corvees fetch failed:', error)
     }
 
     // Get tasks pending validation (completed by others, not yet validated)

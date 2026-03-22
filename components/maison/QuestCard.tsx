@@ -78,19 +78,10 @@ export function QuestCard({ questName, categoryEmoji, steps, totalPoints }: Ques
   const pathD = buildSmoothPath(stepPositions)
 
   const handleComplete = async (taskId: string) => {
-    // Try corvee_steps first, fallback to scheduled_tasks
-    const { error } = await supabase
+    await supabase
       .from('corvee_steps')
-      .update({ status: 'completed', completed_at: new Date().toISOString(), completed_by: undefined })
+      .update({ status: 'completed', completed_at: new Date().toISOString() })
       .eq('id', taskId)
-
-    if (error) {
-      // Fallback for scheduled_tasks
-      await supabase
-        .from('scheduled_tasks')
-        .update({ status: 'completed', completed_at: new Date().toISOString() })
-        .eq('id', taskId)
-    }
 
     setLocalSteps(prev =>
       prev.map(s => s.task_id === taskId ? { ...s, status: 'completed' } : s)

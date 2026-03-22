@@ -36,9 +36,11 @@ export function PeripetiesCarousel({
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [unlockedIds, setUnlockedIds] = useState<Set<string>>(new Set())
 
-  // Sort: completed first, then pending/in_progress (active), then future pending
-  // Active = first non-completed task
-  const activeIndex = localTasks.findIndex(t => t.status === 'pending' || t.status === 'in_progress')
+  // Active = first non-completed task whose scheduled_date is today or past
+  const todayCheck = new Date().toISOString().split('T')[0]
+  const activeIndex = localTasks.findIndex(t =>
+    (t.status === 'pending' || t.status === 'in_progress') && t.scheduled_date <= todayCheck
+  )
 
   const handleComplete = async (taskId: string) => {
     await supabase
@@ -60,10 +62,14 @@ export function PeripetiesCarousel({
 
   if (localTasks.length === 0) return null
 
+  const todayStr = new Date().toISOString().split('T')[0]
+
   const cards = localTasks.map((task, i) => {
     const isCompleted = task.status === 'completed' || task.status === 'skipped'
-    const isActive = i === activeIndex
-    const isFuture = activeIndex >= 0 && i > activeIndex
+    // A task is "future" if its scheduled_date is after today (hidden calendar)
+    const isScheduledFuture = task.scheduled_date > todayStr
+    const isActive = !isCompleted && !isScheduledFuture
+    const isFuture = !isCompleted && isScheduledFuture
     const isUnlocked = unlockedIds.has(task.task_id)
     const isBoosted = isFuture && isUnlocked
     const isLocked = isFuture && !isUnlocked
@@ -136,7 +142,7 @@ export function PeripetiesCarousel({
           {/* Status badge */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              {isActive && <div className="w-2 h-2 rounded-full bg-yellow/60 animate-pulse" />}
+              {i === activeIndex && <div className="w-2 h-2 rounded-full bg-yellow/60 animate-pulse" />}
               <span className="font-medieval text-[10px] text-yellow/50 tracking-widest uppercase">
                 {isActive ? 'Active' : 'Peripetie'}
               </span>
