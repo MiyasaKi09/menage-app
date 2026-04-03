@@ -40,19 +40,19 @@ export function AdminTab({ tasks, members, inviteCode, isAdmin }: AdminTabProps)
   return (
     <div className="space-y-8">
       {/* Vacation mode */}
-      <div className="flex items-center justify-between py-3 border-b border-cream/[0.06]">
+      <div className="flex items-center justify-between py-3 border-b border-border/60">
         <div>
-          <p className="font-cinzel text-[14px] text-cream/70">Mode vacances</p>
-          <p className="font-lora text-[11px] text-cream/25">Suspendre toutes les quetes</p>
+          <p className="font-sans font-semibold text-[14px] text-foreground/70">Mode vacances</p>
+          <p className="font-sans text-[11px] text-foreground/25">Suspendre toutes les quetes</p>
         </div>
         <button
           onClick={() => setVacationMode(!vacationMode)}
           className={`w-12 h-6 rounded-full transition-colors duration-200 ${
-            vacationMode ? 'bg-yellow/60' : 'bg-cream/10'
+            vacationMode ? 'bg-yellow/60' : 'bg-foreground/10'
           }`}
         >
           <div
-            className={`w-5 h-5 rounded-full bg-cream shadow transition-transform duration-200 ${
+            className={`w-5 h-5 rounded-full bg-foreground shadow transition-transform duration-200 ${
               vacationMode ? 'translate-x-6' : 'translate-x-0.5'
             }`}
           />
@@ -62,11 +62,11 @@ export function AdminTab({ tasks, members, inviteCode, isAdmin }: AdminTabProps)
       {/* Task management */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase">
+          <p className="font-sans text-[11px] text-foreground/25 tracking-widest uppercase">
             Gestion des taches
           </p>
           {isAdmin && (
-            <button className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-yellow/[0.1] border border-yellow/20 text-yellow/70 font-medieval text-[11px] hover:bg-yellow/[0.15] transition-colors">
+            <button className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-yellow/[0.1] border border-yellow/20 text-yellow/70 font-sans text-[11px] hover:bg-yellow/[0.15] transition-colors">
               <Plus size={12} />
               Nouvelle
             </button>
@@ -77,7 +77,7 @@ export function AdminTab({ tasks, members, inviteCode, isAdmin }: AdminTabProps)
           {tasks.map((task) => (
             <div
               key={task.id}
-              className="flex items-center gap-3 py-3 border-b border-cream/[0.04] last:border-0"
+              className="flex items-center gap-3 py-3 border-b border-border/40 last:border-0"
             >
               {/* Toggle */}
               <button
@@ -88,36 +88,36 @@ export function AdminTab({ tasks, members, inviteCode, isAdmin }: AdminTabProps)
                 {taskStates[task.id] ? (
                   <Eye size={16} className="text-green/60" />
                 ) : (
-                  <EyeOff size={16} className="text-cream/20" />
+                  <EyeOff size={16} className="text-foreground/20" />
                 )}
               </button>
 
               {/* Task info */}
               <div className="flex-1 min-w-0">
-                <p className={`font-cinzel text-[13px] leading-tight ${
-                  taskStates[task.id] ? 'text-cream/70' : 'text-cream/25 line-through'
+                <p className={`font-sans font-semibold text-[13px] leading-tight ${
+                  taskStates[task.id] ? 'text-foreground/70' : 'text-foreground/25 line-through'
                 }`}>
                   {task.name}
                 </p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="font-lora text-[11px] text-cream/20">
+                  <span className="font-sans text-[11px] text-foreground/20">
                     {task.categories?.emoji} {task.categories?.name}
                   </span>
-                  <span className="font-lora text-[11px] text-cream/15">
+                  <span className="font-sans text-[11px] text-foreground/15">
                     {task.frequencies?.label}
                   </span>
                 </div>
               </div>
 
               {/* Points */}
-              <span className="font-cinzel text-[12px] text-yellow/40 flex-shrink-0">
+              <span className="font-sans font-semibold text-[12px] text-yellow/40 flex-shrink-0">
                 {task.points} or
               </span>
             </div>
           ))}
 
           {tasks.length === 0 && (
-            <p className="text-center font-lora text-[13px] text-cream/30 py-6">
+            <p className="text-center font-sans text-[13px] text-foreground/30 py-6">
               Aucune quete configuree
             </p>
           )}
@@ -126,7 +126,7 @@ export function AdminTab({ tasks, members, inviteCode, isAdmin }: AdminTabProps)
 
       {/* Members */}
       <div className="space-y-3">
-        <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase">
+        <p className="font-sans text-[11px] text-foreground/25 tracking-widest uppercase">
           Membres
         </p>
         <div className="space-y-1">
@@ -134,14 +134,14 @@ export function AdminTab({ tasks, members, inviteCode, isAdmin }: AdminTabProps)
             const profile = member.profiles as any
             return (
               <div key={member.profile_id} className="flex items-center gap-3 py-2.5">
-                <div className="w-8 h-8 rounded-full bg-cream/[0.06] flex items-center justify-center">
-                  <span className="font-cinzel text-[12px] text-cream/40">
+                <div className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center">
+                  <span className="font-sans font-semibold text-[12px] text-foreground/40">
                     {(profile?.display_name || 'J')[0].toUpperCase()}
                   </span>
                 </div>
                 <div className="flex-1">
-                  <p className="font-cinzel text-[13px] text-cream/60">{profile?.display_name || 'Joueur'}</p>
-                  <p className="font-lora text-[11px] text-cream/20">{member.role}</p>
+                  <p className="font-sans font-semibold text-[13px] text-foreground/60">{profile?.display_name || 'Joueur'}</p>
+                  <p className="font-sans text-[11px] text-foreground/20">{member.role}</p>
                 </div>
               </div>
             )
@@ -151,18 +151,18 @@ export function AdminTab({ tasks, members, inviteCode, isAdmin }: AdminTabProps)
 
       {/* Invite */}
       <div className="space-y-3">
-        <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase">
+        <p className="font-sans text-[11px] text-foreground/25 tracking-widest uppercase">
           Inviter
         </p>
         <div className="flex items-center gap-2">
-          <div className="flex-1 bg-cream/[0.04] rounded-lg px-3 py-2.5 border border-cream/[0.06]">
-            <p className="font-cinzel text-[14px] text-cream/50 tracking-widest">{inviteCode}</p>
+          <div className="flex-1 bg-white/60 rounded-lg px-3 py-2.5 border border-border/60">
+            <p className="font-sans font-semibold text-[14px] text-foreground/50 tracking-widest">{inviteCode}</p>
           </div>
           <button
             onClick={copyInviteCode}
-            className="p-2.5 rounded-lg bg-cream/[0.04] border border-cream/[0.06] hover:bg-cream/[0.08] transition-colors"
+            className="p-2.5 rounded-lg bg-white/60 border border-border/60 hover:bg-white transition-colors"
           >
-            {codeCopied ? <Check size={16} className="text-green/60" /> : <Copy size={16} className="text-cream/40" />}
+            {codeCopied ? <Check size={16} className="text-green/60" /> : <Copy size={16} className="text-foreground/40" />}
           </button>
         </div>
       </div>

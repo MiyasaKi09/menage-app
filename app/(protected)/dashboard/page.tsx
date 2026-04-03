@@ -46,9 +46,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen relative">
-      {/* Background */}
-      <div className="fixed inset-0 bg-gradient-to-b from-deep-green to-deep-blue transition-colors duration-700" />
+    <div className="min-h-screen relative bg-background">
 
       <div className="relative z-10 max-w-2xl mx-auto px-6 py-10 space-y-10">
 
@@ -75,16 +73,16 @@ export default async function DashboardPage() {
         {/* Households */}
         {households && households.length > 0 && (
           <div className="space-y-2">
-            <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase">
+            <p className="font-sans text-[11px] text-foreground/25 tracking-widest uppercase">
               Cite
             </p>
             {households.map((m: any) => (
               <Link key={m.id} href={`/household/${m.households?.id}`}>
-                <div className="group flex items-center justify-between py-3.5 border-b border-cream/[0.06] last:border-0 transition-colors duration-200">
-                  <span className="font-cinzel text-[15px] text-cream/70 group-hover:text-cream transition-colors duration-200">
+                <div className="group flex items-center justify-between py-3.5 border-b border-border/60 last:border-0 transition-colors duration-200">
+                  <span className="font-sans font-semibold text-[15px] text-foreground/70 group-hover:text-foreground transition-colors duration-200">
                     {m.households?.name}
                   </span>
-                  <span className="font-cinzel text-[15px] text-yellow/70">{m.points_in_household || 0}</span>
+                  <span className="font-sans font-semibold text-[15px] text-yellow/70">{m.points_in_household || 0}</span>
                 </div>
               </Link>
             ))}
@@ -95,8 +93,8 @@ export default async function DashboardPage() {
         {(!households || households.length === 0) && (
           <div className="text-center py-16 space-y-4">
             <div className="text-4xl opacity-40">🏰</div>
-            <h2 className="font-cinzel text-xl text-cream font-semibold">Fondez votre cite</h2>
-            <p className="font-lora text-[14px] text-cream/30 max-w-xs mx-auto">
+            <h2 className="font-serif text-xl text-foreground font-semibold">Fondez votre cite</h2>
+            <p className="font-sans text-[14px] text-foreground/30 max-w-xs mx-auto">
               Creez ou rejoignez une cite pour demarrer vos quetes
             </p>
             <Link href="/household/setup">
@@ -107,13 +105,13 @@ export default async function DashboardPage() {
 
         {householdId && !householdHasTasks && (
           <Link href="/questionnaire">
-            <div className="group flex items-center gap-4 py-4 border-b border-cream/[0.06] transition-colors duration-200">
+            <div className="group flex items-center gap-4 py-4 border-b border-border/60 transition-colors duration-200">
               <span className="text-xl opacity-40">📜</span>
               <div>
-                <p className="font-cinzel text-[14px] text-cream/60 group-hover:text-cream transition-colors duration-200">
+                <p className="font-sans font-semibold text-[14px] text-foreground/60 group-hover:text-foreground transition-colors duration-200">
                   Questionnaire initial
                 </p>
-                <p className="font-lora text-[12px] text-cream/25">
+                <p className="font-sans text-[12px] text-foreground/25">
                   Personnalisez vos quetes
                 </p>
               </div>

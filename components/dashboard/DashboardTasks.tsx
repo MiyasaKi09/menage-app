@@ -86,10 +86,10 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase">
+        <p className="font-sans text-[11px] text-foreground/25 tracking-widest uppercase">
           Quetes du jour
         </p>
-        <p className="font-medieval text-[11px] text-cream/20">
+        <p className="font-sans text-[11px] text-foreground/20">
           {completedCount}/{totalCount}
         </p>
       </div>
@@ -97,19 +97,19 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
       {pendingTasks.length === 0 ? (
         <div className="text-center py-10">
           <div className="text-3xl mb-2 opacity-50">🏆</div>
-          <p className="font-cinzel text-[15px] text-cream/60">Toutes les quetes sont accomplies</p>
+          <p className="font-sans font-semibold text-[15px] text-foreground/60">Toutes les quetes sont accomplies</p>
         </div>
       ) : (
         pendingTasks.slice(0, 5).map((task) => (
           <div
             key={task.task_id}
-            className="flex items-center justify-between py-3 border-b border-cream/[0.06] last:border-0"
+            className="flex items-center justify-between py-3 border-b border-border/60 last:border-0"
           >
             <div className="flex items-center gap-3 min-w-0">
               <span className="text-lg flex-shrink-0 opacity-60">{task.category_emoji || '📋'}</span>
               <div className="min-w-0">
-                <p className="font-cinzel text-[14px] text-cream/70 truncate">{task.task_name}</p>
-                <p className="font-medieval text-[11px] text-cream/20">
+                <p className="font-sans font-semibold text-[14px] text-foreground/70 truncate">{task.task_name}</p>
+                <p className="font-sans text-[11px] text-foreground/20">
                   {task.duration_minutes}min · {task.points} or
                 </p>
               </div>
@@ -117,7 +117,7 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
             <button
               onClick={() => handleCompleteTask(task)}
               disabled={completingTaskId === task.task_id}
-              className="flex-shrink-0 ml-3 px-3 py-1.5 rounded-lg text-[12px] font-cinzel text-cream/40 hover:text-cream hover:bg-cream/[0.06] transition-all duration-200 disabled:opacity-30"
+              className="flex-shrink-0 ml-3 px-3 py-1.5 rounded-lg text-[12px] font-sans font-semibold text-foreground/40 hover:text-foreground hover:bg-white/80 transition-all duration-200 disabled:opacity-30"
             >
               {completingTaskId === task.task_id ? '...' : 'Fait'}
             </button>
@@ -126,7 +126,7 @@ export function DashboardTasks({ tasks, householdId, userId }: DashboardTasksPro
       )}
 
       <Link href="/tasks/schedule" className="block pt-2">
-        <p className="text-center font-medieval text-[11px] text-cream/15 hover:text-cream/30 transition-colors duration-200">
+        <p className="text-center font-sans text-[11px] text-foreground/15 hover:text-foreground/30 transition-colors duration-200">
           Voir le planning
         </p>
       </Link>

@@ -115,7 +115,7 @@ export function ScheduleTaskCard({ task, householdId, userId }: ScheduleTaskCard
   return (
     <div
       className={cn(
-        'flex items-center border border-charcoal/10 bg-cream rounded-lg transition-all shadow-watercolor-sm hover:shadow-watercolor',
+        'flex items-center border border-border bg-white rounded-2xl transition-all shadow-sm hover:shadow-md',
         isCompleted && 'opacity-60 bg-green/10',
         isSkipped && 'opacity-40 bg-charcoal/5'
       )}
@@ -127,17 +127,17 @@ export function ScheduleTaskCard({ task, householdId, userId }: ScheduleTaskCard
 
       {/* Task Info */}
       <div className="flex-1 p-4 min-w-0">
-        <h4 className="font-cinzel text-lg font-semibold leading-tight truncate text-charcoal">
+        <h4 className="font-serif text-lg font-semibold leading-tight truncate text-charcoal">
           {task.task_name}
         </h4>
 
         {task.task_tip && !isCompleted && (
-          <p className="font-lora text-xs opacity-60 mt-1 line-clamp-2">
+          <p className="font-sans text-xs opacity-60 mt-1 line-clamp-2">
             💡 {task.task_tip}
           </p>
         )}
 
-        <div className="flex gap-4 mt-2 font-medieval text-xs opacity-70 flex-wrap">
+        <div className="flex gap-4 mt-2 font-sans text-xs opacity-70 flex-wrap">
           <span>💰 {task.points} or</span>
           <span>⏳ {task.duration_minutes} min</span>
           <span className="opacity-50">{task.category_name}</span>
@@ -151,11 +151,11 @@ export function ScheduleTaskCard({ task, householdId, userId }: ScheduleTaskCard
       {/* Action Button */}
       <div className="p-4 flex-shrink-0">
         {isCompleted ? (
-          <div className="font-medieval text-sm text-green bg-green/10 px-4 py-2 border border-green/20 rounded-md">
+          <div className="font-sans text-sm text-green bg-green/10 px-4 py-2 border border-green/20 rounded-md">
             ✓ Accompli
           </div>
         ) : isSkipped ? (
-          <div className="font-medieval text-sm text-charcoal/50 px-4 py-2">
+          <div className="font-sans text-sm text-charcoal/50 px-4 py-2">
             Passe
           </div>
         ) : (

@@ -58,10 +58,10 @@ export function QuickAccessBar({
             <button
               key={btn.id}
               onClick={() => setActiveOverlay(btn.id)}
-              className="flex flex-col items-center gap-1 px-4 py-2.5 rounded-xl bg-cream/[0.06] border border-cream/[0.08] hover:bg-cream/[0.1] transition-all duration-200"
+              className="flex flex-col items-center gap-1 px-4 py-2.5 rounded-xl bg-white/80 border border-border hover:bg-white transition-all duration-200"
             >
               <Icon size={18} className="text-yellow/70" />
-              <span className="font-medieval text-[10px] text-cream/40">{btn.label}</span>
+              <span className="font-sans text-[10px] text-foreground/40">{btn.label}</span>
             </button>
           )
         })}
@@ -73,7 +73,7 @@ export function QuickAccessBar({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-charcoal/80 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-[60] bg-foreground/40 backdrop-blur-sm flex items-center justify-center p-4"
             onClick={() => setActiveOverlay(null)}
           >
             <motion.div
@@ -81,12 +81,12 @@ export function QuickAccessBar({
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="w-full max-w-md max-h-[80vh] bg-gradient-to-b from-charcoal to-ink rounded-2xl border border-cream/[0.08] overflow-hidden"
+              className="w-full max-w-md max-h-[80vh] bg-white rounded-[22px] border border-border shadow-xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-5 py-4 border-b border-cream/[0.06]">
-                <h2 className="font-cinzel text-lg text-cream font-semibold">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-border/60">
+                <h2 className="font-serif text-lg text-foreground font-semibold">
                   {activeOverlay === 'fief' && 'Fief'}
                   {activeOverlay === 'negoce' && 'Negoce'}
                   {activeOverlay === 'tournoi' && 'Tournoi'}
@@ -94,9 +94,9 @@ export function QuickAccessBar({
                 </h2>
                 <button
                   onClick={() => setActiveOverlay(null)}
-                  className="p-1.5 rounded-lg hover:bg-cream/[0.06] transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-white/80 transition-colors"
                 >
-                  <X size={18} className="text-cream/40" />
+                  <X size={18} className="text-foreground/40" />
                 </button>
               </div>
 
@@ -166,17 +166,17 @@ function FiefOverlayContent({ households, userId }: { households: Array<{ id: st
   }
 
   const renderFiefCard = (h: typeof households[0]) => (
-    <div key={h.id} className={`py-3 px-3 rounded-xl border ${h.status === 'active' ? 'bg-cream/[0.04] border-cream/[0.06]' : 'bg-cream/[0.02] border-cream/[0.04]'}`}>
+    <div key={h.id} className={`py-3 px-3 rounded-xl border ${h.status === 'active' ? 'bg-white/60 border-border/60' : 'bg-white/40 border-border/40'}`}>
       <div className="flex items-center justify-between">
         <div>
-          <p className={`font-cinzel text-[14px] ${h.status === 'active' ? 'text-cream/70' : 'text-cream/30'}`}>{h.name}</p>
-          <p className={`font-lora text-[11px] ${h.status === 'active' ? 'text-cream/25' : 'text-cream/15'}`}>{h.role}</p>
+          <p className={`font-sans font-semibold text-[14px] ${h.status === 'active' ? 'text-foreground/70' : 'text-foreground/30'}`}>{h.name}</p>
+          <p className={`font-sans text-[11px] ${h.status === 'active' ? 'text-foreground/25' : 'text-foreground/15'}`}>{h.role}</p>
         </div>
         <button
           onClick={() => toggleStatus(h.id, h.status)}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medieval text-[10px] transition-colors ${
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-sans text-[10px] transition-colors ${
             h.status === 'active'
-              ? 'bg-cream/[0.04] border border-cream/[0.06] text-cream/30 hover:bg-cream/[0.08]'
+              ? 'bg-white/60 border border-border/60 text-foreground/30 hover:bg-white'
               : 'bg-yellow/[0.08] border border-yellow/20 text-yellow/60 hover:bg-yellow/[0.15]'
           }`}
         >
@@ -185,10 +185,10 @@ function FiefOverlayContent({ households, userId }: { households: Array<{ id: st
         </button>
       </div>
       {/* Quitter / Supprimer */}
-      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-cream/[0.04]">
+      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/40">
         <button
           onClick={() => setConfirmAction({ type: 'leave', householdId: h.id, name: h.name })}
-          className="flex items-center gap-1 px-2 py-0.5 rounded text-red/40 font-medieval text-[10px] hover:text-red/60 hover:bg-red/[0.05] transition-colors"
+          className="flex items-center gap-1 px-2 py-0.5 rounded text-red/40 font-sans text-[10px] hover:text-red/60 hover:bg-red/[0.05] transition-colors"
         >
           <LogOut size={10} />
           Quitter
@@ -196,7 +196,7 @@ function FiefOverlayContent({ households, userId }: { households: Array<{ id: st
         {h.role === 'admin' && (
           <button
             onClick={() => setConfirmAction({ type: 'delete', householdId: h.id, name: h.name })}
-            className="flex items-center gap-1 px-2 py-0.5 rounded text-red/40 font-medieval text-[10px] hover:text-red/60 hover:bg-red/[0.05] transition-colors"
+            className="flex items-center gap-1 px-2 py-0.5 rounded text-red/40 font-sans text-[10px] hover:text-red/60 hover:bg-red/[0.05] transition-colors"
           >
             <Trash2 size={10} />
             Supprimer
@@ -213,11 +213,11 @@ function FiefOverlayContent({ households, userId }: { households: Array<{ id: st
         <div className="bg-red/[0.06] border border-red/20 rounded-xl p-4 space-y-3">
           <div className="flex items-center gap-2">
             <AlertTriangle size={16} className="text-red/60" />
-            <p className="font-cinzel text-[13px] text-red/70">
+            <p className="font-sans font-semibold text-[13px] text-red/70">
               {confirmAction.type === 'delete' ? 'Supprimer' : 'Quitter'} &laquo;{confirmAction.name}&raquo; ?
             </p>
           </div>
-          <p className="font-lora text-[12px] text-cream/30">
+          <p className="font-sans text-[12px] text-foreground/30">
             {confirmAction.type === 'delete'
               ? 'Cela supprimera le fief et toutes ses donnees pour tous les membres.'
               : 'Vous perdrez votre progression dans ce fief.'}
@@ -225,13 +225,13 @@ function FiefOverlayContent({ households, userId }: { households: Array<{ id: st
           <div className="flex gap-2">
             <button
               onClick={() => confirmAction.type === 'delete' ? handleDelete(confirmAction.householdId) : handleLeave(confirmAction.householdId)}
-              className="flex-1 py-2 rounded-lg bg-red/[0.15] border border-red/20 text-red/70 font-cinzel text-[12px] hover:bg-red/[0.25] transition-colors"
+              className="flex-1 py-2 rounded-lg bg-red/[0.15] border border-red/20 text-red/70 font-sans font-semibold text-[12px] hover:bg-red/[0.25] transition-colors"
             >
               Confirmer
             </button>
             <button
               onClick={() => setConfirmAction(null)}
-              className="flex-1 py-2 rounded-lg bg-cream/[0.04] border border-cream/[0.06] text-cream/40 font-cinzel text-[12px] hover:bg-cream/[0.08] transition-colors"
+              className="flex-1 py-2 rounded-lg bg-white/60 border border-border/60 text-foreground/40 font-sans font-semibold text-[12px] hover:bg-white transition-colors"
             >
               Annuler
             </button>
@@ -252,36 +252,36 @@ function FiefOverlayContent({ households, userId }: { households: Array<{ id: st
           {localHouseholds.map((h) => (
             <div
               key={h.id}
-              className={`w-2 h-2 rounded-full ${h.status === 'active' ? 'bg-green/40' : 'bg-cream/15'}`}
+              className={`w-2 h-2 rounded-full ${h.status === 'active' ? 'bg-green/40' : 'bg-foreground/15'}`}
             />
           ))}
         </div>
       )}
 
       {localHouseholds.length === 0 && (
-        <p className="text-center font-lora text-[13px] text-cream/30 py-4">Aucun fief</p>
+        <p className="text-center font-sans text-[13px] text-foreground/30 py-4">Aucun fief</p>
       )}
 
       {/* Action buttons */}
-      <div className="space-y-2 pt-2 border-t border-cream/[0.06]">
+      <div className="space-y-2 pt-2 border-t border-border/60">
         <button
           onClick={() => router.push('/household/setup')}
-          className="w-full flex items-center gap-3 py-3 px-4 rounded-xl bg-cream/[0.04] border border-cream/[0.06] hover:bg-cream/[0.06] transition-colors"
+          className="w-full flex items-center gap-3 py-3 px-4 rounded-xl bg-white/60 border border-border/60 hover:bg-white/80 transition-colors"
         >
-          <Plus size={16} className="text-cream/30" />
-          <span className="font-cinzel text-[13px] text-cream/50">Rejoindre</span>
+          <Plus size={16} className="text-foreground/30" />
+          <span className="font-sans font-semibold text-[13px] text-foreground/45">Rejoindre</span>
         </button>
         <button
           onClick={() => router.push('/household/setup')}
-          className="w-full flex items-center gap-3 py-3 px-4 rounded-xl bg-cream/[0.04] border border-cream/[0.06] hover:bg-cream/[0.06] transition-colors"
+          className="w-full flex items-center gap-3 py-3 px-4 rounded-xl bg-white/60 border border-border/60 hover:bg-white/80 transition-colors"
         >
-          <Shield size={16} className="text-cream/30" />
-          <span className="font-cinzel text-[13px] text-cream/50">Nouveau fief</span>
+          <Shield size={16} className="text-foreground/30" />
+          <span className="font-sans font-semibold text-[13px] text-foreground/45">Nouveau fief</span>
         </button>
-        <button className="w-full flex items-center gap-3 py-3 px-4 rounded-xl bg-cream/[0.04] border border-cream/[0.06] hover:bg-cream/[0.06] transition-colors">
-          <Users size={16} className="text-cream/30" />
-          <span className="font-cinzel text-[13px] text-cream/50">Mode accompagnateur</span>
-          <span className="ml-auto font-lora text-[10px] text-cream/15">Ajouter un enfant</span>
+        <button className="w-full flex items-center gap-3 py-3 px-4 rounded-xl bg-white/60 border border-border/60 hover:bg-white/80 transition-colors">
+          <Users size={16} className="text-foreground/30" />
+          <span className="font-sans font-semibold text-[13px] text-foreground/45">Mode accompagnateur</span>
+          <span className="ml-auto font-sans text-[10px] text-foreground/15">Ajouter un enfant</span>
         </button>
       </div>
     </div>
@@ -331,18 +331,18 @@ function NegoceOverlayContent({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Coins size={18} className="text-yellow/60" />
-          <span className="font-cinzel text-xl text-yellow font-bold">{totalPoints}</span>
-          <span className="font-medieval text-[11px] text-cream/25">pieces d&apos;or</span>
+          <span className="font-serif text-xl text-yellow font-bold">{totalPoints}</span>
+          <span className="font-sans text-[11px] text-foreground/25">pieces d&apos;or</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <ShoppingBag size={14} className="text-cream/25" />
-          <span className="font-medieval text-[11px] text-cream/25">{purchasedItems.length} objets</span>
+          <ShoppingBag size={14} className="text-foreground/25" />
+          <span className="font-sans text-[11px] text-foreground/25">{purchasedItems.length} objets</span>
         </div>
       </div>
 
       {/* Mes ressources summary */}
-      <div className="bg-cream/[0.03] rounded-xl p-3 border border-cream/[0.04]">
-        <p className="font-medieval text-[10px] text-cream/20 tracking-widest uppercase mb-2">Mes ressources</p>
+      <div className="bg-white/40 rounded-xl p-3 border border-border/40">
+        <p className="font-sans text-[10px] text-foreground/20 tracking-widest uppercase mb-2">Mes ressources</p>
         <div className="flex flex-wrap gap-1.5">
           {shopCategories.slice(0, 4).map((cat: any) => {
             const count = purchasedItems.filter((p: any) => {
@@ -350,7 +350,7 @@ function NegoceOverlayContent({
               return item?.category_id === cat.id
             }).length
             return (
-              <span key={cat.id} className="px-2 py-0.5 rounded bg-cream/[0.04] font-lora text-[10px] text-cream/30">
+              <span key={cat.id} className="px-2 py-0.5 rounded bg-white/60 font-sans text-[10px] text-foreground/30">
                 {cat.name}: {count}
               </span>
             )
@@ -362,8 +362,8 @@ function NegoceOverlayContent({
       <div className="flex gap-1.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
         <button
           onClick={() => setActiveCategory(null)}
-          className={`flex-shrink-0 px-2.5 py-1 rounded-lg font-medieval text-[10px] transition-colors ${
-            !activeCategory ? 'bg-yellow/[0.15] text-yellow/70 border border-yellow/20' : 'bg-cream/[0.04] text-cream/30 border border-transparent'
+          className={`flex-shrink-0 px-2.5 py-1 rounded-lg font-sans text-[10px] transition-colors ${
+            !activeCategory ? 'bg-yellow/[0.15] text-yellow/70 border border-yellow/20' : 'bg-white/60 text-foreground/30 border border-transparent'
           }`}
         >
           Tout
@@ -372,8 +372,8 @@ function NegoceOverlayContent({
           <button
             key={cat.id}
             onClick={() => setActiveCategory(cat.id)}
-            className={`flex-shrink-0 px-2.5 py-1 rounded-lg font-medieval text-[10px] transition-colors ${
-              activeCategory === cat.id ? 'bg-yellow/[0.15] text-yellow/70 border border-yellow/20' : 'bg-cream/[0.04] text-cream/30 border border-transparent'
+            className={`flex-shrink-0 px-2.5 py-1 rounded-lg font-sans text-[10px] transition-colors ${
+              activeCategory === cat.id ? 'bg-yellow/[0.15] text-yellow/70 border border-yellow/20' : 'bg-white/60 text-foreground/30 border border-transparent'
             }`}
           >
             {cat.name}
@@ -390,11 +390,11 @@ function NegoceOverlayContent({
             <div
               key={item.id}
               className={`flex items-center gap-3 py-3 px-3 rounded-xl border transition-colors ${
-                owned ? 'bg-green/[0.04] border-green/10' : 'bg-cream/[0.03] border-cream/[0.06]'
+                owned ? 'bg-green/[0.04] border-green/10' : 'bg-white/40 border-border/60'
               }`}
             >
               {/* Item preview */}
-              <div className="w-10 h-10 rounded-lg bg-cream/[0.06] flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-lg bg-white/80 flex items-center justify-center flex-shrink-0">
                 <span className="text-sm opacity-40">
                   {item.item_type === 'furniture' ? '🪑' : item.item_type === 'lighting' ? '💡' : item.item_type === 'decor' ? '🖼️' : '📦'}
                 </span>
@@ -402,23 +402,23 @@ function NegoceOverlayContent({
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <p className="font-cinzel text-[13px] text-cream/60 truncate">{item.name}</p>
-                <p className="font-lora text-[11px] text-cream/20">
+                <p className="font-sans font-semibold text-[13px] text-foreground/50 truncate">{item.name}</p>
+                <p className="font-sans text-[11px] text-foreground/20">
                   {(item.shop_categories as any)?.name || ''}
                 </p>
               </div>
 
               {/* Price / owned */}
               {owned ? (
-                <span className="font-medieval text-[10px] text-green/50 px-2 py-0.5 rounded bg-green/[0.1]">Possede</span>
+                <span className="font-sans text-[10px] text-green/50 px-2 py-0.5 rounded bg-green/[0.1]">Possede</span>
               ) : (
                 <button
                   onClick={() => handlePurchase(item)}
                   disabled={!canAfford}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-cinzel text-[12px] transition-colors ${
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-sans font-semibold text-[12px] transition-colors ${
                     canAfford
                       ? 'bg-yellow/[0.1] border border-yellow/20 text-yellow/70 hover:bg-yellow/[0.2]'
-                      : 'bg-cream/[0.03] border border-cream/[0.04] text-cream/15 cursor-not-allowed'
+                      : 'bg-white/40 border border-border/40 text-foreground/15 cursor-not-allowed'
                   }`}
                 >
                   <Coins size={10} />
@@ -430,7 +430,7 @@ function NegoceOverlayContent({
         })}
 
         {filteredItems.length === 0 && (
-          <p className="text-center font-lora text-[13px] text-cream/30 py-6">
+          <p className="text-center font-sans text-[13px] text-foreground/30 py-6">
             Aucun objet disponible
           </p>
         )}
@@ -446,7 +446,7 @@ function TournoiOverlayContent({ leaderboard }: { leaderboard: any[] }) {
     <div className="space-y-4">
       <div className="text-center mb-4">
         <div className="text-3xl mb-1">⚔️</div>
-        <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase">Classement du fief</p>
+        <p className="font-sans text-[11px] text-foreground/25 tracking-widest uppercase">Classement du fief</p>
       </div>
       <div className="space-y-1">
         {leaderboard.map((member, index) => {
@@ -456,25 +456,25 @@ function TournoiOverlayContent({ leaderboard }: { leaderboard: any[] }) {
             <div
               key={member.profile_id}
               className={`flex items-center gap-3 py-2.5 px-3 rounded-lg transition-colors ${
-                index < 3 ? 'bg-cream/[0.04]' : ''
+                index < 3 ? 'bg-white/60' : ''
               }`}
             >
-              <span className="w-6 text-center font-cinzel text-[14px] text-cream/40">
+              <span className="w-6 text-center font-sans font-semibold text-[14px] text-foreground/40">
                 {index < 3 ? medals[index] : `${index + 1}`}
               </span>
               {/* Blason icon */}
-              <div className="w-6 h-6 rounded bg-cream/[0.06] flex items-center justify-center flex-shrink-0">
-                <Shield size={12} className="text-cream/20" />
+              <div className="w-6 h-6 rounded bg-white/80 flex items-center justify-center flex-shrink-0">
+                <Shield size={12} className="text-foreground/20" />
               </div>
-              <span className="flex-1 font-lora text-[14px] text-cream/60">{displayName}</span>
-              <span className="font-cinzel text-[13px] text-yellow/60">
+              <span className="flex-1 font-sans text-[14px] text-foreground/50">{displayName}</span>
+              <span className="font-sans font-semibold text-[13px] text-yellow/60">
                 {member.points_in_household || 0}
               </span>
             </div>
           )
         })}
         {leaderboard.length === 0 && (
-          <p className="text-center font-lora text-[13px] text-cream/30 py-8">
+          <p className="text-center font-sans text-[13px] text-foreground/30 py-8">
             Aucun membre dans le tournoi
           </p>
         )}
@@ -495,33 +495,33 @@ function StatsOverlayContent({
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase">
+        <p className="font-sans text-[11px] text-foreground/25 tracking-widest uppercase">
           Mise a jour hebdomadaire
         </p>
       </div>
 
       {/* Times on podium */}
       <div className="space-y-2">
-        <p className="font-medieval text-[10px] text-cream/20 tracking-widest uppercase">Podium</p>
+        <p className="font-sans text-[10px] text-foreground/20 tracking-widest uppercase">Podium</p>
         <div className="flex items-end justify-center gap-4">
           <div className="flex flex-col items-center">
-            <span className="font-cinzel text-sm text-cream/25 mb-1">{stats.timesSecond}x</span>
-            <span className="font-cinzel text-xl text-cream/30">2</span>
-            <div className="w-14 h-10 bg-cream/[0.06] rounded-t-lg flex items-center justify-center">
+            <span className="font-serif text-sm text-foreground/25 mb-1">{stats.timesSecond}x</span>
+            <span className="font-serif text-xl text-foreground/30">2</span>
+            <div className="w-14 h-10 bg-white/80 rounded-t-lg flex items-center justify-center">
               <span className="text-lg">🥈</span>
             </div>
           </div>
           <div className="flex flex-col items-center">
-            <span className="font-cinzel text-sm text-yellow/60 mb-1">{stats.timesFirst}x</span>
-            <span className="font-cinzel text-2xl text-yellow">1</span>
+            <span className="font-serif text-sm text-yellow/60 mb-1">{stats.timesFirst}x</span>
+            <span className="font-serif text-2xl text-yellow">1</span>
             <div className="w-14 h-16 bg-yellow/[0.1] rounded-t-lg flex items-center justify-center border border-yellow/20">
               <span className="text-xl">🥇</span>
             </div>
           </div>
           <div className="flex flex-col items-center">
-            <span className="font-cinzel text-sm text-cream/25 mb-1">{stats.timesThird}x</span>
-            <span className="font-cinzel text-xl text-cream/30">3</span>
-            <div className="w-14 h-7 bg-cream/[0.06] rounded-t-lg flex items-center justify-center">
+            <span className="font-serif text-sm text-foreground/25 mb-1">{stats.timesThird}x</span>
+            <span className="font-serif text-xl text-foreground/30">3</span>
+            <div className="w-14 h-7 bg-white/80 rounded-t-lg flex items-center justify-center">
               <span className="text-lg">🥉</span>
             </div>
           </div>
@@ -530,27 +530,27 @@ function StatsOverlayContent({
 
       {/* Tasks by category - bar chart */}
       <div className="space-y-2">
-        <p className="font-medieval text-[10px] text-cream/20 tracking-widest uppercase">
+        <p className="font-sans text-[10px] text-foreground/20 tracking-widest uppercase">
           Corvees effectuees → type le plus fait
         </p>
         <div className="space-y-1.5">
           {stats.tasksByCategory.slice(0, 5).map((cat, index) => (
             <div key={cat.category} className="flex items-center gap-2">
-              <span className="w-20 font-lora text-[11px] text-cream/35 truncate">{cat.category}</span>
-              <div className="flex-1 h-4 bg-cream/[0.03] rounded overflow-hidden">
+              <span className="w-20 font-sans text-[11px] text-foreground/35 truncate">{cat.category}</span>
+              <div className="flex-1 h-4 bg-white/40 rounded overflow-hidden">
                 <div
-                  className={`h-full rounded transition-all ${index === 0 ? 'bg-yellow/30' : 'bg-cream/[0.08]'}`}
+                  className={`h-full rounded transition-all ${index === 0 ? 'bg-yellow/30' : 'bg-white'}`}
                   style={{ width: `${(cat.count / maxCategoryCount) * 100}%` }}
                 />
               </div>
-              <span className="font-cinzel text-[11px] text-cream/30 w-6 text-right">{cat.count}</span>
+              <span className="font-sans font-semibold text-[11px] text-foreground/30 w-6 text-right">{cat.count}</span>
             </div>
           ))}
         </div>
         {stats.tasksByCategory[0] && (
           <div className="flex items-center gap-2 mt-2 px-2 py-2 bg-yellow/[0.05] rounded-lg border border-yellow/10">
-            <span className="font-medieval text-[10px] text-yellow/50">→</span>
-            <span className="font-lora text-[12px] text-yellow/50">
+            <span className="font-sans text-[10px] text-yellow/50">→</span>
+            <span className="font-sans text-[12px] text-yellow/50">
               Tache la plus realisee : {stats.tasksByCategory[0].category}
             </span>
           </div>
@@ -560,18 +560,18 @@ function StatsOverlayContent({
       {/* Favorite character (guild annual) */}
       {stats.favoriteCharacter && (
         <div className="space-y-2">
-          <p className="font-medieval text-[10px] text-cream/20 tracking-widest uppercase">
+          <p className="font-sans text-[10px] text-foreground/20 tracking-widest uppercase">
             Guilde annuelle
           </p>
-          <div className="flex items-center gap-3 p-3 bg-cream/[0.03] rounded-xl border border-cream/[0.06]">
-            <div className="w-10 h-10 rounded-lg bg-cream/[0.06] flex items-center justify-center">
+          <div className="flex items-center gap-3 p-3 bg-white/40 rounded-xl border border-border/60">
+            <div className="w-10 h-10 rounded-lg bg-white/80 flex items-center justify-center">
               <span className="text-lg">{CLASS_EMOJIS[stats.favoriteCharacter.class] || '🃏'}</span>
             </div>
             <div>
-              <p className="font-cinzel text-[13px] text-cream/60">
+              <p className="font-sans font-semibold text-[13px] text-foreground/50">
                 Personnage le plus attribue
               </p>
-              <p className="font-lora text-[12px] text-cream/35">
+              <p className="font-sans text-[12px] text-foreground/35">
                 {stats.favoriteCharacter.name} ({stats.favoriteCharacter.timesReceived}x)
               </p>
             </div>
@@ -582,10 +582,10 @@ function StatsOverlayContent({
       {/* Annual card */}
       {stats.annualCard && (
         <div className="space-y-2">
-          <p className="font-medieval text-[10px] text-cream/20 tracking-widest uppercase">
+          <p className="font-sans text-[10px] text-foreground/20 tracking-widest uppercase">
             Carte annuelle
           </p>
-          <div className="relative bg-gradient-to-br from-cream/[0.06] to-cream/[0.02] rounded-2xl border border-cream/[0.08] p-5 text-center overflow-hidden">
+          <div className="relative bg-gradient-to-br from-white/80 to-white/40 rounded-2xl border border-border p-5 text-center overflow-hidden">
             {/* Character image background */}
             {stats.favoriteCharacter && CLASS_IMAGES[stats.favoriteCharacter.class] && (
               <div className="absolute inset-0 opacity-10">
@@ -598,14 +598,14 @@ function StatsOverlayContent({
               </div>
             )}
             <div className="relative">
-              <p className="font-cinzel text-lg text-cream/70 font-semibold">
+              <p className="font-serif text-lg text-foreground/70 font-semibold">
                 {stats.annualCard.title}
               </p>
-              <p className="font-lora text-[12px] text-cream/30 mt-1">
+              <p className="font-sans text-[12px] text-foreground/30 mt-1">
                 {stats.annualCard.subtitle}
               </p>
-              <div className="mt-3 inline-flex px-3 py-1 rounded-lg bg-cream/[0.04] border border-cream/[0.06]">
-                <span className="font-medieval text-[10px] text-cream/20">→ ordre chronologique</span>
+              <div className="mt-3 inline-flex px-3 py-1 rounded-lg bg-white/60 border border-border/60">
+                <span className="font-sans text-[10px] text-foreground/20">→ ordre chronologique</span>
               </div>
             </div>
           </div>

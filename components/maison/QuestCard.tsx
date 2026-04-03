@@ -44,16 +44,16 @@ export function QuestCard({ questName, categoryEmoji, steps, totalPoints }: Ques
   const allDone = completedCount === localSteps.length
 
   return (
-    <div className="bg-cream/[0.04] border border-cream/[0.06] rounded-xl p-4 space-y-4">
+    <div className="bg-white/60 border border-border/60 rounded-xl p-4 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-base">{categoryEmoji}</span>
-          <h3 className="font-cinzel text-[14px] text-cream/80 font-semibold">{questName}</h3>
+          <h3 className="font-serif text-[14px] text-foreground/70 font-semibold">{questName}</h3>
         </div>
         <div className="flex items-center gap-2">
-          <span className="font-medieval text-[10px] text-cream/25">{completedCount}/{localSteps.length}</span>
-          <span className="font-cinzel text-[11px] text-yellow/50">{totalPoints} or</span>
+          <span className="font-sans text-[10px] text-foreground/25">{completedCount}/{localSteps.length}</span>
+          <span className="font-sans font-semibold text-[11px] text-yellow/50">{totalPoints} or</span>
         </div>
       </div>
 
@@ -88,14 +88,14 @@ export function QuestCard({ questName, categoryEmoji, steps, totalPoints }: Ques
                       ? 'bg-green/20 border-green/40'
                       : isCurrent
                         ? 'bg-yellow/[0.2] border-yellow/50 cursor-pointer hover:bg-yellow/[0.3]'
-                        : 'bg-cream/[0.03] border-cream/[0.08]'
+                        : 'bg-white/40 border-border'
                   }`}>
                     {isCompleted ? (
                       <Check size={iconSize} className="text-green/70" />
                     ) : isCurrent ? (
                       <div className={`${isCompact ? 'w-1.5 h-1.5' : 'w-2 h-2'} rounded-full bg-yellow/60`} />
                     ) : (
-                      <div className={`${isCompact ? 'w-1 h-1' : 'w-1.5 h-1.5'} rounded-full bg-cream/10`} />
+                      <div className={`${isCompact ? 'w-1 h-1' : 'w-1.5 h-1.5'} rounded-full bg-foreground/10`} />
                     )}
                   </div>
                 </button>
@@ -104,7 +104,7 @@ export function QuestCard({ questName, categoryEmoji, steps, totalPoints }: Ques
               {i < localSteps.length - 1 && (
                 <div className={`flex-1 ${isCompact ? 'mx-0.5' : 'mx-1'}`}>
                   <div className={`h-0.5 w-full rounded-full transition-colors ${
-                    isCompleted ? 'bg-green/30' : 'bg-cream/[0.06]'
+                    isCompleted ? 'bg-green/30' : 'bg-white/80'
                   }`} />
                 </div>
               )}

@@ -43,20 +43,20 @@ export default async function QuestionnairePage() {
     .single()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-deep-green to-deep-blue relative overflow-hidden">
+    <div className="min-h-screen bg-background relative overflow-hidden">
       <GrainOverlay opacity={0.08} />
       <DiagonalStripe position="top-right" />
 
       <div className="relative z-10 p-6 max-w-3xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <div className="font-medieval text-xs opacity-50 tracking-wider mb-1 text-cream">
+          <div className="font-sans text-xs opacity-50 tracking-wider mb-1 text-foreground">
             {householdName}
           </div>
-          <h1 className="font-cinzel text-4xl md:text-5xl text-cream font-bold leading-none mb-4">
+          <h1 className="font-serif text-4xl md:text-5xl text-foreground font-bold leading-none mb-4">
             Questionnaire
           </h1>
-          <p className="font-lora text-cream opacity-80 text-lg">
+          <p className="font-sans text-foreground opacity-80 text-lg">
             {existingResponse
               ? 'Modifiez vos reponses pour ajuster les quetes de votre cite'
               : 'Repondez a quelques questions pour personnaliser les quetes de votre cite'}
@@ -67,8 +67,8 @@ export default async function QuestionnairePage() {
         <div className="border border-yellow/20 bg-yellow/15 p-6 rounded-lg shadow-golden">
           <GrainOverlay opacity={0.03} />
           <div className="relative z-10">
-            <h2 className="font-cinzel text-xl font-bold mb-2">Comment ca marche ?</h2>
-            <ul className="font-lora space-y-2 text-sm">
+            <h2 className="font-serif text-xl font-bold mb-2">Comment ca marche ?</h2>
+            <ul className="font-sans space-y-2 text-sm">
               <li>Nous creons automatiquement les quetes adaptees a votre cite</li>
               <li>Les pieces d&apos;or sont ajustees selon la complexite de votre logement</li>
               <li>Vous pourrez toujours modifier vos reponses plus tard</li>

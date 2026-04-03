@@ -51,8 +51,7 @@ export default async function CharactersPage() {
   }
 
   return (
-    <div className="min-h-screen relative">
-      <div className="fixed inset-0 bg-gradient-to-b from-deep-purple to-deep-green transition-colors duration-700" />
+    <div className="min-h-screen relative bg-background">
 
       <div className="relative z-10 max-w-2xl mx-auto px-6 py-10 space-y-14">
 
@@ -61,18 +60,18 @@ export default async function CharactersPage() {
 
         {/* Separator */}
         <div className="flex items-center gap-4">
-          <div className="flex-1 h-px bg-cream/[0.06]" />
-          <p className="font-medieval text-[11px] text-cream/20 tracking-widest uppercase">
+          <div className="flex-1 h-px bg-border/60" />
+          <p className="font-sans text-[11px] text-foreground/20 tracking-widest uppercase">
             Collection
           </p>
-          <div className="flex-1 h-px bg-cream/[0.06]" />
+          <div className="flex-1 h-px bg-border/60" />
         </div>
 
         {/* Collection Gallery */}
         <CharacterGallery characters={characters} />
 
         {/* Debug */}
-        <p className="font-medieval text-[9px] text-cream/10 text-center">
+        <p className="font-sans text-[9px] text-foreground/10 text-center">
           {debugInfo}
         </p>
       </div>

@@ -84,21 +84,21 @@ export function TaskCompletionModal({ taskName, points, onClose }: TaskCompletio
         </div>
 
         {/* Content */}
-        <div className="relative z-10 bg-charcoal p-8 text-cream text-center rounded-t-xl border-t border-yellow/20">
-          <p className="font-medieval text-xs opacity-50 tracking-wider mb-2">
+        <div className="relative z-10 bg-white p-8 text-foreground text-center rounded-t-xl border-t border-border">
+          <p className="font-sans text-xs opacity-50 tracking-wider mb-2">
             Quete accomplie
           </p>
-          <h2 className="font-cinzel text-3xl font-bold leading-tight mb-1">
+          <h2 className="font-serif text-3xl font-bold leading-tight mb-1">
             {taskName}
           </h2>
-          <p className="font-cinzel text-2xl text-yellow font-bold">
+          <p className="font-serif text-2xl text-yellow font-bold">
             Terminee !
           </p>
 
           {/* Points Display */}
           <div className="mt-6 p-4 bg-gradient-to-r from-yellow to-orange/80 text-black rounded-lg flex items-baseline justify-center gap-3">
-            <span className="font-cinzel text-5xl font-bold">+{points}</span>
-            <span className="font-cinzel text-xl font-semibold">or</span>
+            <span className="font-serif text-5xl font-bold">+{points}</span>
+            <span className="font-serif text-xl font-semibold">or</span>
           </div>
 
           <Button

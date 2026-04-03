@@ -34,8 +34,8 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
       >
         {/* Flip hint */}
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
-          <RotateCcw size={12} className="text-cream/20" />
-          <span className="font-medieval text-[10px] text-cream/20">
+          <RotateCcw size={12} className="text-foreground/20" />
+          <span className="font-sans text-[10px] text-foreground/20">
             {isFlipped ? 'Voir le portrait' : 'Retourner'}
           </span>
         </div>
@@ -73,15 +73,15 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
 
             {/* Name overlay at bottom */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-5 pt-16">
-              <h2 className="font-cinzel text-2xl text-cream font-bold">{character.avatar_name}</h2>
+              <h2 className="font-serif text-2xl text-foreground font-bold">{character.avatar_name}</h2>
               <div className="flex items-center gap-2 mt-1">
                 <span
-                  className="inline-flex px-2 py-0.5 rounded text-[10px] font-medieval"
+                  className="inline-flex px-2 py-0.5 rounded text-[10px] font-sans"
                   style={{ backgroundColor: `${rarityColor}25`, color: rarityColor }}
                 >
                   {rarityLabel}
                 </span>
-                <span className="font-medieval text-[12px] text-cream/40">{emoji}</span>
+                <span className="font-sans text-[12px] text-foreground/40">{emoji}</span>
               </div>
             </div>
           </div>
@@ -102,11 +102,11 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
               {/* Header */}
               <div className="text-center mb-6">
                 <span className="text-3xl">{emoji}</span>
-                <h2 className="font-cinzel text-xl text-cream font-bold mt-2">
+                <h2 className="font-serif text-xl text-foreground font-bold mt-2">
                   {character.avatar_name}
                 </h2>
                 <span
-                  className="inline-flex px-2.5 py-0.5 rounded text-[11px] font-medieval mt-1"
+                  className="inline-flex px-2.5 py-0.5 rounded text-[11px] font-sans mt-1"
                   style={{ backgroundColor: `${rarityColor}20`, color: rarityColor }}
                 >
                   {rarityLabel}
@@ -117,10 +117,10 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
               <div className="flex-1 space-y-4 overflow-y-auto">
                 {character.description && (
                   <div>
-                    <p className="font-medieval text-[10px] text-cream/20 tracking-widest uppercase mb-1">
+                    <p className="font-sans text-[10px] text-foreground/20 tracking-widest uppercase mb-1">
                       Description
                     </p>
-                    <p className="font-lora text-[13px] text-cream/50 leading-relaxed">
+                    <p className="font-sans text-[13px] text-foreground/50 leading-relaxed">
                       {character.description}
                     </p>
                   </div>
@@ -128,10 +128,10 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
 
                 {character.lore_text && (
                   <div>
-                    <p className="font-medieval text-[10px] text-cream/20 tracking-widest uppercase mb-1">
+                    <p className="font-sans text-[10px] text-foreground/20 tracking-widest uppercase mb-1">
                       Histoire
                     </p>
-                    <p className="font-lora text-[13px] text-cream/40 leading-relaxed italic">
+                    <p className="font-sans text-[13px] text-foreground/40 leading-relaxed italic">
                       {character.lore_text}
                     </p>
                   </div>
@@ -139,10 +139,10 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
 
                 {/* Power */}
                 <div>
-                  <p className="font-medieval text-[10px] text-cream/20 tracking-widest uppercase mb-1">
+                  <p className="font-sans text-[10px] text-foreground/20 tracking-widest uppercase mb-1">
                     Pouvoir
                   </p>
-                  <p className="font-lora text-[13px] text-cream/50 leading-relaxed">
+                  <p className="font-sans text-[13px] text-foreground/50 leading-relaxed">
                     {character.power_description}
                   </p>
                 </div>
@@ -154,7 +154,7 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
                   e.stopPropagation()
                   setShowAction(true)
                 }}
-                className="mt-4 w-full py-3 rounded-xl font-cinzel text-[14px] transition-colors"
+                className="mt-4 w-full py-3 rounded-xl font-sans font-semibold text-[14px] transition-colors"
                 style={{
                   backgroundColor: `${rarityColor}20`,
                   color: rarityColor,

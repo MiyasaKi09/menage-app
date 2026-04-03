@@ -26,10 +26,10 @@ export function ParametresTab(_props: ParametresTabProps) {
       {/* Rooms list */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase">
+          <p className="font-sans text-[11px] text-foreground/25 tracking-widest uppercase">
             Pieces
           </p>
-          <button className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-yellow/[0.1] border border-yellow/20 text-yellow/70 font-medieval text-[11px] hover:bg-yellow/[0.15] transition-colors">
+          <button className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-yellow/[0.1] border border-yellow/20 text-yellow/70 font-sans text-[11px] hover:bg-yellow/[0.15] transition-colors">
             <Plus size={12} />
             Ajouter
           </button>
@@ -42,24 +42,24 @@ export function ParametresTab(_props: ParametresTabProps) {
               onClick={() => setSelectedRoom(selectedRoom === room.id ? null : room.id)}
               className={`w-full flex items-center justify-between py-3 px-3 rounded-lg transition-colors ${
                 selectedRoom === room.id
-                  ? 'bg-cream/[0.06] border border-cream/[0.08]'
-                  : 'hover:bg-cream/[0.03] border border-transparent'
+                  ? 'bg-white/80 border border-border'
+                  : 'hover:bg-white/40 border border-transparent'
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-cream/[0.06] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-white/80 flex items-center justify-center">
                   <span className="text-sm">
                     {room.room_type === 'kitchen' ? '🍳' : room.room_type === 'bathroom' ? '🚿' : room.room_type === 'bedroom' ? '🛏️' : '🛋️'}
                   </span>
                 </div>
                 <div className="text-left">
-                  <p className="font-cinzel text-[13px] text-cream/70">{room.name}</p>
-                  <p className="font-lora text-[11px] text-cream/25">{room.surface_m2} m²</p>
+                  <p className="font-sans font-semibold text-[13px] text-foreground/70">{room.name}</p>
+                  <p className="font-sans text-[11px] text-foreground/25">{room.surface_m2} m²</p>
                 </div>
               </div>
               <ChevronRight
                 size={14}
-                className={`text-cream/20 transition-transform ${selectedRoom === room.id ? 'rotate-90' : ''}`}
+                className={`text-foreground/20 transition-transform ${selectedRoom === room.id ? 'rotate-90' : ''}`}
               />
             </button>
           ))}
@@ -68,41 +68,41 @@ export function ParametresTab(_props: ParametresTabProps) {
 
       {/* Room detail */}
       {selectedRoomData && (
-        <div className="space-y-4 bg-cream/[0.03] rounded-xl border border-cream/[0.06] p-4">
-          <h3 className="font-cinzel text-[15px] text-cream/70">{selectedRoomData.name}</h3>
+        <div className="space-y-4 bg-white/40 rounded-xl border border-border/60 p-4">
+          <h3 className="font-sans font-semibold text-[15px] text-foreground/70">{selectedRoomData.name}</h3>
 
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <label className="font-medieval text-[10px] text-cream/25 tracking-widest uppercase">
+              <label className="font-sans text-[10px] text-foreground/25 tracking-widest uppercase">
                 Nom
               </label>
               <input
                 type="text"
                 defaultValue={selectedRoomData.name}
-                className="w-full bg-cream/[0.04] border border-cream/[0.06] rounded-lg px-3 py-2 text-cream/60 font-lora text-[13px] focus:outline-none focus:border-yellow/30"
+                className="w-full bg-white/60 border border-border/60 rounded-lg px-3 py-2 text-foreground/60 font-sans text-[13px] focus:outline-none focus:border-yellow/30"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="font-medieval text-[10px] text-cream/25 tracking-widest uppercase">
+              <label className="font-sans text-[10px] text-foreground/25 tracking-widest uppercase">
                 Surface (m²)
               </label>
               <input
                 type="number"
                 defaultValue={selectedRoomData.surface_m2}
-                className="w-full bg-cream/[0.04] border border-cream/[0.06] rounded-lg px-3 py-2 text-cream/60 font-lora text-[13px] focus:outline-none focus:border-yellow/30"
+                className="w-full bg-white/60 border border-border/60 rounded-lg px-3 py-2 text-foreground/60 font-sans text-[13px] focus:outline-none focus:border-yellow/30"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="font-medieval text-[10px] text-cream/25 tracking-widest uppercase">
+              <label className="font-sans text-[10px] text-foreground/25 tracking-widest uppercase">
                 Configuration
               </label>
               <div className="flex flex-wrap gap-2">
                 {['Petit cote', 'Grand cote', 'Central'].map((config) => (
                   <button
                     key={config}
-                    className="px-3 py-1.5 rounded-lg bg-cream/[0.04] border border-cream/[0.06] text-cream/40 font-lora text-[12px] hover:bg-cream/[0.08] transition-colors"
+                    className="px-3 py-1.5 rounded-lg bg-white/60 border border-border/60 text-foreground/40 font-sans text-[12px] hover:bg-white transition-colors"
                   >
                     {config}
                   </button>
@@ -111,14 +111,14 @@ export function ParametresTab(_props: ParametresTabProps) {
             </div>
 
             <div className="space-y-1.5">
-              <label className="font-medieval text-[10px] text-cream/25 tracking-widest uppercase">
+              <label className="font-sans text-[10px] text-foreground/25 tracking-widest uppercase">
                 Materiau
               </label>
               <div className="flex flex-wrap gap-2">
                 {['Parquet', 'Carrelage', 'Moquette', 'Pierre'].map((mat) => (
                   <button
                     key={mat}
-                    className="px-3 py-1.5 rounded-lg bg-cream/[0.04] border border-cream/[0.06] text-cream/40 font-lora text-[12px] hover:bg-cream/[0.08] transition-colors"
+                    className="px-3 py-1.5 rounded-lg bg-white/60 border border-border/60 text-foreground/40 font-sans text-[12px] hover:bg-white transition-colors"
                   >
                     {mat}
                   </button>

@@ -101,7 +101,7 @@ export const SwipeCarousel = forwardRef<SwipeCarouselHandle, SwipeCarouselProps>
             onClick={() => goToIndex(viewIndex - 1)}
             disabled={viewIndex <= 0}
             className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${
-              viewIndex <= 0 ? 'text-cream/10' : 'text-cream/30 hover:text-cream/50 hover:bg-cream/[0.06]'
+              viewIndex <= 0 ? 'text-foreground/10' : 'text-foreground/30 hover:text-foreground/50 hover:bg-white/80'
             }`}
           >
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 1.5L3.5 5L6.5 8.5" /></svg>
@@ -115,13 +115,13 @@ export const SwipeCarousel = forwardRef<SwipeCarouselHandle, SwipeCarouselProps>
                   key={i}
                   onClick={() => goToIndex(i)}
                   className={`w-1.5 h-1.5 rounded-full transition-colors duration-200 ${
-                    i === viewIndex ? 'bg-cream/40' : 'bg-cream/10'
+                    i === viewIndex ? 'bg-foreground/40' : 'bg-foreground/10'
                   }`}
                 />
               ))}
             </div>
           ) : (
-            <span className="font-medieval text-[10px] text-cream/25 tabular-nums">
+            <span className="font-sans text-[10px] text-foreground/25 tabular-nums">
               {viewIndex + 1}/{children.length}
             </span>
           )}
@@ -131,7 +131,7 @@ export const SwipeCarousel = forwardRef<SwipeCarouselHandle, SwipeCarouselProps>
             onClick={() => goToIndex(viewIndex + 1)}
             disabled={viewIndex >= children.length - 1}
             className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${
-              viewIndex >= children.length - 1 ? 'text-cream/10' : 'text-cream/30 hover:text-cream/50 hover:bg-cream/[0.06]'
+              viewIndex >= children.length - 1 ? 'text-foreground/10' : 'text-foreground/30 hover:text-foreground/50 hover:bg-white/80'
             }`}
           >
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3.5 1.5L6.5 5L3.5 8.5" /></svg>

@@ -19,10 +19,10 @@ export function CharacterGallery({ characters }: CharacterGalleryProps) {
     <>
       {/* Progress */}
       <div className="flex items-center gap-3 mb-8">
-        <span className="font-medieval text-[11px] text-cream/30">
+        <span className="font-sans text-[11px] text-foreground/30">
           {collected}/{total}
         </span>
-        <div className="flex-1 h-px bg-cream/[0.06] relative">
+        <div className="flex-1 h-px bg-white/80 relative">
           <div
             className="absolute top-0 left-0 h-full bg-yellow/30 rounded-full transition-all duration-700"
             style={{ width: `${(collected / total) * 100}%` }}

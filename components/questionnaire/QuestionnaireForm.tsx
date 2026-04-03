@@ -192,9 +192,9 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
                 onChange={(e) => handleAnswer(question.id, e.target.value)}
                 className="sr-only"
               />
-              <span className="font-lora font-bold">{option.label}</span>
+              <span className="font-sans font-bold">{option.label}</span>
               {option.description && (
-                <span className="font-lora text-xs opacity-60 mt-1">
+                <span className="font-sans text-xs opacity-60 mt-1">
                   {option.description}
                 </span>
               )}
@@ -249,9 +249,9 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
                   onChange={(e) => handleMultipleChange(e.target.checked)}
                   className="sr-only"
                 />
-                <span className="font-lora font-bold">{option.label}</span>
+                <span className="font-sans font-bold">{option.label}</span>
                 {option.description && (
-                  <span className="font-lora text-xs opacity-60 mt-1">
+                  <span className="font-sans text-xs opacity-60 mt-1">
                     {option.description}
                   </span>
                 )}
@@ -270,7 +270,7 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
           max={question.max}
           value={currentValue || ''}
           onChange={(e) => handleAnswer(question.id, e.target.value)}
-          className="w-full h-16 px-6 font-cinzel text-3xl text-center border border-charcoal/12 rounded-md bg-off-white focus:bg-yellow/20 focus:outline-none focus:ring-2 focus:ring-yellow focus:border-yellow/50 transition-colors"
+          className="w-full h-16 px-6 font-serif text-3xl text-center border border-charcoal/12 rounded-md bg-off-white focus:bg-yellow/20 focus:outline-none focus:ring-2 focus:ring-yellow focus:border-yellow/50 transition-colors"
         />
       )
     }
@@ -318,18 +318,18 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
             <CardTitle>
               Question {currentStep + 1} / {visibleQuestions.length}
             </CardTitle>
-            <div className="font-medieval text-xs opacity-60">
+            <div className="font-sans text-xs opacity-60">
               {Math.round(progress)}%
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <h2 className="font-cinzel text-2xl uppercase mb-2">
+            <h2 className="font-serif text-2xl uppercase mb-2">
               {currentQuestion.question}
             </h2>
             {currentQuestion.description && (
-              <p className="font-lora text-sm opacity-70">
+              <p className="font-sans text-sm opacity-70">
                 {currentQuestion.description}
               </p>
             )}
@@ -338,7 +338,7 @@ export function QuestionnaireForm({ householdId, userId }: QuestionnaireFormProp
           {renderQuestion(currentQuestion)}
 
           {error && (
-            <div className="p-4 border border-red/20 bg-red/10 text-red rounded-md font-lora font-bold">
+            <div className="p-4 border border-red/20 bg-red/10 text-red rounded-md font-sans font-bold">
               {error}
             </div>
           )}

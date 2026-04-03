@@ -40,12 +40,12 @@ export function FiefPageClient({
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
       {/* Title */}
       <div className="text-center">
-        <h1 className="font-cinzel text-2xl text-cream font-semibold">{householdName}</h1>
-        <p className="font-medieval text-[11px] text-cream/25 mt-1">Votre fief</p>
+        <h1 className="font-serif text-2xl text-foreground font-semibold">{householdName}</h1>
+        <p className="font-sans text-[11px] text-foreground/25 mt-1">Votre fief</p>
       </div>
 
       {/* Tab bar */}
-      <div className="flex items-center justify-center gap-1 bg-cream/[0.04] rounded-xl p-1">
+      <div className="flex items-center justify-center gap-1 bg-white/60 rounded-xl p-1">
         {tabs.map((tab) => {
           const Icon = tab.icon
           const isActive = activeTab === tab.id
@@ -53,10 +53,10 @@ export function FiefPageClient({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`relative flex items-center gap-1.5 px-4 py-2 rounded-lg font-cinzel text-[13px] transition-all duration-200 ${
+              className={`relative flex items-center gap-1.5 px-4 py-2 rounded-lg font-sans font-semibold text-[13px] transition-all duration-200 ${
                 isActive
-                  ? 'text-cream bg-cream/[0.08]'
-                  : 'text-cream/30 hover:text-cream/50'
+                  ? 'text-foreground bg-white'
+                  : 'text-foreground/30 hover:text-foreground/50'
               }`}
             >
               <Icon size={14} />

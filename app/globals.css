@@ -4,11 +4,11 @@
 
 @layer base {
   :root {
-    /* Deep backgrounds */
-    --deep-blue: 35 55 50;
-    --deep-green: 43 76 63;
-    --deep-purple: 60 48 72;
-    --deep-orange: 107 75 42;
+    /* Deep backgrounds (used for hero cards, dark accents) */
+    --deep-blue: 26 23 20;
+    --deep-green: 35 45 38;
+    --deep-purple: 40 35 48;
+    --deep-orange: 60 45 30;
 
     /* Accents */
     --yellow: 196 163 90;
@@ -19,18 +19,18 @@
     --purple: 155 140 181;
     --pink: 200 139 122;
 
-    /* Neutrals */
-    --cream: 240 228 208;
-    --off-white: 232 220 200;
-    --black: 40 30 20;
-    --charcoal: 75 60 42;
-    --ink: 90 65 35;
+    /* Neutrals — warm light palette */
+    --cream: 246 241 235;
+    --off-white: 255 255 255;
+    --black: 26 23 20;
+    --charcoal: 26 23 20;
+    --ink: 45 37 32;
 
     /* Semantic */
-    --background: var(--cream);
-    --foreground: var(--charcoal);
-    --card: var(--off-white);
-    --card-foreground: var(--charcoal);
+    --background: 246 241 235;
+    --foreground: 26 23 20;
+    --card: 255 255 255;
+    --card-foreground: 26 23 20;
     --primary: var(--yellow);
     --primary-foreground: var(--black);
     --secondary: var(--blue);
@@ -41,8 +41,8 @@
     --accent-foreground: var(--black);
     --destructive: var(--red);
     --destructive-foreground: 255 255 255;
-    --border: var(--charcoal);
-    --input: var(--charcoal);
+    --border: 232 224 212;
+    --input: 232 224 212;
     --ring: var(--yellow);
 
     /* Character theme */
@@ -60,10 +60,10 @@
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar { width: 6px; display: none; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(75, 60, 42, 0.15); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(75, 60, 42, 0.25); }
+::-webkit-scrollbar-thumb { background: rgba(26, 23, 20, 0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(26, 23, 20, 0.18); }
 
 /* Animations */
 @keyframes float {
@@ -72,8 +72,8 @@
 }
 
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 6px rgba(196, 163, 90, 0.15); }
-  50% { box-shadow: 0 0 20px rgba(196, 163, 90, 0.3); }
+  0%, 100% { box-shadow: 0 0 6px rgba(196, 163, 90, 0.1); }
+  50% { box-shadow: 0 0 20px rgba(196, 163, 90, 0.2); }
 }
 
 @keyframes reveal {
@@ -89,6 +89,22 @@
 @keyframes shimmer {
   0% { background-position: -200% center; }
   100% { background-position: 200% center; }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+@keyframes grad-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 @layer base {

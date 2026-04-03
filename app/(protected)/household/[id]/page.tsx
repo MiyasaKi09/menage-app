@@ -59,7 +59,7 @@ export default async function HouseholdDetailPage({
           <Link href="/household" className="text-sm text-muted-foreground hover:underline mb-2 block">
             ← Retour a la cite
           </Link>
-          <h1 className="text-3xl font-cinzel font-bold">{household?.name}</h1>
+          <h1 className="text-3xl font-serif font-bold">{household?.name}</h1>
           <p className="text-muted-foreground">
             {members?.length || 0} membre{(members?.length || 0) > 1 ? 's' : ''}
           </p>
@@ -74,7 +74,7 @@ export default async function HouseholdDetailPage({
           <CardContent className="space-y-4">
             <div>
               <p className="text-sm text-muted-foreground">Code d'invitation</p>
-              <p className="text-2xl font-medieval font-bold">{household?.invite_code}</p>
+              <p className="text-2xl font-sans font-bold">{household?.invite_code}</p>
               <p className="text-xs text-muted-foreground mt-1">
                 Partagez ce code pour inviter de nouveaux membres
               </p>

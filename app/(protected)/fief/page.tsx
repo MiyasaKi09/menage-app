@@ -43,8 +43,7 @@ export default async function FiefPage() {
     .single()
 
   return (
-    <div className="min-h-screen relative">
-      <div className="fixed inset-0 bg-gradient-to-b from-deep-green to-deep-blue transition-colors duration-700" />
+    <div className="min-h-screen relative bg-background">
       <div className="relative z-10">
         <FiefPageClient
           householdId={householdId}

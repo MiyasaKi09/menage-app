@@ -34,7 +34,7 @@ export function CharacterDetailModal({ character, onClose }: CharacterDetailModa
         <div className="px-8 pt-10 pb-8 flex flex-col items-center text-center">
           {/* Rarity */}
           <span
-            className="font-medieval text-[10px] px-3 py-1 rounded-full mb-6"
+            className="font-sans text-[10px] px-3 py-1 rounded-full mb-6"
             style={{ color: rarityColor, backgroundColor: rarityColor + '12' }}
           >
             {RARITY_LABELS[character.rarity]}
@@ -50,24 +50,24 @@ export function CharacterDetailModal({ character, onClose }: CharacterDetailModa
           )}
 
           {/* Name */}
-          <h2 className="font-cinzel text-2xl font-semibold text-charcoal">{character.avatar_name}</h2>
+          <h2 className="font-serif text-2xl font-semibold text-charcoal">{character.avatar_name}</h2>
 
           {/* Power */}
           <p
-            className="font-lora text-[14px] italic mt-4"
+            className="font-sans text-[14px] italic mt-4"
             style={{ color: rarityColor }}
           >
             {character.power_description}
           </p>
 
           {/* Lore */}
-          <p className="font-lora text-[13px] text-charcoal/35 mt-6 leading-relaxed">
+          <p className="font-sans text-[13px] text-charcoal/35 mt-6 leading-relaxed">
             {character.lore_text}
           </p>
 
           {/* Stats */}
           {character.is_collected && character.times_received > 0 && (
-            <p className="font-medieval text-[11px] text-charcoal/20 mt-6">
+            <p className="font-sans text-[11px] text-charcoal/20 mt-6">
               Obtenu {character.times_received} fois
             </p>
           )}

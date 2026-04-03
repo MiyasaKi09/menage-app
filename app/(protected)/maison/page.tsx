@@ -1,9 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
-import { StatCard } from '@/components/ui/StatCard'
-import { DashboardCharacterHeader } from '@/components/dashboard/DashboardCharacterHeader'
 import { QuickAccessBar } from '@/components/maison/QuickAccessBar'
 import { ConsecrationCarousel } from '@/components/maison/ConsecrationCarousel'
 import { MaisonQuestsSection } from '@/components/maison/MaisonQuestsSection'
+import { XpHeroCard } from '@/components/maison/XpHeroCard'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 
@@ -215,18 +214,32 @@ export default async function MaisonPage() {
     ? { title: `${favoriteCharacter.name}`, subtitle: `Specialiste ${topTask}` }
     : null
 
+  // Format today's date in French
+  const todayFormatted = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())
+
   return (
-    <div className="min-h-screen relative">
-      {/* Background */}
-      <div className="fixed inset-0 bg-gradient-to-b from-deep-green to-deep-blue transition-colors duration-700" />
+    <div className="min-h-screen relative bg-background">
 
-      <div className="relative z-10 max-w-2xl mx-auto px-4 py-6 space-y-8">
+      <div className="relative z-10 max-w-app mx-auto px-3.5 pb-10">
+        {/* Header */}
+        <header className="pt-5 pb-3 flex justify-between items-end">
+          <div>
+            <p className="font-sans text-[11px] font-semibold text-foreground/30 uppercase tracking-[0.15em]">
+              {todayFormatted}
+            </p>
+            <h1 className="font-serif text-[38px] font-black leading-none mt-0.5 bg-gradient-to-br from-foreground to-foreground/60 bg-clip-text text-transparent" style={{ letterSpacing: '-0.03em' }}>
+              the keep
+            </h1>
+          </div>
+          <div className="relative mb-1">
+            <div className="w-[46px] h-[46px] rounded-2xl flex items-center justify-center font-sans text-base font-extrabold shadow-md" style={{ background: 'linear-gradient(145deg, hsl(24,55%,80%), hsl(20,50%,72%))', color: 'hsl(24,45%,38%)' }}>
+              {(profile?.display_name || 'A')[0].toUpperCase()}
+            </div>
+            <div className="absolute top-[-2px] right-[-2px] w-3 h-3 rounded-full bg-green border-[2.5px] border-background" />
+          </div>
+        </header>
 
-        {/* Header with character + user name */}
-        <DashboardCharacterHeader
-          displayName={profile?.display_name || 'Aventurier'}
-          totalPoints={profile?.total_points || 0}
-        />
+        <div className="space-y-3.5">
 
         {/* Quick access buttons */}
         <QuickAccessBar
@@ -250,12 +263,16 @@ export default async function MaisonPage() {
           }}
         />
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          <StatCard label="Serie" value={`${profile?.current_streak || 0}j`} icon="🔥" />
-          <StatCard label="Niveau" value={profile?.current_level || 1} />
-          <StatCard label="Quetes" value={profile?.tasks_completed || 0} icon="⚔️" />
-        </div>
+        {/* Bento Stats */}
+        <XpHeroCard
+          totalXp={profile?.total_points || 0}
+          done={weekTasks.filter((t: any) => t.status === 'completed').length}
+          total={weekTasks.length}
+          streak={profile?.current_streak || 0}
+          level={profile?.current_level || 1}
+          habitants={leaderboard.length}
+          habitantInitials={leaderboard.slice(0, 3).map((m: any) => ((m.profiles as any)?.display_name || '?')[0].toUpperCase())}
+        />
 
         {/* Corvée (carte au trésor) + Péripéties (carousel) */}
         {(() => {
@@ -286,8 +303,8 @@ export default async function MaisonPage() {
         {(!memberships || memberships.length === 0) && (
           <div className="text-center py-16 space-y-4">
             <div className="text-4xl opacity-40">🏰</div>
-            <h2 className="font-cinzel text-xl text-cream font-semibold">Fondez votre cite</h2>
-            <p className="font-lora text-[14px] text-cream/30 max-w-xs mx-auto">
+            <h2 className="font-serif text-xl text-foreground font-semibold">Fondez votre cite</h2>
+            <p className="font-sans text-[14px] text-foreground/30 max-w-xs mx-auto">
               Creez ou rejoignez une cite pour demarrer vos quetes
             </p>
             <Link href="/household/setup">
@@ -298,19 +315,20 @@ export default async function MaisonPage() {
 
         {householdId && !householdHasTasks && (
           <Link href="/questionnaire">
-            <div className="group flex items-center gap-4 py-4 border-b border-cream/[0.06] transition-colors duration-200">
+            <div className="group flex items-center gap-4 py-4 border-b border-border/60 transition-colors duration-200">
               <span className="text-xl opacity-40">📜</span>
               <div>
-                <p className="font-cinzel text-[14px] text-cream/60 group-hover:text-cream transition-colors duration-200">
+                <p className="font-sans font-semibold text-[14px] text-foreground/60 group-hover:text-foreground transition-colors duration-200">
                   Questionnaire initial
                 </p>
-                <p className="font-lora text-[12px] text-cream/25">
+                <p className="font-sans text-[12px] text-foreground/25">
                   Personnalisez vos quetes
                 </p>
               </div>
             </div>
           </Link>
         )}
+        </div>
       </div>
     </div>
   )

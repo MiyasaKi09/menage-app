@@ -55,13 +55,12 @@ export default async function PersonnagePage() {
 
   if (!weeklyCharacter) {
     return (
-      <div className="min-h-screen relative">
-        <div className="fixed inset-0 bg-gradient-to-b from-deep-green to-deep-blue" />
+      <div className="min-h-screen relative bg-background">
         <div className="relative z-10 flex items-center justify-center min-h-screen p-6">
           <div className="text-center space-y-4">
             <div className="text-5xl opacity-40">🃏</div>
-            <h2 className="font-cinzel text-xl text-cream font-semibold">Aucun personnage</h2>
-            <p className="font-lora text-[14px] text-cream/30 max-w-xs mx-auto">
+            <h2 className="font-serif text-xl text-foreground font-semibold">Aucun personnage</h2>
+            <p className="font-sans text-[14px] text-foreground/30 max-w-xs mx-auto">
               Rejoignez une cite pour recevoir votre premier personnage hebdomadaire
             </p>
             <Link href="/household/setup">
@@ -74,8 +73,7 @@ export default async function PersonnagePage() {
   }
 
   return (
-    <div className="min-h-screen relative">
-      <div className="fixed inset-0 bg-gradient-to-b from-deep-green to-deep-blue transition-colors duration-700" />
+    <div className="min-h-screen relative bg-background">
       <div className="relative z-10">
         <PersonnagePageClient character={weeklyCharacter} />
       </div>

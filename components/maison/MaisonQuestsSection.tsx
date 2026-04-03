@@ -58,7 +58,7 @@ export function MaisonQuestsSection({ corveeData, peripeties, userId, householdI
       {/* La corvée — carte au trésor unique */}
       {corvee && corvee.steps.length > 0 && (
         <div className="space-y-3">
-          <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase px-1">
+          <p className="font-sans text-[11px] text-foreground/25 tracking-widest uppercase px-1">
             Corvee de la semaine
           </p>
           <QuestCard

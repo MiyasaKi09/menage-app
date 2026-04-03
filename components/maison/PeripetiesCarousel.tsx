@@ -47,7 +47,7 @@ function CountdownBadge({ date }: { date: string }) {
     return () => clearInterval(interval)
   }, [date])
 
-  return <span className="font-lora text-[9px] text-cream/25">{remaining}</span>
+  return <span className="font-sans text-[9px] text-foreground/25">{remaining}</span>
 }
 
 export function PeripetiesCarousel({
@@ -181,15 +181,15 @@ export function PeripetiesCarousel({
               <div className="w-5 h-5 rounded-full bg-green/[0.2] flex items-center justify-center">
                 <Check size={12} className="text-green/70" />
               </div>
-              <span className="font-medieval text-[10px] text-green/50">Termine</span>
-              <span className="ml-auto font-cinzel text-[11px] text-yellow/40">+{task.points} or</span>
+              <span className="font-sans text-[10px] text-green/50">Termine</span>
+              <span className="ml-auto font-sans font-semibold text-[11px] text-yellow/40">+{task.points} or</span>
             </div>
-            <h3 className="font-cinzel text-[13px] text-cream/50 leading-tight">{task.task_name}</h3>
+            <h3 className="font-sans font-semibold text-[13px] text-foreground/45 leading-tight">{task.task_name}</h3>
             <div className="flex items-center gap-1">
               <span className="text-xs">{task.category_emoji}</span>
-              <span className="font-lora text-[10px] text-cream/25">{task.category_name}</span>
+              <span className="font-sans text-[10px] text-foreground/25">{task.category_name}</span>
             </div>
-            <p className="font-lora text-[9px] text-cream/15 italic">En attente de confirmation</p>
+            <p className="font-sans text-[9px] text-foreground/15 italic">En attente de confirmation</p>
           </div>
         </CarouselCard>
       )
@@ -198,25 +198,25 @@ export function PeripetiesCarousel({
     if (isLocked) {
       return (
         <CarouselCard key={task.task_id}>
-          <div className="rounded-xl p-4 h-full bg-charcoal/60 border border-cream/[0.04] backdrop-blur-sm relative overflow-hidden">
+          <div className="rounded-xl p-4 h-full bg-foreground/40 backdrop-blur-sm border border-border/40 relative overflow-hidden">
             <div className="blur-sm opacity-20 space-y-2 pointer-events-none">
-              <span className="font-medieval text-[10px] text-cream/30">Peripetie</span>
-              <h3 className="font-cinzel text-[12px] text-cream/40">???</h3>
+              <span className="font-sans text-[10px] text-foreground/30">Peripetie</span>
+              <h3 className="font-sans font-semibold text-[12px] text-foreground/40">???</h3>
             </div>
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-              <Lock size={18} className="text-cream/20" />
+              <Lock size={18} className="text-foreground/20" />
               <div className="flex items-center gap-1">
-                <Clock size={10} className="text-cream/20" />
+                <Clock size={10} className="text-foreground/20" />
                 <CountdownBadge date={task.scheduled_date} />
               </div>
               <button
                 onClick={() => handleUnlock(task.task_id)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow/[0.1] border border-yellow/20 text-yellow/60 font-cinzel text-[10px] hover:bg-yellow/[0.2] transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow/[0.1] border border-yellow/20 text-yellow/60 font-sans font-semibold text-[10px] hover:bg-yellow/[0.2] transition-colors"
               >
                 <Coins size={10} />
                 {unlockCost} or
               </button>
-              <span className="font-lora text-[8px] text-cream/15">Bonus x{bonusMultiplier}</span>
+              <span className="font-sans text-[8px] text-foreground/15">Bonus x{bonusMultiplier}</span>
             </div>
           </div>
         </CarouselCard>
@@ -231,37 +231,37 @@ export function PeripetiesCarousel({
       >
         <div className={`rounded-xl p-4 space-y-2 h-full border ${
           i === activeIndex
-            ? 'bg-cream/[0.08] border-yellow/[0.2] ring-1 ring-yellow/[0.1]'
-            : 'bg-cream/[0.06] border-cream/[0.08]'
+            ? 'bg-white border-yellow/[0.2] ring-1 ring-yellow/[0.1]'
+            : 'bg-white/80 border-border'
         }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               {i === activeIndex && <div className="w-2 h-2 rounded-full bg-yellow/60 animate-pulse" />}
-              <span className="font-medieval text-[10px] text-yellow/50 tracking-widest uppercase">
+              <span className="font-sans text-[10px] text-yellow/50 tracking-widest uppercase">
                 {i === activeIndex ? 'Active' : 'Peripetie'}
               </span>
               {isBoosted && (
                 <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-yellow/[0.15] border border-yellow/20">
                   <Sparkles size={8} className="text-yellow/60" />
-                  <span className="font-medieval text-[8px] text-yellow/60">x{mult}</span>
+                  <span className="font-sans text-[8px] text-yellow/60">x{mult}</span>
                 </span>
               )}
             </div>
-            <span className="font-cinzel text-[11px] text-yellow/60">
+            <span className="font-sans font-semibold text-[11px] text-yellow/60">
               {isBoosted ? Math.round(task.points * mult) : task.points} or
             </span>
           </div>
 
-          <h3 className="font-cinzel text-[13px] text-cream/80 leading-tight">{task.task_name}</h3>
+          <h3 className="font-sans font-semibold text-[13px] text-foreground/70 leading-tight">{task.task_name}</h3>
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span className="text-xs">{task.category_emoji}</span>
-              <span className="font-lora text-[11px] text-cream/25">{task.category_name}</span>
+              <span className="font-sans text-[11px] text-foreground/25">{task.category_name}</span>
             </div>
             <div className="flex items-center gap-1">
-              <Clock size={10} className="text-cream/15" />
-              <span className="font-lora text-[10px] text-cream/15">{task.duration_minutes}min</span>
+              <Clock size={10} className="text-foreground/15" />
+              <span className="font-sans text-[10px] text-foreground/15">{task.duration_minutes}min</span>
             </div>
           </div>
 
@@ -271,7 +271,7 @@ export function PeripetiesCarousel({
               handleComplete(task.task_id)
             }}
             disabled={isBeingCompleted}
-            className="w-full mt-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-green/[0.08] border border-green/15 text-green/60 font-cinzel text-[11px] hover:bg-green/[0.15] transition-colors disabled:opacity-30"
+            className="w-full mt-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-green/[0.08] border border-green/15 text-green/60 font-sans font-semibold text-[11px] hover:bg-green/[0.15] transition-colors disabled:opacity-30"
           >
             <Check size={12} />
             {isBeingCompleted ? 'En cours...' : 'Valider'}
@@ -284,13 +284,13 @@ export function PeripetiesCarousel({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between px-1">
-        <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase">
+        <p className="font-sans text-[11px] text-foreground/25 tracking-widest uppercase">
           Peripeties
         </p>
         {activeIndex >= 0 && (
           <button
             onClick={() => carouselRef.current?.goToIndex(activeIndex)}
-            className={`flex items-center gap-1 px-2 py-1 rounded-lg border font-medieval text-[9px] transition-colors ${
+            className={`flex items-center gap-1 px-2 py-1 rounded-lg border font-sans text-[9px] transition-colors ${
               isAtActive
                 ? 'bg-yellow/[0.05] border-yellow/10 text-yellow/30'
                 : 'bg-yellow/[0.12] border-yellow/20 text-yellow/60 hover:bg-yellow/[0.2]'
@@ -324,7 +324,7 @@ export function PeripetiesCarousel({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[60] bg-charcoal/80 backdrop-blur-sm flex items-center justify-center p-4"
+              className="fixed inset-0 z-[60] bg-foreground/40 backdrop-blur-sm flex items-center justify-center p-4"
               onClick={() => setExpandedId(null)}
             >
               <motion.div
@@ -332,20 +332,20 @@ export function PeripetiesCarousel({
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="w-full max-w-sm bg-gradient-to-b from-charcoal to-ink rounded-2xl border border-cream/[0.08] p-6 space-y-5"
+                className="w-full max-w-sm bg-white rounded-[22px] border border-border shadow-xl p-6 space-y-5"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="text-center space-y-2">
                   <span className="text-3xl">{task.category_emoji}</span>
-                  <h3 className="font-cinzel text-lg text-cream font-semibold">{task.task_name}</h3>
-                  <p className="font-lora text-[13px] text-cream/40">
+                  <h3 className="font-serif text-lg text-foreground font-semibold">{task.task_name}</h3>
+                  <p className="font-sans text-[13px] text-foreground/40">
                     {task.duration_minutes} min · {displayPoints} pieces d&apos;or
                     {isBoosted && ' (bonus)'}
                   </p>
                 </div>
 
                 {task.task_tip && (
-                  <p className="font-lora text-[12px] text-cream/30 text-center italic">
+                  <p className="font-sans text-[12px] text-foreground/30 text-center italic">
                     {task.task_tip}
                   </p>
                 )}
@@ -353,7 +353,7 @@ export function PeripetiesCarousel({
                 <button
                   onClick={() => handleComplete(task.task_id)}
                   disabled={completing === task.task_id}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-green/[0.15] border border-green/20 text-green/80 font-cinzel text-[14px] hover:bg-green/[0.25] transition-colors disabled:opacity-30"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-green/[0.15] border border-green/20 text-green/80 font-sans font-semibold text-[14px] hover:bg-green/[0.25] transition-colors disabled:opacity-30"
                 >
                   <Check size={16} />
                   {completing === task.task_id ? 'En cours...' : 'Terminer'}

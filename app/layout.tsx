@@ -1,30 +1,23 @@
 import type { Metadata } from 'next'
-import { Cinzel, MedievalSharp, Lora } from 'next/font/google'
+import { Plus_Jakarta_Sans, Fraunces } from 'next/font/google'
 import './globals.css'
 
-const cinzel = Cinzel({
-  weight: ['400', '500', '600', '700', '800', '900'],
+const plusJakarta = Plus_Jakarta_Sans({
+  weight: ['400', '500', '600', '700', '800'],
   subsets: ['latin'],
-  variable: '--font-cinzel',
+  variable: '--font-sans',
   display: 'swap',
 })
 
-const medievalSharp = MedievalSharp({
-  weight: '400',
+const fraunces = Fraunces({
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
   subsets: ['latin'],
-  variable: '--font-medieval',
-  display: 'swap',
-})
-
-const lora = Lora({
-  weight: ['400', '500', '600', '700'],
-  subsets: ['latin'],
-  variable: '--font-lora',
+  variable: '--font-serif',
   display: 'swap',
 })
 
 export const metadata: Metadata = {
-  title: 'Ménage App - Gamification du ménage',
+  title: 'The Keep — Gamification du ménage',
   description: 'Transformez le menage en aventure avec votre cite',
 }
 
@@ -35,7 +28,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <body className={`${cinzel.variable} ${medievalSharp.variable} ${lora.variable} font-lora`}>{children}</body>
+      <body className={`${plusJakarta.variable} ${fraunces.variable} font-sans`}>{children}</body>
     </html>
   )
 }

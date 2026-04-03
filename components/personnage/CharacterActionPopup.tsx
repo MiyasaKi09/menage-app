@@ -38,7 +38,7 @@ export function CharacterActionPopup({ character, onClose }: CharacterActionPopu
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[70] bg-charcoal/85 backdrop-blur-sm flex items-end justify-center p-4"
+      className="fixed inset-0 z-[70] bg-foreground/40 backdrop-blur-sm flex items-end justify-center p-4"
       onClick={onClose}
     >
       <motion.div
@@ -46,28 +46,28 @@ export function CharacterActionPopup({ character, onClose }: CharacterActionPopu
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="w-full max-w-md bg-gradient-to-b from-charcoal to-ink rounded-2xl border border-cream/[0.08] overflow-hidden"
+        className="w-full max-w-md bg-white rounded-3xl border border-[#E8E0D4] shadow-xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-cream/[0.06]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border/60">
           <div className="flex items-center gap-2">
             <Sparkles size={16} style={{ color: rarityColor }} />
-            <h2 className="font-cinzel text-[16px] text-cream font-semibold">
+            <h2 className="font-serif text-[16px] text-foreground font-semibold">
               Pouvoir
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-cream/[0.06] transition-colors"
+            className="p-1.5 rounded-lg hover:bg-white/80 transition-colors"
           >
-            <X size={18} className="text-cream/40" />
+            <X size={18} className="text-foreground/40" />
           </button>
         </div>
 
         {/* Power description */}
-        <div className="px-5 py-3 bg-cream/[0.02]">
-          <p className="font-lora text-[13px] text-cream/40">{character.power_description}</p>
+        <div className="px-5 py-3 bg-white/40">
+          <p className="font-sans text-[13px] text-foreground/40">{character.power_description}</p>
         </div>
 
         {/* Action choices */}
@@ -75,12 +75,12 @@ export function CharacterActionPopup({ character, onClose }: CharacterActionPopu
           {actions.map((action, index) => (
             <button
               key={index}
-              className="w-full text-left p-4 rounded-xl bg-cream/[0.03] border border-cream/[0.06] hover:bg-cream/[0.06] transition-colors group"
+              className="w-full text-left p-4 rounded-xl bg-white/40 border border-border/60 hover:bg-white/80 transition-colors group"
             >
-              <p className="font-cinzel text-[14px] text-cream/70 group-hover:text-cream transition-colors">
+              <p className="font-sans font-semibold text-[14px] text-foreground/70 group-hover:text-foreground transition-colors">
                 {action.label}
               </p>
-              <p className="font-lora text-[12px] text-cream/25 mt-0.5">
+              <p className="font-sans text-[12px] text-foreground/25 mt-0.5">
                 {action.description}
               </p>
             </button>

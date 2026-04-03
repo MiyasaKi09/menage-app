@@ -3,15 +3,15 @@ import { Button } from '@/components/ui/Button'
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-cream/70 backdrop-blur-xl">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/70 backdrop-blur-xl">
         <div className="max-w-5xl mx-auto px-6 h-12 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 bg-gradient-to-br from-yellow/70 to-yellow/40 rounded-lg flex items-center justify-center">
-              <span className="font-cinzel text-[13px] font-bold text-charcoal/60">M</span>
+              <span className="font-sans font-semibold text-[13px] text-charcoal/60">K</span>
             </div>
-            <span className="font-cinzel text-[15px] font-semibold text-charcoal/80">Menage</span>
+            <span className="font-serif font-bold text-[15px] text-charcoal/80">the keep</span>
           </div>
           <div className="flex items-center gap-2">
             <Link href="/login">
@@ -33,7 +33,7 @@ export default function Home() {
         />
 
         <div className="relative max-w-3xl mx-auto px-6 pt-24 pb-20 text-center">
-          <h1 className="font-cinzel text-[clamp(2.5rem,6vw,4.5rem)] font-semibold text-charcoal leading-[1.05] tracking-tight">
+          <h1 className="font-serif text-[clamp(2.5rem,6vw,4.5rem)] font-semibold text-charcoal leading-[1.05] tracking-tight">
             Chaque semaine,
             <br />
             <span className="text-yellow">un heros</span> sommeille
@@ -41,7 +41,7 @@ export default function Home() {
             en vous
           </h1>
 
-          <p className="mt-6 text-charcoal/40 font-lora text-lg md:text-xl max-w-md mx-auto leading-relaxed">
+          <p className="mt-6 text-charcoal/40 font-sans text-lg md:text-xl max-w-md mx-auto leading-relaxed">
             Incarnez des personnages legendaires et transformez
             votre foyer en royaume etincelant.
           </p>
@@ -72,8 +72,8 @@ export default function Home() {
                 <div className="w-10 h-10 mx-auto mb-4 rounded-xl bg-yellow/10 flex items-center justify-center">
                   <span className="text-lg">🃏</span>
                 </div>
-                <h3 className="font-cinzel text-[15px] font-semibold text-charcoal">Personnages</h3>
-                <p className="mt-2 font-lora text-[14px] text-charcoal/35 leading-relaxed">
+                <h3 className="font-sans font-semibold text-[15px] text-charcoal">Personnages</h3>
+                <p className="mt-2 font-sans text-[14px] text-charcoal/35 leading-relaxed">
                   Chaque semaine, un nouveau personnage
                   avec ses pouvoirs uniques.
                 </p>
@@ -82,8 +82,8 @@ export default function Home() {
                 <div className="w-10 h-10 mx-auto mb-4 rounded-xl bg-blue/10 flex items-center justify-center">
                   <span className="text-lg">⚔️</span>
                 </div>
-                <h3 className="font-cinzel text-[15px] font-semibold text-charcoal">Quetes</h3>
-                <p className="mt-2 font-lora text-[14px] text-charcoal/35 leading-relaxed">
+                <h3 className="font-sans font-semibold text-[15px] text-charcoal">Quetes</h3>
+                <p className="mt-2 font-sans text-[14px] text-charcoal/35 leading-relaxed">
                   Les taches deviennent des quetes.
                   Gagnez de l&apos;or, montez en niveau.
                 </p>
@@ -92,8 +92,8 @@ export default function Home() {
                 <div className="w-10 h-10 mx-auto mb-4 rounded-xl bg-green/10 flex items-center justify-center">
                   <span className="text-lg">👥</span>
                 </div>
-                <h3 className="font-cinzel text-[15px] font-semibold text-charcoal">Cite</h3>
-                <p className="mt-2 font-lora text-[14px] text-charcoal/35 leading-relaxed">
+                <h3 className="font-sans font-semibold text-[15px] text-charcoal">Cite</h3>
+                <p className="mt-2 font-sans text-[14px] text-charcoal/35 leading-relaxed">
                   Rejoignez une cite, partagez les quetes.
                   Qui sera le heros de la semaine?
                 </p>
@@ -104,8 +104,8 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-charcoal/[0.04] py-6">
-        <p className="text-center font-medieval text-[11px] text-charcoal/20">
-          &copy; 2025 Menage
+        <p className="text-center font-sans text-[11px] text-charcoal/20">
+          &copy; 2025 The Keep
         </p>
       </footer>
     </div>

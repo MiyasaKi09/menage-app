@@ -65,7 +65,7 @@ export function ScheduleView({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-deep-purple to-deep-blue relative overflow-hidden">
+    <div className="min-h-screen bg-background relative overflow-hidden">
       <GrainOverlay opacity={0.08} />
       <DiagonalStripe position="top-left" />
 
@@ -73,13 +73,13 @@ export function ScheduleView({
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <div className="font-medieval text-xs opacity-50 tracking-wider mb-1 text-cream">
+            <div className="font-sans text-xs opacity-50 tracking-wider mb-1 text-foreground">
               {householdName}
             </div>
-            <h1 className="font-cinzel text-4xl md:text-5xl text-cream font-bold leading-none">
+            <h1 className="font-serif text-4xl md:text-5xl text-foreground font-bold leading-none">
               Grimoire
             </h1>
-            <p className="font-medieval text-sm text-cream opacity-60 mt-2">
+            <p className="font-sans text-sm text-foreground opacity-60 mt-2">
               Vue liste par jour
             </p>
           </div>
@@ -101,8 +101,8 @@ export function ScheduleView({
           <Card>
             <CardContent className="p-8 text-center">
               <div className="text-6xl mb-4">🏆</div>
-              <h3 className="font-cinzel text-2xl font-bold mb-2">Aucune quete planifiee</h3>
-              <p className="font-lora opacity-70 mb-4">
+              <h3 className="font-serif text-2xl font-bold mb-2">Aucune quete planifiee</h3>
+              <p className="font-sans opacity-70 mb-4">
                 Toutes vos quetes sont a jour pour ce jour ! Profitez-en pour vous reposer.
               </p>
               <Link href="/tasks">
@@ -117,20 +117,20 @@ export function ScheduleView({
             }`}>
               <div className="flex justify-between items-center flex-wrap gap-2">
                 <div>
-                  <CardTitle className="font-cinzel text-2xl font-bold flex items-center gap-2">
+                  <CardTitle className="font-serif text-2xl font-bold flex items-center gap-2">
                     {getDateLabel()}
                     {isToday && (
-                      <span className="text-sm bg-charcoal text-cream px-2 py-1 font-medieval rounded-md">
+                      <span className="text-sm bg-foreground text-white px-2 py-1 font-sans rounded-md">
                         Aujourd&apos;hui
                       </span>
                     )}
                   </CardTitle>
-                  <p className="font-medieval text-xs opacity-70 mt-1">
+                  <p className="font-sans text-xs opacity-70 mt-1">
                     {todayTasks.length} quete{todayTasks.length > 1 ? 's' : ''} · {totalMinutes} min · {completedCount}/{todayTasks.length} accomplie{completedCount > 1 ? 's' : ''}
                   </p>
                 </div>
                 {completedCount === todayTasks.length && (
-                  <div className="font-medieval text-sm text-green bg-green/10 px-3 py-1 rounded-md border border-green/20">
+                  <div className="font-sans text-sm text-green bg-green/10 px-3 py-1 rounded-md border border-green/20">
                     ✓ Jour termine
                   </div>
                 )}

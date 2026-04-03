@@ -45,7 +45,7 @@ export function CharacterCard({
         onClick={onClick}
       >
         <span className="text-4xl grayscale opacity-10">{emoji}</span>
-        <span className="font-cinzel text-[12px] text-cream/15 mt-2">???</span>
+        <span className="font-sans font-semibold text-[12px] text-foreground/15 mt-2">???</span>
       </div>
     )
   }
@@ -84,7 +84,7 @@ export function CharacterCard({
 
       {/* Rarity badge */}
       <span
-        className="absolute top-3 right-3 font-medieval text-[9px] px-2 py-0.5 rounded-full backdrop-blur-sm"
+        className="absolute top-3 right-3 font-sans text-[9px] px-2 py-0.5 rounded-full backdrop-blur-sm"
         style={{ color: 'white', backgroundColor: rarityColor + '80' }}
       >
         {RARITY_LABELS[character.rarity]}
@@ -92,11 +92,11 @@ export function CharacterCard({
 
       {/* Bottom info */}
       <div className="absolute bottom-0 left-0 right-0 p-4">
-        <h3 className={cn('font-cinzel font-semibold text-white leading-tight drop-shadow-md', s.name)}>
+        <h3 className={cn('font-serif font-semibold text-white leading-tight drop-shadow-md', s.name)}>
           {character.avatar_name}
         </h3>
         <p
-          className={cn('font-lora italic leading-snug mt-1 text-white/70', s.power)}
+          className={cn('font-sans italic leading-snug mt-1 text-white/70', s.power)}
         >
           {character.power_description}
         </p>

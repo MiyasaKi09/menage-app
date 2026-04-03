@@ -56,9 +56,9 @@ export function QuestPostIt({ questName, categoryEmoji, steps, totalPoints }: Qu
       <div className="space-y-1">
         <div className="flex items-center gap-1.5">
           <span className="text-sm">{categoryEmoji}</span>
-          <span className="font-medieval text-[10px] text-cream/25 tracking-widest uppercase">Quete</span>
+          <span className="font-sans text-[10px] text-foreground/25 tracking-widest uppercase">Quete</span>
         </div>
-        <h3 className="font-cinzel text-[13px] text-cream/80 leading-tight pr-4">
+        <h3 className="font-sans font-semibold text-[13px] text-foreground/70 leading-tight pr-4">
           {questName}
         </h3>
       </div>
@@ -66,10 +66,10 @@ export function QuestPostIt({ questName, categoryEmoji, steps, totalPoints }: Qu
       {/* Progress bar */}
       <div className="space-y-1">
         <div className="flex items-center justify-between">
-          <span className="font-medieval text-[10px] text-cream/25">{completedCount}/{totalSteps} etapes</span>
-          <span className="font-cinzel text-[11px] text-yellow/50">{totalPoints} or</span>
+          <span className="font-sans text-[10px] text-foreground/25">{completedCount}/{totalSteps} etapes</span>
+          <span className="font-sans font-semibold text-[11px] text-yellow/50">{totalPoints} or</span>
         </div>
-        <div className="h-1.5 bg-cream/[0.06] rounded-full overflow-hidden">
+        <div className="h-1.5 bg-white/80 rounded-full overflow-hidden">
           <motion.div
             className="h-full bg-yellow/40 rounded-full"
             initial={{ width: 0 }}
@@ -93,23 +93,23 @@ export function QuestPostIt({ questName, categoryEmoji, steps, totalPoints }: Qu
               className={`w-full flex items-center gap-2 py-1.5 px-2 rounded-lg text-left transition-colors ${
                 isCompleted
                   ? 'bg-green/[0.06]'
-                  : 'hover:bg-cream/[0.04]'
+                  : 'hover:bg-white/60'
               }`}
             >
               <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
                 isCompleted
                   ? 'bg-green/20 border-green/30'
-                  : 'border-cream/15 hover:border-cream/25'
+                  : 'border-foreground/15 hover:border-foreground/25'
               }`}>
                 {isCompleted && <Check size={10} className="text-green/70" />}
               </div>
-              <span className={`font-lora text-[11px] flex-1 ${
-                isCompleted ? 'text-cream/30 line-through' : 'text-cream/50'
+              <span className={`font-sans text-[11px] flex-1 ${
+                isCompleted ? 'text-foreground/30 line-through' : 'text-foreground/45'
               }`}>
                 {dayLabel}
               </span>
-              <span className={`font-medieval text-[9px] ${
-                isCompleted ? 'text-green/40' : 'text-cream/15'
+              <span className={`font-sans text-[9px] ${
+                isCompleted ? 'text-green/40' : 'text-foreground/15'
               }`}>
                 +{step.points}
               </span>

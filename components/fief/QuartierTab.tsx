@@ -12,10 +12,10 @@ const RoomScene = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="aspect-square max-w-md mx-auto bg-cream/[0.03] rounded-2xl border border-cream/[0.06] flex items-center justify-center">
+      <div className="aspect-square max-w-md mx-auto bg-white/40 rounded-2xl border border-border/60 flex items-center justify-center">
         <div className="text-center space-y-2">
-          <div className="w-8 h-8 border-2 border-cream/20 border-t-cream/50 rounded-full animate-spin mx-auto" />
-          <p className="font-lora text-[12px] text-cream/25">Chargement de la chambre...</p>
+          <div className="w-8 h-8 border-2 border-foreground/20 border-t-foreground/50 rounded-full animate-spin mx-auto" />
+          <p className="font-sans text-[12px] text-foreground/25">Chargement de la chambre...</p>
         </div>
       </div>
     ),
@@ -208,7 +208,7 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
         {!isEditMode ? (
           <button
             onClick={() => setIsEditMode(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-cream/[0.06] border border-cream/[0.08] text-cream/50 font-medieval text-[12px] hover:bg-cream/[0.1] transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/80 border border-border text-foreground/50 font-sans text-[12px] hover:bg-white transition-colors"
           >
             <Pencil size={14} />
             Editer
@@ -219,14 +219,14 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
               <>
                 <button
                   onClick={handleRotate}
-                  className="flex items-center gap-1 px-3 py-2 rounded-lg bg-cream/[0.06] border border-cream/[0.06] text-cream/40 font-medieval text-[11px] hover:bg-cream/[0.1] transition-colors"
+                  className="flex items-center gap-1 px-3 py-2 rounded-lg bg-white/80 border border-border/60 text-foreground/40 font-sans text-[11px] hover:bg-white transition-colors"
                 >
                   <RotateCw size={12} />
                   Tourner
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="flex items-center gap-1 px-3 py-2 rounded-lg bg-red/[0.08] border border-red/15 text-red/50 font-medieval text-[11px] hover:bg-red/[0.15] transition-colors"
+                  className="flex items-center gap-1 px-3 py-2 rounded-lg bg-red/[0.08] border border-red/15 text-red/50 font-sans text-[11px] hover:bg-red/[0.15] transition-colors"
                 >
                   <Trash2 size={12} />
                 </button>
@@ -235,7 +235,7 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-green/[0.1] border border-green/20 text-green/60 font-medieval text-[12px] hover:bg-green/[0.2] transition-colors disabled:opacity-30"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-green/[0.1] border border-green/20 text-green/60 font-sans text-[12px] hover:bg-green/[0.2] transition-colors disabled:opacity-30"
             >
               <Save size={14} />
               {saving ? 'Sauvegarde...' : 'Sauvegarder'}
@@ -247,7 +247,7 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
       {/* Catalog (visible in edit mode) */}
       {isEditMode && (
         <div className="space-y-3">
-          <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase">
+          <p className="font-sans text-[11px] text-foreground/25 tracking-widest uppercase">
             Ajouter
           </p>
 
@@ -257,10 +257,10 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
               <button
                 key={cat.key}
                 onClick={() => setActiveCategory(cat.key)}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-lg font-medieval text-[10px] transition-colors ${
+                className={`flex-shrink-0 px-3 py-1.5 rounded-lg font-sans text-[10px] transition-colors ${
                   activeCategory === cat.key
                     ? 'bg-yellow/[0.12] border border-yellow/20 text-yellow/60'
-                    : 'bg-cream/[0.04] border border-cream/[0.06] text-cream/30'
+                    : 'bg-white/60 border border-border/60 text-foreground/30'
                 }`}
               >
                 {cat.label}
@@ -274,12 +274,12 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
               <button
                 key={item.id}
                 onClick={() => handleAddItem(item.id)}
-                className="flex-shrink-0 w-20 h-24 rounded-xl bg-cream/[0.04] border border-cream/[0.06] flex flex-col items-center justify-center gap-1.5 hover:bg-cream/[0.08] transition-colors"
+                className="flex-shrink-0 w-20 h-24 rounded-xl bg-white/60 border border-border/60 flex flex-col items-center justify-center gap-1.5 hover:bg-white transition-colors"
               >
-                <Plus size={14} className="text-cream/20" />
-                <span className="font-lora text-[9px] text-cream/35 text-center leading-tight px-1">{item.name}</span>
+                <Plus size={14} className="text-foreground/20" />
+                <span className="font-sans text-[9px] text-foreground/35 text-center leading-tight px-1">{item.name}</span>
                 {item.price > 0 && (
-                  <span className="flex items-center gap-0.5 font-cinzel text-[8px] text-yellow/40">
+                  <span className="flex items-center gap-0.5 font-sans font-semibold text-[8px] text-yellow/40">
                     <Coins size={8} />
                     {item.price}
                   </span>
@@ -287,7 +287,7 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
               </button>
             ))}
             {filteredCatalog.length === 0 && (
-              <p className="font-lora text-[11px] text-cream/20 py-4 px-2">Aucun objet dans cette categorie</p>
+              <p className="font-sans text-[11px] text-foreground/20 py-4 px-2">Aucun objet dans cette categorie</p>
             )}
           </div>
         </div>

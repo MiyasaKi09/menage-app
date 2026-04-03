@@ -24,21 +24,30 @@ export function useCharacterTheme() {
 
 function applyTheme(theme: FullTheme) {
   const root = document.documentElement
-  // Replace ALL site colors based on character
+  // Deep backgrounds (for hero cards, dark accents)
   root.style.setProperty('--deep-green', theme.deepBg1)
   root.style.setProperty('--deep-blue', theme.deepBg2)
   root.style.setProperty('--deep-purple', theme.deepBg1)
   root.style.setProperty('--deep-orange', theme.deepBg1)
+  // Accent colors
   root.style.setProperty('--yellow', theme.accent)
   root.style.setProperty('--orange', theme.warm)
   root.style.setProperty('--green', theme.secondary)
   root.style.setProperty('--blue', theme.secondarySoft)
   root.style.setProperty('--purple', theme.accentSoft)
   root.style.setProperty('--pink', theme.warm)
+  // Neutrals
   root.style.setProperty('--cream', theme.cream)
   root.style.setProperty('--off-white', theme.offWhite)
   root.style.setProperty('--charcoal', theme.charcoal)
   root.style.setProperty('--ink', theme.ink)
+  // Semantic (light palette)
+  root.style.setProperty('--background', theme.cream)
+  root.style.setProperty('--foreground', theme.charcoal)
+  root.style.setProperty('--card', theme.offWhite)
+  root.style.setProperty('--card-foreground', theme.charcoal)
+  root.style.setProperty('--black', theme.charcoal)
+  // Character-specific
   root.style.setProperty('--character-primary', theme.accent)
   root.style.setProperty('--character-accent', theme.accentSoft)
   root.style.setProperty('--character-glow', theme.glow)

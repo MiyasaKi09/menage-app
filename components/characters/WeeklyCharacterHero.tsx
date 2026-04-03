@@ -11,8 +11,8 @@ export function WeeklyCharacterHero() {
     return (
       <div className="text-center py-16">
         <div className="text-5xl opacity-20 mb-4">🃏</div>
-        <h2 className="font-cinzel text-xl text-cream/50">Aucun personnage cette semaine</h2>
-        <p className="font-lora text-[13px] text-cream/25 mt-2">
+        <h2 className="font-serif text-xl text-foreground/50">Aucun personnage cette semaine</h2>
+        <p className="font-sans text-[13px] text-foreground/25 mt-2">
           Rejoignez une cite pour recevoir votre premier personnage
         </p>
       </div>
@@ -29,7 +29,7 @@ export function WeeklyCharacterHero() {
   return (
     <div>
       {/* Title */}
-      <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase mb-6">
+      <p className="font-sans text-[11px] text-foreground/25 tracking-widest uppercase mb-6">
         Votre personnage cette semaine
       </p>
 
@@ -42,7 +42,7 @@ export function WeeklyCharacterHero() {
             style={{ backgroundColor: `rgb(${primary})` }}
           />
           {imageUrl ? (
-            <div className="relative w-44 h-60 sm:w-52 sm:h-72 rounded-2xl overflow-hidden shadow-lg border border-cream/10">
+            <div className="relative w-44 h-60 sm:w-52 sm:h-72 rounded-2xl overflow-hidden shadow-lg border border-border">
               <Image
                 src={imageUrl}
                 alt={character.avatar_name}
@@ -56,7 +56,7 @@ export function WeeklyCharacterHero() {
             </div>
           ) : (
             <div
-              className="w-44 h-60 sm:w-52 sm:h-72 rounded-2xl flex items-center justify-center shadow-lg border border-cream/10"
+              className="w-44 h-60 sm:w-52 sm:h-72 rounded-2xl flex items-center justify-center shadow-lg border border-border"
               style={{ background: `linear-gradient(to bottom, rgb(${primary} / 0.2), rgb(${primary} / 0.05))` }}
             >
               <span className="text-7xl">{emoji}</span>
@@ -68,24 +68,24 @@ export function WeeklyCharacterHero() {
         <div className="flex-1 flex flex-col justify-center text-center sm:text-left">
           {/* Rarity */}
           <span
-            className="inline-block self-center sm:self-start font-medieval text-[10px] px-3 py-1 rounded-full mb-3"
+            className="inline-block self-center sm:self-start font-sans text-[10px] px-3 py-1 rounded-full mb-3"
             style={{ color: rarityColor, backgroundColor: rarityColor + '15' }}
           >
             {rarityLabel}
           </span>
 
           {/* Name */}
-          <h1 className="font-cinzel text-3xl sm:text-4xl text-cream font-semibold tracking-tight leading-tight">
+          <h1 className="font-serif text-3xl sm:text-4xl text-foreground font-semibold tracking-tight leading-tight">
             {character.avatar_name}
           </h1>
 
           {/* Power */}
           {power && (
-            <div className="mt-5 p-4 rounded-xl bg-cream/[0.04] border border-cream/[0.06]">
-              <p className="font-medieval text-[10px] text-cream/25 tracking-widest uppercase mb-1">
+            <div className="mt-5 p-4 rounded-xl bg-white/60 border border-border/60">
+              <p className="font-sans text-[10px] text-foreground/25 tracking-widest uppercase mb-1">
                 Pouvoir
               </p>
-              <p className="font-cinzel text-[15px] text-yellow/80">
+              <p className="font-sans font-semibold text-[15px] text-yellow/80">
                 {character.power_description}
               </p>
             </div>
@@ -93,7 +93,7 @@ export function WeeklyCharacterHero() {
 
           {/* Lore */}
           {character.lore_text && (
-            <p className="font-lora text-[13px] text-cream/30 italic leading-relaxed mt-5">
+            <p className="font-sans text-[13px] text-foreground/30 italic leading-relaxed mt-5">
               &ldquo;{character.lore_text}&rdquo;
             </p>
           )}

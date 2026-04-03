@@ -162,7 +162,7 @@ function SceneContent({ furniture, isEditMode, selectedId, onSelect, onMove }: R
 
 export function RoomScene({ furniture, isEditMode, selectedId, onSelect, onMove }: RoomSceneProps) {
   return (
-    <div className="relative aspect-square max-w-md mx-auto rounded-2xl overflow-hidden border border-cream/[0.08]">
+    <div className="relative aspect-square max-w-md mx-auto rounded-2xl overflow-hidden border border-border">
       <Canvas
         shadows
         orthographic
@@ -190,13 +190,13 @@ export function RoomScene({ furniture, isEditMode, selectedId, onSelect, onMove 
       {/* Edit mode indicator */}
       {isEditMode && (
         <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-yellow/[0.2] border border-yellow/30 backdrop-blur-sm">
-          <span className="font-medieval text-[10px] text-yellow/70">Mode edition</span>
+          <span className="font-sans text-[10px] text-yellow/70">Mode edition</span>
         </div>
       )}
 
       {/* Room state */}
       <div className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-green/[0.15] border border-green/20 backdrop-blur-sm">
-        <span className="font-medieval text-[10px] text-green/60">Propre</span>
+        <span className="font-sans text-[10px] text-green/60">Propre</span>
       </div>
     </div>
   )

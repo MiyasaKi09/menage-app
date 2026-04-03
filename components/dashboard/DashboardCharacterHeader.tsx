@@ -28,11 +28,11 @@ export function DashboardCharacterHeader({ displayName, totalPoints }: Dashboard
           style={{ backgroundColor: `rgb(${primary})` }}
         />
         {imageUrl ? (
-          <div className="relative w-16 h-20 md:w-20 md:h-24 rounded-xl overflow-hidden border border-cream/15 shadow-md">
+          <div className="relative w-16 h-20 md:w-20 md:h-24 rounded-xl overflow-hidden border border-border shadow-md">
             <Image src={imageUrl} alt={charName || ''} fill className="object-cover object-top" sizes="80px" />
           </div>
         ) : (
-          <div className="w-16 h-20 md:w-20 md:h-24 rounded-xl bg-cream/[0.06] border border-cream/10 flex items-center justify-center">
+          <div className="w-16 h-20 md:w-20 md:h-24 rounded-xl bg-white/80 border border-border flex items-center justify-center">
             <span className="text-3xl">{emoji}</span>
           </div>
         )}
@@ -41,20 +41,20 @@ export function DashboardCharacterHeader({ displayName, totalPoints }: Dashboard
       {/* Names + points */}
       <div className="flex-1 min-w-0">
         {charName && (
-          <p className="font-cinzel text-xl md:text-2xl text-cream/90 font-semibold truncate leading-tight">
+          <p className="font-serif text-xl md:text-2xl text-foreground/90 font-semibold truncate leading-tight">
             {charName}
           </p>
         )}
-        <p className="font-lora text-[13px] text-cream/35 truncate">
+        <p className="font-sans text-[13px] text-foreground/35 truncate">
           {displayName}
           {rarity && (
-            <span className="ml-2 font-medieval text-[10px] text-cream/20">
+            <span className="ml-2 font-sans text-[10px] text-foreground/20">
               · {rarity}
             </span>
           )}
         </p>
         {character?.power_description && (
-          <p className="font-lora text-[11px] text-cream/20 italic mt-0.5 truncate">
+          <p className="font-sans text-[11px] text-foreground/20 italic mt-0.5 truncate">
             {character.power_description}
           </p>
         )}
@@ -62,8 +62,8 @@ export function DashboardCharacterHeader({ displayName, totalPoints }: Dashboard
 
       {/* Points */}
       <div className="flex-shrink-0 text-right">
-        <div className="font-cinzel text-2xl font-semibold text-yellow">{totalPoints}</div>
-        <div className="font-medieval text-[10px] text-cream/25 tracking-wider">or</div>
+        <div className="font-serif text-2xl font-semibold text-yellow">{totalPoints}</div>
+        <div className="font-sans text-[10px] text-foreground/25 tracking-wider">or</div>
       </div>
     </div>
   )

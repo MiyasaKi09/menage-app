@@ -9,9 +9,12 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        cinzel: ['var(--font-cinzel)', 'serif'],
-        medieval: ['var(--font-medieval)', 'cursive'],
-        lora: ['var(--font-lora)', 'serif'],
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-serif)', 'Georgia', 'serif'],
+        // Keep old names as aliases for gradual migration
+        cinzel: ['var(--font-serif)', 'serif'],
+        medieval: ['var(--font-sans)', 'sans-serif'],
+        lora: ['var(--font-sans)', 'sans-serif'],
       },
       colors: {
         'deep-blue': 'rgb(var(--deep-blue) / <alpha-value>)',
@@ -64,26 +67,26 @@ const config: Config = {
         },
       },
       boxShadow: {
-        'sm': '0 1px 3px rgba(75, 60, 42, 0.06)',
-        'DEFAULT': '0 2px 8px rgba(75, 60, 42, 0.08)',
-        'md': '0 4px 16px rgba(75, 60, 42, 0.1)',
-        'lg': '0 8px 32px rgba(75, 60, 42, 0.12)',
+        'sm': '0 1px 3px rgba(26, 23, 20, 0.04)',
+        'DEFAULT': '0 2px 8px rgba(26, 23, 20, 0.06)',
+        'md': '0 4px 16px rgba(26, 23, 20, 0.08)',
+        'lg': '0 8px 32px rgba(26, 23, 20, 0.1)',
+        'xl': '0 12px 50px rgba(26, 23, 20, 0.12)',
         'golden': '0 4px 20px rgba(196, 163, 90, 0.12)',
         'golden-lg': '0 8px 32px rgba(196, 163, 90, 0.18)',
-        // Keep old names as aliases
-        'watercolor': '0 2px 8px rgba(75, 60, 42, 0.08)',
-        'watercolor-sm': '0 1px 3px rgba(75, 60, 42, 0.06)',
-        'watercolor-lg': '0 8px 32px rgba(75, 60, 42, 0.12)',
-        'brutal': '0 2px 8px rgba(75, 60, 42, 0.08)',
-        'brutal-sm': '0 1px 3px rgba(75, 60, 42, 0.06)',
-        'brutal-lg': '0 8px 32px rgba(75, 60, 42, 0.12)',
+        'watercolor': '0 2px 8px rgba(26, 23, 20, 0.06)',
+        'watercolor-sm': '0 1px 3px rgba(26, 23, 20, 0.04)',
+        'watercolor-lg': '0 8px 32px rgba(26, 23, 20, 0.1)',
+        'brutal': '0 2px 8px rgba(26, 23, 20, 0.06)',
+        'brutal-sm': '0 1px 3px rgba(26, 23, 20, 0.04)',
+        'brutal-lg': '0 8px 32px rgba(26, 23, 20, 0.1)',
       },
       borderRadius: {
         'lg': 'var(--radius)',
         'md': 'calc(var(--radius) - 2px)',
         'sm': 'calc(var(--radius) - 4px)',
-        '2xl': '1rem',
-        '3xl': '1.5rem',
+        '2xl': '18px',
+        '3xl': '22px',
       },
       animation: {
         'float': 'float 3s ease-in-out infinite',
@@ -92,6 +95,12 @@ const config: Config = {
         'fade-in': 'fade-in 0.4s ease-out',
         'shimmer': 'shimmer 3s linear infinite',
         'spin-slow': 'spin 8s linear infinite',
+        'rise': 'rise 0.6s cubic-bezier(.22,1,.36,1) forwards',
+        'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
+        'grad-shift': 'grad-shift 8s ease infinite',
+      },
+      maxWidth: {
+        'app': '440px',
       },
       transitionDuration: {
         DEFAULT: '300ms',

@@ -78,29 +78,28 @@ export default async function TasksPage() {
   const taskCount = tasks?.length || 0
 
   return (
-    <div className="min-h-screen relative">
-      <div className="fixed inset-0 bg-gradient-to-b from-deep-purple to-deep-blue transition-colors duration-700" />
+    <div className="min-h-screen relative bg-background">
 
       <div className="relative z-10 max-w-2xl mx-auto px-6 py-10 space-y-8">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
-            <p className="font-medieval text-[11px] text-cream/25 tracking-widest uppercase mb-1">
+            <p className="font-sans text-[11px] text-foreground/25 tracking-widest uppercase mb-1">
               {householdName}
             </p>
-            <h1 className="font-cinzel text-3xl md:text-4xl text-cream font-semibold tracking-tight">
+            <h1 className="font-serif text-3xl md:text-4xl text-foreground font-semibold tracking-tight">
               Quetes
             </h1>
-            <p className="font-medieval text-[12px] text-cream/30 mt-1">
+            <p className="font-sans text-[12px] text-foreground/30 mt-1">
               {taskCount} disponible{taskCount > 1 ? 's' : ''}
             </p>
           </div>
           <div className="flex gap-2">
             <Link href="/tasks/schedule">
-              <Button variant="ghost" size="sm" className="text-cream/30 hover:text-cream/60">Planning</Button>
+              <Button variant="ghost" size="sm" className="text-foreground/30 hover:text-foreground/60">Planning</Button>
             </Link>
             <Link href="/tasks/history">
-              <Button variant="ghost" size="sm" className="text-cream/30 hover:text-cream/60">Historique</Button>
+              <Button variant="ghost" size="sm" className="text-foreground/30 hover:text-foreground/60">Historique</Button>
             </Link>
           </div>
         </div>
@@ -108,15 +107,15 @@ export default async function TasksPage() {
         {/* Tasks */}
         {tasksError && (
           <div className="rounded-2xl bg-red/[0.06] border border-red/10 p-6">
-            <p className="font-cinzel text-[15px] text-cream/70 mb-2">Erreur de chargement</p>
-            <pre className="text-[12px] text-cream/30 overflow-auto">{JSON.stringify(tasksError, null, 2)}</pre>
+            <p className="font-sans font-semibold text-[15px] text-foreground/70 mb-2">Erreur de chargement</p>
+            <pre className="text-[12px] text-foreground/30 overflow-auto">{JSON.stringify(tasksError, null, 2)}</pre>
           </div>
         )}
         {!tasksError && (!tasks || tasks.length === 0) ? (
           <div className="text-center py-16">
             <div className="text-3xl opacity-30 mb-3">📜</div>
-            <p className="font-cinzel text-[15px] text-cream/50">Aucune quete disponible</p>
-            <p className="font-lora text-[13px] text-cream/25 mt-1">Les quetes seront bientot configurees</p>
+            <p className="font-sans font-semibold text-[15px] text-foreground/50">Aucune quete disponible</p>
+            <p className="font-sans text-[13px] text-foreground/25 mt-1">Les quetes seront bientot configurees</p>
           </div>
         ) : (
           <TasksPageClient

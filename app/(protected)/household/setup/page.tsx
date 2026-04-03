@@ -6,7 +6,7 @@ export default function HouseholdSetupPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-cinzel font-bold">Fonder ou Rejoindre une Cite</h1>
+        <h1 className="text-3xl font-serif font-bold">Fonder ou Rejoindre une Cite</h1>
         <p className="text-muted-foreground">
           Une cite vous permet de partager les quetes avec d&apos;autres aventuriers
         </p>

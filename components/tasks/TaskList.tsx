@@ -126,8 +126,8 @@ export function TaskList({ tasks, householdId, userId, onTaskCompleted }: TaskLi
           <div className="relative z-10 p-4 border-b border-charcoal/10 bg-gradient-to-r from-orange/20 to-yellow/10 flex items-center gap-4">
             <CategoryIcon category={categoryName} size={48} />
             <div className="flex-1">
-              <h3 className="font-cinzel text-xl font-bold">{categoryName}</h3>
-              <p className="font-medieval text-xs opacity-70">
+              <h3 className="font-serif text-xl font-bold">{categoryName}</h3>
+              <p className="font-sans text-xs opacity-70">
                 {categoryTasks.length} tâche{categoryTasks.length > 1 ? 's' : ''}
               </p>
             </div>
@@ -141,7 +141,7 @@ export function TaskList({ tasks, householdId, userId, onTaskCompleted }: TaskLi
                 onMouseEnter={() => setHoveredId(task.id)}
                 onMouseLeave={() => setHoveredId(null)}
                 className={cn(
-                  "flex items-center border border-charcoal/8 bg-cream rounded-md transition-all cursor-pointer overflow-hidden",
+                  "flex items-center border border-border bg-white rounded-2xl transition-all cursor-pointer overflow-hidden",
                   hoveredId === task.id && "-translate-y-0.5 shadow-watercolor-sm"
                 )}
               >
@@ -152,15 +152,15 @@ export function TaskList({ tasks, householdId, userId, onTaskCompleted }: TaskLi
 
                 {/* Info */}
                 <div className="flex-1 p-4">
-                  <h4 className="font-cinzel text-lg font-semibold">
+                  <h4 className="font-serif text-lg font-semibold">
                     {task.task_templates.name}
                   </h4>
                   {task.task_templates.tip && (
-                    <p className="font-lora text-sm opacity-70 mt-1">
+                    <p className="font-sans text-sm opacity-70 mt-1">
                       {task.task_templates.tip}
                     </p>
                   )}
-                  <div className="flex gap-4 mt-2 font-medieval text-xs opacity-60">
+                  <div className="flex gap-4 mt-2 font-sans text-xs opacity-60">
                     <span>💰 {task.custom_points} or</span>
                     {task.task_templates.duration_minutes && (
                       <span>⏱️ ~{task.task_templates.duration_minutes} min</span>
