@@ -3,10 +3,11 @@
 import { useRef, useCallback } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { ContactShadows } from '@react-three/drei'
-import { EffectComposer, Noise, HueSaturation, Vignette } from '@react-three/postprocessing'
-import { BlendFunction } from 'postprocessing'
+import { EffectComposer } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { FurnitureItem } from './FurnitureItem'
+import { RoomDecorations } from './RoomDecorations'
+import { Watercolor } from './WatercolorEffect'
 
 export interface RoomFurnitureData {
   id: string
@@ -82,7 +83,8 @@ function CeilingLight() {
   const ref = useRef<THREE.PointLight>(null)
   useFrame(({ clock }) => {
     if (ref.current) {
-      ref.current.intensity = 1.0 + Math.sin(clock.elapsedTime * 2) * 0.08
+      const t = clock.elapsedTime
+      ref.current.intensity = 1.0 + Math.sin(t * 2) * 0.08 + Math.sin(t * 5.3) * 0.04
     }
   })
 
@@ -105,12 +107,26 @@ function CeilingLight() {
   )
 }
 
+// Gentle camera sway — disabled in edit mode
+function CameraSway({ enabled }: { enabled: boolean }) {
+  useFrame(({ camera, clock }) => {
+    if (!enabled) {
+      camera.position.set(5, 4, 5)
+      camera.lookAt(0, 0.5, 0)
+      return
+    }
+    const t = clock.elapsedTime
+    camera.position.x = 5 + Math.sin(t * 0.12) * 0.06
+    camera.position.z = 5 + Math.cos(t * 0.09) * 0.06
+    camera.lookAt(0, 0.5, 0)
+  })
+  return null
+}
+
 function WatercolorFilter() {
   return (
     <EffectComposer>
-      <HueSaturation saturation={-0.05} hue={0.02} />
-      <Noise opacity={0.04} blendFunction={BlendFunction.SOFT_LIGHT} />
-      <Vignette offset={0.15} darkness={0.3} />
+      <Watercolor />
     </EffectComposer>
   )
 }
@@ -123,12 +139,12 @@ function SceneContent({ furniture, isEditMode, selectedId, onSelect, onMove }: R
 
   return (
     <>
-      <ambientLight intensity={0.9} color="#fff5e8" />
-      <directionalLight position={[5, 8, 4]} intensity={0.7} color="#fff8ee" castShadow shadow-mapSize={1024} />
-      <directionalLight position={[-3, 4, 5]} intensity={0.2} color="#e8ddd0" />
-      <directionalLight position={[0.3, 3, -4]} intensity={0.5} color="#d0e0f0" />
+      {/* Atmospheric lighting — dim ambient, point lights do the heavy lifting */}
+      <ambientLight intensity={0.18} color="#b8a898" />
+      <directionalLight position={[5, 8, 4]} intensity={0.3} color="#d8d0c8" castShadow shadow-mapSize={1024} />
 
       <CeilingLight />
+      <CameraSway enabled={!isEditMode} />
 
       {/* Click catcher for deselect */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} onPointerDown={handleBackgroundClick}>
@@ -137,6 +153,7 @@ function SceneContent({ furniture, isEditMode, selectedId, onSelect, onMove }: R
       </mesh>
 
       <RoomShell />
+      <RoomDecorations />
 
       {/* Dynamic furniture */}
       {furniture.map((item) => (
@@ -154,7 +171,7 @@ function SceneContent({ furniture, isEditMode, selectedId, onSelect, onMove }: R
         />
       ))}
 
-      <ContactShadows position={[0, 0.02, 0]} opacity={0.2} scale={5} blur={2} far={3} />
+      <ContactShadows position={[0, 0.02, 0]} opacity={0.25} scale={5} blur={2} far={3} />
       <WatercolorFilter />
     </>
   )
@@ -162,20 +179,20 @@ function SceneContent({ furniture, isEditMode, selectedId, onSelect, onMove }: R
 
 export function RoomScene({ furniture, isEditMode, selectedId, onSelect, onMove }: RoomSceneProps) {
   return (
-    <div className="relative aspect-square max-w-md mx-auto rounded-2xl overflow-hidden border border-border">
+    <div className="relative aspect-square w-full rounded-[28px] overflow-hidden">
       <Canvas
         shadows
         orthographic
         camera={{
-          position: [6, 6, 6],
-          zoom: 90,
+          position: [5, 4, 5],
+          zoom: 95,
           near: 0.1,
           far: 50,
         }}
         gl={{ antialias: true }}
-        style={{ background: '#e8d8c4' }}
+        style={{ background: '#ddd0be' }}
         onCreated={({ camera }) => {
-          camera.lookAt(0, 0.6, 0)
+          camera.lookAt(0, 0.5, 0)
         }}
       >
         <SceneContent
@@ -189,13 +206,13 @@ export function RoomScene({ furniture, isEditMode, selectedId, onSelect, onMove 
 
       {/* Edit mode indicator */}
       {isEditMode && (
-        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-yellow/[0.2] border border-yellow/30 backdrop-blur-sm">
+        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-yellow/[0.2] border border-yellow/30 backdrop-blur-sm z-10">
           <span className="font-sans text-[10px] text-yellow/70">Mode edition</span>
         </div>
       )}
 
       {/* Room state */}
-      <div className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-green/[0.15] border border-green/20 backdrop-blur-sm">
+      <div className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-green/[0.15] border border-green/20 backdrop-blur-sm z-10">
         <span className="font-sans text-[10px] text-green/60">Propre</span>
       </div>
     </div>

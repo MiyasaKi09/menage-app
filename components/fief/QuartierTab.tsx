@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
+import { motion } from 'framer-motion'
 import { Pencil, Save, Trash2, RotateCw, Plus, Coins } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -12,7 +13,7 @@ const RoomScene = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="aspect-square max-w-md mx-auto bg-white/40 rounded-2xl border border-border/60 flex items-center justify-center">
+      <div className="aspect-square max-w-md mx-auto bg-white/40 rounded-[28px] border border-border/60 flex items-center justify-center">
         <div className="text-center space-y-2">
           <div className="w-8 h-8 border-2 border-foreground/20 border-t-foreground/50 rounded-full animate-spin mx-auto" />
           <p className="font-sans text-[12px] text-foreground/25">Chargement de la chambre...</p>
@@ -193,22 +194,56 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
   const filteredCatalog = catalog.filter(c => c.category === activeCategory)
 
   return (
-    <div className="space-y-5">
-      {/* 3D Room */}
-      <RoomScene
-        furniture={furniture}
-        isEditMode={isEditMode}
-        selectedId={selectedId}
-        onSelect={handleSelect}
-        onMove={handleMove}
-      />
+    <motion.div
+      className="space-y-5"
+      initial={{ opacity: 0, y: 20, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {/* 3D Room with enhanced container */}
+      <div className="relative max-w-md mx-auto">
+        <div
+          className="relative rounded-[28px] overflow-hidden"
+          style={{ boxShadow: '0 12px 50px hsla(30, 30%, 20%, 0.18), 0 2px 8px hsla(30, 30%, 20%, 0.08)' }}
+        >
+          <RoomScene
+            furniture={furniture}
+            isEditMode={isEditMode}
+            selectedId={selectedId}
+            onSelect={handleSelect}
+            onMove={handleMove}
+          />
+
+          {/* Gradient fade at bottom */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-10"
+            style={{ background: 'linear-gradient(to top, rgb(var(--background)), transparent)' }}
+          />
+
+          {/* "En direct" live badge — only when NOT in edit mode */}
+          {!isEditMode && (
+            <div
+              className="absolute top-3.5 left-3.5 z-20 flex items-center gap-2 px-3 py-1.5 rounded-[14px] border border-white/[0.08]"
+              style={{ background: 'rgba(26, 20, 16, 0.55)', backdropFilter: 'blur(12px)' }}
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF6830] opacity-60" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF6830]" style={{ boxShadow: '0 0 8px rgba(255,104,48,0.5)' }} />
+              </span>
+              <span className="font-sans text-[10px] font-bold text-white/70 tracking-[0.1em] uppercase">
+                En direct
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Edit toolbar */}
       <div className="flex items-center justify-center gap-2">
         {!isEditMode ? (
           <button
             onClick={() => setIsEditMode(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/80 border border-border text-foreground/50 font-sans text-[12px] hover:bg-white transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-[14px] bg-white border border-[#E8E0D4] text-foreground/50 font-sans text-[12px] font-medium hover:bg-white hover:shadow-sm transition-all"
           >
             <Pencil size={14} />
             Editer
@@ -219,14 +254,14 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
               <>
                 <button
                   onClick={handleRotate}
-                  className="flex items-center gap-1 px-3 py-2 rounded-lg bg-white/80 border border-border/60 text-foreground/40 font-sans text-[11px] hover:bg-white transition-colors"
+                  className="flex items-center gap-1 px-3 py-2 rounded-[14px] bg-white border border-[#E8E0D4] text-foreground/40 font-sans text-[11px] hover:shadow-sm transition-all"
                 >
                   <RotateCw size={12} />
                   Tourner
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="flex items-center gap-1 px-3 py-2 rounded-lg bg-red/[0.08] border border-red/15 text-red/50 font-sans text-[11px] hover:bg-red/[0.15] transition-colors"
+                  className="flex items-center gap-1 px-3 py-2 rounded-[14px] bg-red/[0.08] border border-red/15 text-red/50 font-sans text-[11px] hover:bg-red/[0.15] transition-colors"
                 >
                   <Trash2 size={12} />
                 </button>
@@ -235,7 +270,7 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-green/[0.1] border border-green/20 text-green/60 font-sans text-[12px] hover:bg-green/[0.2] transition-colors disabled:opacity-30"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-[14px] bg-green/[0.1] border border-green/20 text-green/60 font-sans text-[12px] font-medium hover:bg-green/[0.2] transition-colors disabled:opacity-30"
             >
               <Save size={14} />
               {saving ? 'Sauvegarde...' : 'Sauvegarder'}
@@ -257,10 +292,10 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
               <button
                 key={cat.key}
                 onClick={() => setActiveCategory(cat.key)}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-lg font-sans text-[10px] transition-colors ${
+                className={`flex-shrink-0 px-3 py-1.5 rounded-[10px] font-sans text-[10px] font-medium transition-colors ${
                   activeCategory === cat.key
-                    ? 'bg-yellow/[0.12] border border-yellow/20 text-yellow/60'
-                    : 'bg-white/60 border border-border/60 text-foreground/30'
+                    ? 'bg-yellow/[0.12] border border-yellow/20 text-yellow/70'
+                    : 'bg-white border border-[#E8E0D4] text-foreground/30 hover:text-foreground/45'
                 }`}
               >
                 {cat.label}
@@ -274,12 +309,12 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
               <button
                 key={item.id}
                 onClick={() => handleAddItem(item.id)}
-                className="flex-shrink-0 w-20 h-24 rounded-xl bg-white/60 border border-border/60 flex flex-col items-center justify-center gap-1.5 hover:bg-white transition-colors"
+                className="flex-shrink-0 w-20 h-24 rounded-[14px] bg-white border border-[#E8E0D4] flex flex-col items-center justify-center gap-1.5 hover:shadow-sm hover:-translate-y-0.5 transition-all"
               >
                 <Plus size={14} className="text-foreground/20" />
                 <span className="font-sans text-[9px] text-foreground/35 text-center leading-tight px-1">{item.name}</span>
                 {item.price > 0 && (
-                  <span className="flex items-center gap-0.5 font-sans font-semibold text-[8px] text-yellow/40">
+                  <span className="flex items-center gap-0.5 font-sans font-semibold text-[8px] text-yellow/50">
                     <Coins size={8} />
                     {item.price}
                   </span>
@@ -292,6 +327,6 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }
