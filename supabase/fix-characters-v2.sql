@@ -196,7 +196,7 @@ BEGIN
 
     IF v_existing_id IS NOT NULL THEN
         RETURN QUERY
-        SELECT wc.id, a.id, a.name, a.description, a.character_class, a.rarity, a.color_theme, a.power_type, a.power_description, a.power_value, a.lore_text, wc.is_revealed
+        SELECT wc.id, a.id, a.name::TEXT, a.description::TEXT, a.character_class, a.rarity, a.color_theme, a.power_type, a.power_description, a.power_value, a.lore_text, wc.is_revealed
         FROM weekly_characters wc JOIN avatars a ON a.id = wc.avatar_id
         WHERE wc.id = v_existing_id;
         RETURN;
@@ -246,7 +246,7 @@ RETURNS TABLE(out_avatar_id UUID, out_avatar_name TEXT, out_description TEXT, ou
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT a.id, a.name, a.description, a.character_class, a.rarity, a.color_theme, a.power_type, a.power_description, a.power_value, a.lore_text,
+    SELECT a.id, a.name::TEXT, a.description::TEXT, a.character_class, a.rarity, a.color_theme, a.power_type, a.power_description, a.power_value, a.lore_text,
            COALESCE(cc.times_received, 0), COALESCE(cc.is_favorite, false), cc.id IS NOT NULL
     FROM avatars a
     LEFT JOIN character_collection cc ON cc.avatar_id = a.id AND cc.profile_id = p_profile_id
