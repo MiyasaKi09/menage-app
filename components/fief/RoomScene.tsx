@@ -185,9 +185,18 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
       <hemisphereLight args={['#f5e6c8', '#a09070', 0.4]} />
 
       {/* ====== WINDOW GLOWS — blown-out bright warm white ====== */}
-      <WindowGlow position={[-0.7, 1.2, -1.3]} rotation={[0, 0, 0]} />
-      <WindowGlow position={[0.5, 1.2, -1.3]} rotation={[0, 0, 0]} />
-      <WindowGlow position={[1.3, 1.2, -0.3]} rotation={[0, -Math.PI / 2, 0]} />
+      {/* Model is rotated 0.25π (45°). Walls run diagonal.
+          Back-left wall runs from ~(-1.4, y, -1.4) toward (1.4, y, -1.4) rotated 45°
+          After rotation, back wall aligns ~NW-SE, left wall ~SW-NE.
+          Window positions estimated from screenshot. */}
+
+      {/* Back wall windows (2 gothic windows visible) — facing toward camera */}
+      <WindowGlow position={[-0.4, 0.9, -1.35]} rotation={[0, 0, 0]} size={[0.3, 0.55]} />
+      <WindowGlow position={[0.4, 0.9, -1.35]} rotation={[0, 0, 0]} size={[0.3, 0.55]} />
+
+      {/* Left wall windows (2 gothic windows) — facing right */}
+      <WindowGlow position={[-1.35, 0.9, -0.4]} rotation={[0, Math.PI / 2, 0]} size={[0.3, 0.55]} />
+      <WindowGlow position={[-1.35, 0.9, 0.4]} rotation={[0, Math.PI / 2, 0]} size={[0.3, 0.55]} />
 
       {/* ====== CAMERA + ORBIT ====== */}
       <CameraSetup />
