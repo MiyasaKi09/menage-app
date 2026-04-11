@@ -55,19 +55,12 @@ function RoomModel() {
       scale={0.55}
       position={[0, 0, 0]}
       rotation={[0, Math.PI * 0.25, 0]}
-      onPointerDown={(e: any) => {
-        e.stopPropagation()
-        const p = e.point
-        console.log(`WINDOW_POS: [${p.x.toFixed(3)}, ${p.y.toFixed(3)}, ${p.z.toFixed(3)}]`)
-      }}
     />
   )
 }
 
 useGLTF.preload('/models/chambre-web.glb')
 
-/*
-// Window glow — will re-enable once we have exact positions
 function WindowGlow({ position, rotation = [0, 0, 0], size = [0.3, 0.5] }: {
   position: [number, number, number]
   rotation?: [number, number, number]
@@ -89,7 +82,6 @@ function WindowGlow({ position, rotation = [0, 0, 0], size = [0.3, 0.5] }: {
     </group>
   )
 }
-*/
 
 // Subtle dust motes in light beams — additive blended points
 function DustMotes({ count = 200 }: { count?: number }) {
@@ -184,7 +176,12 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
       {/* ====== HEMISPHERE — warm sky / warm ground ====== */}
       <hemisphereLight args={['#f5e6c8', '#a09070', 0.4]} />
 
-      {/* ====== WINDOW GLOWS — disabled until we get correct positions ====== */}
+      {/* ====== WINDOW GLOWS — exact R3F raycasted positions, pushed behind walls ====== */}
+      {/* Left wall window — push -0.2 in X (behind wall) */}
+      <WindowGlow position={[-1.55, 0.962, -0.337]} rotation={[0, Math.PI / 2, 0]} size={[0.3, 0.5]} />
+      {/* Back wall windows — push -0.2 in Z (behind wall) */}
+      <WindowGlow position={[-0.333, 0.972, -1.55]} rotation={[0, 0, 0]} size={[0.3, 0.5]} />
+      <WindowGlow position={[0.505, 0.985, -1.43]} rotation={[0, 0, 0]} size={[0.3, 0.5]} />
 
       {/* ====== CAMERA + ORBIT ====== */}
       <CameraSetup />
