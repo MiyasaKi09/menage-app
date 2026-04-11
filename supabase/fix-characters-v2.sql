@@ -186,6 +186,8 @@ RETURNS TABLE(weekly_id UUID, avatar_id UUID, avatar_name TEXT, description TEXT
 AS $$
 DECLARE v_week_start DATE; v_week_end DATE; v_existing_id UUID; v_avatar_id UUID;
 BEGIN
+    -- Preferer les colonnes des tables aux variables de retour
+    #variable_conflict use_column
     v_week_start := date_trunc('week', CURRENT_DATE)::date;
     v_week_end := v_week_start + 6;
 
@@ -245,6 +247,7 @@ CREATE OR REPLACE FUNCTION get_character_collection(p_profile_id UUID)
 RETURNS TABLE(avatar_id UUID, avatar_name TEXT, description TEXT, character_class VARCHAR, rarity VARCHAR, color_theme JSONB, power_type VARCHAR, power_description TEXT, power_value JSONB, lore_text TEXT, times_received INT, is_favorite BOOLEAN, is_collected BOOLEAN)
 AS $$
 BEGIN
+    #variable_conflict use_column
     RETURN QUERY
     SELECT a.id, a.name, a.description, a.character_class, a.rarity, a.color_theme, a.power_type, a.power_description, a.power_value, a.lore_text,
            COALESCE(cc.times_received, 0), COALESCE(cc.is_favorite, false), cc.id IS NOT NULL
