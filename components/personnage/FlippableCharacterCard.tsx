@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useRef } from 'react'
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion'
 import { RotateCcw } from 'lucide-react'
 import { CharacterActionPopup } from './CharacterActionPopup'
 import {
@@ -19,18 +19,45 @@ interface FlippableCharacterCardProps {
 export function FlippableCharacterCard({ character }: FlippableCharacterCardProps) {
   const [isFlipped, setIsFlipped] = useState(false)
   const [showAction, setShowAction] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
 
   const image = CLASS_IMAGES[character.character_class]
   const emoji = CLASS_EMOJIS[character.character_class] || '🃏'
   const rarityColor = RARITY_COLORS[character.rarity] || '#C4A35A'
   const rarityLabel = RARITY_LABELS[character.rarity] || character.rarity
 
+  // 3D tilt effect
+  const mouseX = useMotionValue(0)
+  const mouseY = useMotionValue(0)
+
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [8, -8]), { stiffness: 200, damping: 20 })
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-8, 8]), { stiffness: 200, damping: 20 })
+  const glareX = useTransform(mouseX, [-0.5, 0.5], [0, 100])
+  const glareY = useTransform(mouseY, [-0.5, 0.5], [0, 100])
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!cardRef.current || isFlipped) return
+    const rect = cardRef.current.getBoundingClientRect()
+    const x = (e.clientX - rect.left) / rect.width - 0.5
+    const y = (e.clientY - rect.top) / rect.height - 0.5
+    mouseX.set(x)
+    mouseY.set(y)
+  }
+
+  const handleMouseLeave = () => {
+    mouseX.set(0)
+    mouseY.set(0)
+  }
+
   return (
     <>
       <div
+        ref={cardRef}
         className="relative w-full max-w-sm cursor-pointer"
         style={{ perspective: '1200px' }}
         onClick={() => setIsFlipped(!isFlipped)}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
       >
         {/* Flip hint */}
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
@@ -43,16 +70,20 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
         <motion.div
           animate={{ rotateY: isFlipped ? 180 : 0 }}
           transition={{ duration: 0.6, type: 'spring', stiffness: 100, damping: 20 }}
-          style={{ transformStyle: 'preserve-3d' }}
+          style={{
+            transformStyle: 'preserve-3d',
+            rotateX: isFlipped ? 0 : rotateX,
+            rotateY: isFlipped ? 180 : rotateY,
+          }}
           className="relative aspect-[3/4.5] w-full"
         >
           {/* FRONT - Character Image */}
           <div
-            className="absolute inset-0 rounded-2xl overflow-hidden border-2 shadow-lg"
+            className="absolute inset-0 rounded-2xl overflow-hidden border-2 shadow-xl"
             style={{
               backfaceVisibility: 'hidden',
               borderColor: `${rarityColor}40`,
-              boxShadow: `0 0 40px ${rarityColor}15`,
+              boxShadow: `0 8px 40px ${rarityColor}20, 0 0 60px ${rarityColor}10`,
             }}
           >
             {image ? (
@@ -71,17 +102,43 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
               </div>
             )}
 
+            {/* Glare effect */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: useTransform(
+                  [glareX, glareY],
+                  ([x, y]) => `radial-gradient(circle at ${x}% ${y}%, rgba(255,255,255,0.15) 0%, transparent 60%)`
+                ),
+              }}
+            />
+
             {/* Name overlay at bottom */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-5 pt-16">
-              <h2 className="font-serif text-2xl text-foreground font-bold">{character.avatar_name}</h2>
-              <div className="flex items-center gap-2 mt-1">
+            <div className="absolute bottom-0 left-0 right-0 p-5 pt-20"
+              style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)' }}
+            >
+              <h2
+                className="font-serif text-2xl font-bold drop-shadow-lg"
+                style={{
+                  color: '#fff',
+                  textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.3)',
+                }}
+              >
+                {character.avatar_name}
+              </h2>
+              <div className="flex items-center gap-2 mt-1.5">
                 <span
-                  className="inline-flex px-2 py-0.5 rounded text-[10px] font-sans"
-                  style={{ backgroundColor: `${rarityColor}25`, color: rarityColor }}
+                  className="inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-sans font-medium backdrop-blur-sm"
+                  style={{
+                    backgroundColor: `${rarityColor}30`,
+                    color: '#fff',
+                    border: `1px solid ${rarityColor}40`,
+                    textShadow: '0 1px 3px rgba(0,0,0,0.4)',
+                  }}
                 >
                   {rarityLabel}
                 </span>
-                <span className="font-sans text-[12px] text-foreground/40">{emoji}</span>
+                <span className="font-sans text-[13px] drop-shadow-md">{emoji}</span>
               </div>
             </div>
           </div>
@@ -93,7 +150,7 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
               backfaceVisibility: 'hidden',
               transform: 'rotateY(180deg)',
               borderColor: `${rarityColor}40`,
-              boxShadow: `0 0 40px ${rarityColor}15`,
+              boxShadow: `0 8px 40px ${rarityColor}20`,
             }}
           >
             <div
