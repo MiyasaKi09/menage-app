@@ -1,8 +1,8 @@
 'use client'
 
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { ContactShadows } from '@react-three/drei'
+import { ContactShadows, useGLTF } from '@react-three/drei'
 import { EffectComposer } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { FurnitureItem } from './FurnitureItem'
@@ -27,56 +27,28 @@ interface RoomSceneProps {
   onMove: (id: string, pos: [number, number, number]) => void
 }
 
-const WALL_COLOR = '#e8d4be'
-const WALL_INNER = '#dcc8b0'
-const FLOOR_COLOR = '#b89070'
+// 3D Room model loaded from GLB
+function RoomModel() {
+  const { scene } = useGLTF('/models/chambre-draco.glb')
 
-// Room shell — L-shaped walls, floor, partial ceiling
-function RoomShell() {
-  const wallThickness = 0.25
-  const wallHeight = 3
-  const roomSize = 3.5
+  // Enable shadows on all meshes in the model
+  scene.traverse((child) => {
+    if ((child as THREE.Mesh).isMesh) {
+      child.castShadow = true
+      child.receiveShadow = true
+    }
+  })
 
   return (
-    <group>
-      {/* Floor */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
-        <planeGeometry args={[roomSize, roomSize]} />
-        <meshStandardMaterial color={FLOOR_COLOR} roughness={0.9} />
-      </mesh>
-      <mesh position={[0, 0.04, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[roomSize - 0.1, roomSize - 0.1]} />
-        <meshStandardMaterial color="#b08858" roughness={0.88} />
-      </mesh>
-
-      {/* Back wall */}
-      <mesh position={[0, wallHeight / 2, -roomSize / 2 - wallThickness / 2]} castShadow>
-        <boxGeometry args={[roomSize + wallThickness * 2, wallHeight, wallThickness]} />
-        <meshStandardMaterial color={WALL_COLOR} roughness={0.92} />
-      </mesh>
-      <mesh position={[0, wallHeight / 2, -roomSize / 2 + 0.01]}>
-        <planeGeometry args={[roomSize, wallHeight]} />
-        <meshStandardMaterial color={WALL_INNER} roughness={0.95} />
-      </mesh>
-
-      {/* Left wall */}
-      <mesh position={[-roomSize / 2 - wallThickness / 2, wallHeight / 2, 0]} castShadow>
-        <boxGeometry args={[wallThickness, wallHeight, roomSize + wallThickness]} />
-        <meshStandardMaterial color="#dcc0a5" roughness={0.92} />
-      </mesh>
-      <mesh position={[-roomSize / 2 + 0.01, wallHeight / 2, 0]} rotation={[0, Math.PI / 2, 0]}>
-        <planeGeometry args={[roomSize, wallHeight]} />
-        <meshStandardMaterial color={WALL_INNER} roughness={0.95} />
-      </mesh>
-
-      {/* Partial ceiling */}
-      <mesh position={[-roomSize / 4 - wallThickness / 2, wallHeight, -roomSize / 4 - wallThickness / 2]} castShadow>
-        <boxGeometry args={[roomSize / 2 + wallThickness * 2, 0.15, roomSize / 2 + wallThickness]} />
-        <meshStandardMaterial color="#e0ccb5" roughness={0.92} />
-      </mesh>
-    </group>
+    <primitive
+      object={scene}
+      scale={1}
+      position={[0, 0, 0]}
+    />
   )
 }
+
+useGLTF.preload('/models/chambre-draco.glb')
 
 // Ceiling pendant light with flicker
 function CeilingLight() {
@@ -139,9 +111,10 @@ function SceneContent({ furniture, isEditMode, selectedId, onSelect, onMove }: R
 
   return (
     <>
-      {/* Atmospheric lighting — dim ambient, point lights do the heavy lifting */}
-      <ambientLight intensity={0.18} color="#b8a898" />
-      <directionalLight position={[5, 8, 4]} intensity={0.3} color="#d8d0c8" castShadow shadow-mapSize={1024} />
+      {/* Lighting — boosted for PBR GLB materials */}
+      <ambientLight intensity={0.4} color="#b8a898" />
+      <directionalLight position={[5, 8, 4]} intensity={0.8} color="#d8d0c8" castShadow shadow-mapSize={1024} />
+      <hemisphereLight args={['#ffe4c4', '#3d2b1f', 0.3]} />
 
       <CeilingLight />
       <CameraSway enabled={!isEditMode} />
@@ -152,7 +125,9 @@ function SceneContent({ furniture, isEditMode, selectedId, onSelect, onMove }: R
         <meshBasicMaterial visible={false} />
       </mesh>
 
-      <RoomShell />
+      <Suspense fallback={null}>
+        <RoomModel />
+      </Suspense>
       <RoomDecorations />
 
       {/* Dynamic furniture */}
