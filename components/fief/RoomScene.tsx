@@ -1,9 +1,9 @@
 'use client'
 
-import { Suspense, useEffect, useRef, useMemo, useState } from 'react'
+import { Suspense, useEffect, useRef, useMemo } from 'react'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
 import { useGLTF, OrbitControls } from '@react-three/drei'
-import { EffectComposer, GodRays, Bloom, N8AO, Vignette } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, N8AO, Vignette, HueSaturation, BrightnessContrast } from '@react-three/postprocessing'
 import { BlendFunction, KernelSize } from 'postprocessing'
 import * as THREE from 'three'
 
@@ -61,29 +61,34 @@ function RoomModel() {
 
 useGLTF.preload('/models/chambre-web.glb')
 
-// Sun source mesh for GodRays — positioned behind window
-function SunSource({ sunRef }: { sunRef: React.RefObject<THREE.Mesh | null> }) {
+// Bright blown-out area light behind each window opening
+// Simulates overexposed exterior sky flooding in
+function WindowLight({ position, size = [0.5, 0.8] }: { position: [number, number, number]; size?: [number, number] }) {
   return (
-    <mesh ref={sunRef} position={[2.5, 2.2, -2.5]}>
-      <sphereGeometry args={[0.25, 16, 16]} />
-      <meshBasicMaterial color="#fff4d0" transparent opacity={0.85} />
-    </mesh>
+    <group position={position}>
+      {/* Emissive plane — the "blown out sky" visible through the window */}
+      <mesh>
+        <planeGeometry args={size} />
+        <meshBasicMaterial color="#fff8e8" transparent opacity={0.95} side={THREE.DoubleSide} />
+      </mesh>
+      {/* Strong point light pushing light into the room */}
+      <pointLight color="#fff0d0" intensity={1.5} distance={4} decay={1.5} />
+    </group>
   )
 }
 
-// Floating dust particles concentrated in light beams
-function DustParticles({ count = 80 }: { count?: number }) {
+// Floating dust particles — subtle, small, golden
+function DustParticles({ count = 60 }: { count?: number }) {
   const meshRef = useRef<THREE.InstancedMesh>(null)
 
   const particles = useMemo(() => {
     return Array.from({ length: count }, () => ({
-      // Concentrate near center/window area
-      x: (Math.random() - 0.3) * 2.0,
-      y: Math.random() * 1.6 + 0.1,
-      z: (Math.random() - 0.3) * 2.0,
-      speed: 0.015 + Math.random() * 0.03,
+      x: (Math.random() - 0.5) * 2.2,
+      y: Math.random() * 1.5 + 0.15,
+      z: (Math.random() - 0.5) * 2.2,
+      speed: 0.01 + Math.random() * 0.025,
       drift: Math.random() * Math.PI * 2,
-      size: 0.005 + Math.random() * 0.01,
+      size: 0.004 + Math.random() * 0.008,
     }))
   }, [count])
 
@@ -94,9 +99,9 @@ function DustParticles({ count = 80 }: { count?: number }) {
 
     particles.forEach((p, i) => {
       dummy.position.set(
-        p.x + Math.sin(t * p.speed + p.drift) * 0.25,
-        p.y + Math.sin(t * p.speed * 0.6 + p.drift) * 0.12,
-        p.z + Math.cos(t * p.speed * 0.4 + p.drift) * 0.25,
+        p.x + Math.sin(t * p.speed + p.drift) * 0.2,
+        p.y + Math.sin(t * p.speed * 0.5 + p.drift) * 0.1,
+        p.z + Math.cos(t * p.speed * 0.3 + p.drift) * 0.2,
       )
       dummy.scale.setScalar(p.size)
       dummy.updateMatrix()
@@ -108,7 +113,7 @@ function DustParticles({ count = 80 }: { count?: number }) {
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
       <sphereGeometry args={[1, 6, 4]} />
-      <meshBasicMaterial color="#fffae0" transparent opacity={0.6} />
+      <meshBasicMaterial color="#fff8d0" transparent opacity={0.5} />
     </instancedMesh>
   )
 }
@@ -118,7 +123,6 @@ function CameraSetup() {
   const { camera } = useThree()
 
   useEffect(() => {
-    // Perspective camera — position further back with low FOV for iso look
     camera.position.set(8, 6, 8)
     camera.lookAt(0, 0.5, 0)
   }, [camera])
@@ -126,79 +130,57 @@ function CameraSetup() {
   return null
 }
 
-// Post-processing pipeline
-function PostProcessing({ sunRef }: { sunRef: React.RefObject<THREE.Mesh | null> }) {
-  const [ready, setReady] = useState(false)
-
-  useEffect(() => {
-    // Wait for ref to be populated
-    if (sunRef.current) setReady(true)
-  })
-
-  if (!ready || !sunRef.current) return null
-
-  return (
-    <EffectComposer>
-      <GodRays
-        sun={sunRef.current}
-        samples={80}
-        density={0.97}
-        decay={0.95}
-        weight={0.5}
-        exposure={0.35}
-        clampMax={1}
-        blur
-        kernelSize={KernelSize.SMALL}
-        blendFunction={BlendFunction.SCREEN}
-      />
-      <Bloom
-        intensity={0.25}
-        luminanceThreshold={0.75}
-        luminanceSmoothing={0.9}
-        kernelSize={KernelSize.LARGE}
-      />
-      <N8AO
-        aoRadius={0.4}
-        intensity={1.2}
-        distanceFalloff={0.5}
-      />
-      <Vignette offset={0.25} darkness={0.35} />
-    </EffectComposer>
-  )
-}
-
 function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
-  const sunRef = useRef<THREE.Mesh>(null)
-
   return (
     <>
-      {/* Ambient — lower for more contrast, warm tone */}
-      <ambientLight intensity={0.35} color="#e8ddd0" />
+      {/* ============================================ */}
+      {/* LIGHTING — matching the diorama reference    */}
+      {/* ============================================ */}
 
-      {/* Key light — strong warm sun entering through windows */}
+      {/* Ambient — generous, no deep blacks anywhere.
+          Warm tone so darkest shadow stays brown-medium */}
+      <ambientLight intensity={0.6} color="#e8d8c4" />
+
+      {/* Key light — warm ~4500K directional from top-left-back,
+          45-50° elevation. Creates soft shadows on floor + gradient on right wall */}
       <directionalLight
-        position={[3, 5, 2]}
-        intensity={2.5}
-        color="#ffe0a0"
+        position={[-3, 5, -2]}
+        intensity={1.8}
+        color="#f5deb3"
         castShadow
         shadow-mapSize={2048}
-        shadow-bias={-0.0003}
+        shadow-bias={-0.0005}
+        shadow-radius={8}
         shadow-camera-near={0.1}
         shadow-camera-far={20}
-        shadow-camera-left={-4}
-        shadow-camera-right={4}
-        shadow-camera-top={4}
-        shadow-camera-bottom={-4}
+        shadow-camera-left={-5}
+        shadow-camera-right={5}
+        shadow-camera-top={5}
+        shadow-camera-bottom={-5}
       />
 
-      {/* Cool fill — subtle, opposite side */}
-      <directionalLight position={[-3, 3, -2]} intensity={0.15} color="#b8c0d8" />
+      {/* Secondary fill — very soft, from the front-right to lift shadows */}
+      <directionalLight position={[4, 3, 4]} intensity={0.4} color="#f0e4d0" />
 
-      {/* Hemisphere — warm sky / dark floor bounce */}
-      <hemisphereLight args={['#ffecd2', '#3a2818', 0.3]} />
+      {/* Hemisphere — warm sky bounce / warm ground bounce
+          No cold tones — everything stays in beige-brown palette */}
+      <hemisphereLight args={['#f5e8d0', '#8b7355', 0.5]} />
 
-      {/* Interior warm glow */}
-      <pointLight position={[0, 1.2, 0]} color="#ffddaa" intensity={0.3} distance={4} decay={2} />
+      {/* ============================================ */}
+      {/* WINDOW LIGHTS — the key visual effect        */}
+      {/* Strong blown-out white-warm light from behind */}
+      {/* each window, like overexposed exterior sky    */}
+      {/* ============================================ */}
+
+      {/* These positions need to match the window openings in the GLB model.
+          Adjust after seeing the result. The model is rotated 0.25π. */}
+      <WindowLight position={[-0.8, 1.2, -1.3]} size={[0.4, 0.7]} />
+      <WindowLight position={[0.5, 1.2, -1.3]} size={[0.4, 0.7]} />
+      <WindowLight position={[1.2, 1.2, -0.5]} size={[0.4, 0.7]} />
+
+      {/* ============================================ */}
+      {/* CAMERA + CONTROLS                            */}
+      {/* ============================================ */}
 
       <CameraSetup />
 
@@ -218,18 +200,50 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
         enabled={!isEditMode}
       />
 
-      {/* Sun source for god rays */}
-      <SunSource sunRef={sunRef} />
+      {/* ============================================ */}
+      {/* SCENE                                        */}
+      {/* ============================================ */}
 
       <Suspense fallback={null}>
         <RoomModel />
       </Suspense>
 
-      {/* Dust particles in light beams */}
-      <DustParticles count={70} />
+      <DustParticles count={60} />
 
-      {/* Post-processing: god rays + bloom + AO + vignette */}
-      <PostProcessing sunRef={sunRef} />
+      {/* ============================================ */}
+      {/* POST-PROCESSING                              */}
+      {/* Bloom for blown-out windows, AO for stone    */}
+      {/* joints, vignette, warm color grade            */}
+      {/* ============================================ */}
+
+      <EffectComposer>
+        {/* Bloom — makes the window lights glow and bleed,
+            creating the overexposed/blown-out look */}
+        <Bloom
+          intensity={0.5}
+          luminanceThreshold={0.6}
+          luminanceSmoothing={0.9}
+          kernelSize={KernelSize.LARGE}
+          blendFunction={BlendFunction.SCREEN}
+        />
+        {/* AO — subtle, reinforces stone joints and base shadows */}
+        <N8AO
+          aoRadius={0.3}
+          intensity={1.0}
+          distanceFalloff={0.3}
+        />
+        {/* Color grade — push everything toward sand/ochre palette */}
+        <HueSaturation
+          hue={0.05}
+          saturation={-0.15}
+        />
+        <BrightnessContrast
+          brightness={0.02}
+          contrast={-0.05}
+        />
+        {/* Vignette — subtle edge darkening */}
+        <Vignette offset={0.3} darkness={0.3} />
+      </EffectComposer>
     </>
   )
 }
@@ -248,9 +262,11 @@ export function RoomScene({ isEditMode }: RoomSceneProps) {
         gl={{
           antialias: true,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.0,
+          toneMappingExposure: 1.15,
         }}
-        style={{ background: '#f0ebe4' }}
+        style={{
+          background: 'linear-gradient(180deg, #f2e8d4 0%, #e8dcc4 50%, #ddd0b8 100%)',
+        }}
         onCreated={({ camera }) => {
           camera.lookAt(0, 0.5, 0)
         }}
