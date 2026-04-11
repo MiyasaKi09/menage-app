@@ -2,8 +2,8 @@
 
 import { Suspense, useEffect, useRef, useMemo } from 'react'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
-import { useGLTF, OrbitControls } from '@react-three/drei'
-import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
+import { useGLTF, OrbitControls, Environment } from '@react-three/drei'
+import { EffectComposer, Bloom, N8AO, Vignette } from '@react-three/postprocessing'
 import { BlendFunction } from 'postprocessing'
 import * as THREE from 'three'
 
@@ -25,7 +25,7 @@ interface RoomSceneProps {
   onMove: (id: string, pos: [number, number, number]) => void
 }
 
-// 3D Room model
+// 3D Room model — lighten materials to match ref
 function RoomModel() {
   const { scene } = useGLTF('/models/chambre-web.glb')
 
@@ -43,7 +43,7 @@ function RoomModel() {
           }
           if (mat.normalMap) mat.normalMap.needsUpdate = true
           if (mat.roughnessMap) mat.roughnessMap.needsUpdate = true
-          // Lighten all materials 35% toward warm beige — softbox look
+          // Lighten material colors 35% toward warm beige
           if (mat.color) {
             mat.color.lerp(new THREE.Color('#f0e8d8'), 0.35)
           }
@@ -65,6 +65,7 @@ function RoomModel() {
 
 useGLTF.preload('/models/chambre-web.glb')
 
+// Window glow — emissive plane + point light
 function WindowGlow({ position, rotation = [0, 0, 0], size = [0.3, 0.5] }: {
   position: [number, number, number]
   rotation?: [number, number, number]
@@ -87,7 +88,7 @@ function WindowGlow({ position, rotation = [0, 0, 0], size = [0.3, 0.5] }: {
   )
 }
 
-// Subtle dust motes in light beams — additive blended points
+// Subtle dust motes — additive blended
 function DustMotes({ count = 200 }: { count?: number }) {
   const pointsRef = useRef<THREE.Points>(null)
 
@@ -137,58 +138,77 @@ function DustMotes({ count = 200 }: { count?: number }) {
   )
 }
 
-// Camera — orthographic isometric
-function CameraSetup() {
-  const { camera } = useThree()
+// Scene setup — fog + environment
+function SceneSetup() {
+  const { scene, camera } = useThree()
+
   useEffect(() => {
+    // Fog — subtle atmospheric dust
+    scene.fog = new THREE.FogExp2(0xede0c8, 0.06)
+
+    // Camera
     camera.position.set(5, 4, 5)
     camera.lookAt(0, 0.5, 0)
     if ((camera as THREE.OrthographicCamera).zoom !== undefined) {
       (camera as THREE.OrthographicCamera).zoom = 115
       camera.updateProjectionMatrix()
     }
-  }, [camera])
+  }, [scene, camera])
+
   return null
 }
 
 function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
   return (
     <>
-      {/* ====== AMBIENT — strong warm, no area truly dark ====== */}
-      <ambientLight intensity={0.9} color="#ede0c0" />
+      {/* ====== ENVIRONMENT MAP — warm indirect light on all surfaces ====== */}
+      <Environment
+        preset="apartment"
+        environmentIntensity={0.3}
+      />
 
-      {/* ====== KEY LIGHT — warm white from upper-left-back, ~45° ====== */}
+      {/* ====== 6-LIGHT GI SIMULATION ====== */}
+
+      {/* 1. Ambient — low, let the other lights do the work */}
+      <ambientLight intensity={0.3} color="#c8b898" />
+
+      {/* 2. Key directional — warm sun, soft shadows */}
       <directionalLight
-        position={[-3, 5, -2]}
-        intensity={1.0}
-        color="#fff0d0"
+        position={[-5, 8, -3]}
+        intensity={2.0}
+        color="#fff4e0"
         castShadow
         shadow-mapSize={2048}
-        shadow-bias={-0.0004}
-        shadow-radius={8}
+        shadow-bias={-0.0005}
+        shadow-normalBias={0.02}
+        shadow-radius={6}
         shadow-camera-near={0.1}
-        shadow-camera-far={20}
+        shadow-camera-far={25}
         shadow-camera-left={-5}
         shadow-camera-right={5}
         shadow-camera-top={5}
         shadow-camera-bottom={-5}
       />
 
-      {/* ====== FILL — subtle cool from front-right ====== */}
-      <directionalLight position={[4, 3, 4]} intensity={0.5} color="#f0e4d0" />
+      {/* 3. Fill directional — warm, no shadows, simulates 1st bounce */}
+      <directionalLight position={[4, 3, 5]} intensity={0.8} color="#e8d8c0" />
 
-      {/* ====== HEMISPHERE — warm sky / warm ground ====== */}
-      <hemisphereLight args={['#f5e6c8', '#c0a880', 0.6]} />
+      {/* 4. Back fill — simulates wall bounce from behind */}
+      <directionalLight position={[0, 2, -5]} intensity={0.4} color="#d0c0a0" />
 
-      {/* ====== WINDOW GLOWS — exact R3F raycasted positions, pushed behind walls ====== */}
-      {/* Left wall window — push -0.2 in X (behind wall) */}
+      {/* 5. Ground bounce — point light below floor pointing up */}
+      <pointLight position={[0, -0.5, 0]} intensity={0.3} color="#d4c4a0" distance={5} decay={1} />
+
+      {/* 6. Hemisphere — warm sky + warm ground */}
+      <hemisphereLight args={['#f0e0c8', '#b0a080', 0.5]} />
+
+      {/* ====== WINDOW GLOWS ====== */}
       <WindowGlow position={[-1.55, 0.962, -0.337]} rotation={[0, Math.PI / 2, 0]} size={[0.3, 0.5]} />
-      {/* Back wall windows — push -0.2 in Z (behind wall) */}
       <WindowGlow position={[-0.333, 0.972, -1.55]} rotation={[0, 0, 0]} size={[0.3, 0.5]} />
       <WindowGlow position={[0.505, 0.985, -1.43]} rotation={[0, 0, 0]} size={[0.3, 0.5]} />
 
       {/* ====== CAMERA + ORBIT ====== */}
-      <CameraSetup />
+      <SceneSetup />
       <OrbitControls
         target={[0, 0.5, 0]}
         enablePan={false}
@@ -213,15 +233,24 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
       {/* ====== DUST MOTES ====== */}
       <DustMotes count={180} />
 
-      {/* ====== POST-PROCESSING — clean and bright ====== */}
+      {/* ====== POST-PROCESSING ====== */}
       <EffectComposer>
+        {/* SSAO — contact shadows in stone joints and corners */}
+        <N8AO
+          aoRadius={0.5}
+          intensity={2.0}
+          distanceFalloff={0.3}
+          color={new THREE.Color('#8a7a60')}
+        />
+        {/* Bloom — window glow + dusty haze */}
         <Bloom
-          intensity={0.15}
-          luminanceThreshold={0.9}
-          radius={0.3}
+          intensity={0.2}
+          luminanceThreshold={0.85}
+          radius={0.8}
           blendFunction={BlendFunction.SCREEN}
         />
-        <Vignette offset={0.35} darkness={0.1} />
+        {/* Subtle vignette */}
+        <Vignette offset={0.4} darkness={0.15} />
       </EffectComposer>
     </>
   )
@@ -242,7 +271,7 @@ export function RoomScene({ isEditMode }: RoomSceneProps) {
         gl={{
           antialias: true,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.8,
+          toneMappingExposure: 2.0,
         }}
         style={{
           background: 'linear-gradient(180deg, #f5e6c8 0%, #ede0c0 100%)',
