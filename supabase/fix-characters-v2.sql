@@ -225,7 +225,7 @@ BEGIN
 
     -- Retourner la nouvelle assignation
     RETURN QUERY
-    SELECT wc.id, a.id, a.name, a.description, a.character_class, a.rarity, a.color_theme, a.power_type, a.power_description, a.power_value, a.lore_text, wc.is_revealed
+    SELECT wc.id, a.id, a.name::TEXT, a.description::TEXT, a.character_class, a.rarity, a.color_theme, a.power_type, a.power_description, a.power_value, a.lore_text, wc.is_revealed
     FROM weekly_characters wc JOIN avatars a ON a.id = wc.avatar_id
     WHERE wc.household_id = p_household_id AND wc.profile_id = p_profile_id AND wc.week_start = v_week_start;
 END;
