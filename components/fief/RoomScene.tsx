@@ -122,8 +122,8 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
         maxZoom={170}
         minPolarAngle={Math.PI / 4}
         maxPolarAngle={Math.PI / 3}
-        minAzimuthAngle={-Math.PI / 6}
-        maxAzimuthAngle={Math.PI / 3}
+        minAzimuthAngle={-Math.PI / 6 + (70 * Math.PI / 180)}
+        maxAzimuthAngle={Math.PI / 3 + (70 * Math.PI / 180)}
         enableDamping
         dampingFactor={0.05}
         rotateSpeed={0.3}
