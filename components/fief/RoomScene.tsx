@@ -27,7 +27,7 @@ interface RoomSceneProps {
 
 // 3D Room model loaded from GLB
 function RoomModel() {
-  const { scene } = useGLTF('/models/chambre.glb')
+  const { scene } = useGLTF('/models/chambre-web.glb')
   const { gl } = useThree()
 
   useEffect(() => {
@@ -54,29 +54,27 @@ function RoomModel() {
     gl.render(gl.domElement as any, scene as any) // force re-render
   }, [scene, gl])
 
-  // Rotate so the open face (cutaway) faces the camera
   return (
     <primitive
       object={scene}
-      scale={0.65}
+      scale={0.55}
       position={[0, 0, 0]}
-      rotation={[0, -Math.PI / 2, 0]}
+      rotation={[0, Math.PI * 0.75, 0]}
     />
   )
 }
 
-useGLTF.preload('/models/chambre.glb')
+useGLTF.preload('/models/chambre-web.glb')
 
 // Fit camera to model on mount
 function CameraSetup() {
   const { camera } = useThree()
 
   useEffect(() => {
-    // Front-left isometric view — looking into the open cutaway
-    camera.position.set(-4, 3, 4)
-    camera.lookAt(0, 0.6, 0)
+    camera.position.set(5, 4, 5)
+    camera.lookAt(0, 0.5, 0)
     if ((camera as THREE.OrthographicCamera).zoom !== undefined) {
-      (camera as THREE.OrthographicCamera).zoom = 105
+      (camera as THREE.OrthographicCamera).zoom = 115
       camera.updateProjectionMatrix()
     }
   }, [camera])
@@ -117,15 +115,15 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
 
       {/* Orbit — very constrained, just subtle rotation */}
       <OrbitControls
-        target={[0, 0.6, 0]}
+        target={[0, 0.5, 0]}
         enablePan={false}
         enableZoom={true}
-        minZoom={70}
-        maxZoom={160}
-        minPolarAngle={Math.PI / 5}
-        maxPolarAngle={Math.PI / 2.8}
-        minAzimuthAngle={Math.PI / 2}
-        maxAzimuthAngle={Math.PI}
+        minZoom={80}
+        maxZoom={170}
+        minPolarAngle={Math.PI / 4}
+        maxPolarAngle={Math.PI / 3}
+        minAzimuthAngle={-Math.PI / 6}
+        maxAzimuthAngle={Math.PI / 3}
         enableDamping
         dampingFactor={0.05}
         rotateSpeed={0.3}
@@ -148,8 +146,8 @@ export function RoomScene({ isEditMode }: RoomSceneProps) {
         shadows
         orthographic
         camera={{
-          position: [-4, 3, 4],
-          zoom: 105,
+          position: [5, 4, 5],
+          zoom: 115,
           near: 0.1,
           far: 50,
         }}
@@ -160,7 +158,7 @@ export function RoomScene({ isEditMode }: RoomSceneProps) {
         }}
         style={{ background: '#f8f5f0' }}
         onCreated={({ camera }) => {
-          camera.lookAt(0, 0.6, 0)
+          camera.lookAt(0, 0.5, 0)
         }}
       >
         <SceneContent isEditMode={isEditMode} />
