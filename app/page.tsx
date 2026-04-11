@@ -56,11 +56,11 @@ export default function Home() {
         {/* Character cards */}
         <div className="max-w-2xl mx-auto px-6 pb-24">
           <div className="flex justify-center items-end gap-3 md:gap-5">
-            <CharacterPreview image="/characters/wizard.webp" emoji="🧙" color="#9B8CB5" rotation={-8} size="small" />
-            <CharacterPreview image="/characters/noblewoman.webp" emoji="🌹" color="#5A8060" rotation={-3} size="medium" />
-            <CharacterPreview image="/characters/angel.webp" emoji="👼" color="#C4A35A" rotation={0} size="large" />
-            <CharacterPreview image="/characters/guardian.webp" emoji="🏰" color="#B27060" rotation={3} size="medium" />
-            <CharacterPreview image="/characters/oracle.webp" emoji="🔮" color="#556F8B" rotation={8} size="small" />
+            <CharacterPreview image="/characters/mage.png" emoji="🧙" color="#9B8CB5" rotation={-8} size="small" />
+            <CharacterPreview image="/characters/imperatrice.png" emoji="👑" color="#5A8060" rotation={-3} size="medium" />
+            <CharacterPreview image="/characters/ange.png" emoji="👼" color="#C4A35A" rotation={0} size="large" />
+            <CharacterPreview image="/characters/sentinelle.png" emoji="🏰" color="#B27060" rotation={3} size="medium" />
+            <CharacterPreview image="/characters/devin.png" emoji="🔮" color="#556F8B" rotation={8} size="small" />
           </div>
         </div>
 

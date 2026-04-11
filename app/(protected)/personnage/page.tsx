@@ -11,12 +11,15 @@ export default async function PersonnagePage() {
   // Get weekly character (same logic as in protected layout)
   let weeklyCharacter = null
   let householdId = null
+  let debugInfo = { userId: user?.id, memberships: null as any, rpcError: null as any, rpcData: null as any }
 
-  const { data: memberships } = await supabase
+  const { data: memberships, error: memberError } = await supabase
     .from('household_members')
     .select('household_id')
     .eq('profile_id', user?.id)
     .limit(1)
+
+  debugInfo.memberships = { data: memberships, error: memberError }
 
   if (memberships && memberships.length > 0) {
     householdId = memberships[0].household_id
@@ -26,6 +29,9 @@ export default async function PersonnagePage() {
         p_household_id: householdId,
         p_profile_id: user?.id,
       })
+
+      debugInfo.rpcError = error
+      debugInfo.rpcData = data
 
       if (error) {
         console.error('Error assigning weekly character:', error)
@@ -66,6 +72,10 @@ export default async function PersonnagePage() {
             <Link href="/household/setup">
               <Button className="mt-4">Rejoindre une cite</Button>
             </Link>
+            {/* Debug temporaire */}
+            <pre className="mt-8 text-left text-[10px] text-foreground/20 max-w-md mx-auto overflow-auto">
+              {JSON.stringify(debugInfo, null, 2)}
+            </pre>
           </div>
         </div>
       </div>

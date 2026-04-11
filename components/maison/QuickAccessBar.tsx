@@ -143,11 +143,16 @@ function FiefOverlayContent({ households, userId }: { households: Array<{ id: st
   }
 
   const handleLeave = async (householdId: string) => {
-    await supabase
+    const { error } = await supabase
       .from('household_members')
       .delete()
       .eq('household_id', householdId)
       .eq('profile_id', userId)
+
+    if (error) {
+      console.error('Error leaving household:', error)
+      return
+    }
 
     setLocalHouseholds((prev) => prev.filter((h) => h.id !== householdId))
     setConfirmAction(null)
@@ -155,10 +160,15 @@ function FiefOverlayContent({ households, userId }: { households: Array<{ id: st
   }
 
   const handleDelete = async (householdId: string) => {
-    await supabase
+    const { error } = await supabase
       .from('households')
       .delete()
       .eq('id', householdId)
+
+    if (error) {
+      console.error('Error deleting household:', error)
+      return
+    }
 
     setLocalHouseholds((prev) => prev.filter((h) => h.id !== householdId))
     setConfirmAction(null)
