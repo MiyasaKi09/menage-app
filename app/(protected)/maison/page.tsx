@@ -314,20 +314,27 @@ export default async function MaisonPage() {
 
         {/* Corvée (carte au trésor) + Péripéties (carousel) */}
         {(() => {
-          // Filter péripéties: today's completed + today's pending + 1 next future (locked/paid)
+          // Filter péripéties: today's completed + ONLY the current active + 1 locked (paid)
           const todayDate = new Date().toISOString().split('T')[0]
           const todayDone = weekTasks.filter((t: any) =>
             (t.status === 'completed' || t.status === 'skipped') && t.scheduled_date <= todayDate
           )
-          const todayPending = weekTasks.filter((t: any) =>
+          const allTodayPending = weekTasks.filter((t: any) =>
             (t.status === 'pending' || t.status === 'in_progress') && t.scheduled_date <= todayDate
           )
-          const futureLocked = weekTasks
-            .filter((t: any) => t.status === 'pending' && t.scheduled_date > todayDate)
-            .slice(0, 1)
-          const peripetiesForCarousel = [...todayDone, ...todayPending, ...futureLocked]
+          // Only show the FIRST pending task (the active one), hide the rest
+          const currentActive = allTodayPending.slice(0, 1)
+          // 1 locked task: either the next today's pending (hidden) or first future task
+          const hiddenTodayPending = allTodayPending.slice(1)
+          const futurePending = weekTasks.filter((t: any) => t.status === 'pending' && t.scheduled_date > todayDate)
+          const nextLockedRaw = hiddenTodayPending.length > 0
+            ? hiddenTodayPending.slice(0, 1)
+            : futurePending.slice(0, 1)
+          // Mark the locked task so the carousel renders it as locked even if scheduled_date is today
+          const nextLocked = nextLockedRaw.map((t: any) => ({ ...t, _forceLocked: true }))
+          const peripetiesForCarousel = [...todayDone, ...currentActive, ...nextLocked]
 
-          const allDoneToday = todayPending.length === 0 && todayDone.length > 0
+          const allDoneToday = allTodayPending.length === 0 && todayDone.length > 0
 
           return (
             <>

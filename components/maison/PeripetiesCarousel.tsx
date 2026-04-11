@@ -20,6 +20,7 @@ interface PeripetieTask {
   is_unlocked?: boolean
   is_boosted?: boolean
   boost_multiplier?: number
+  _forceLocked?: boolean
 }
 
 interface PeripetiesCarouselProps {
@@ -193,7 +194,8 @@ export function PeripetiesCarousel({
     const isScheduledFuture = task.scheduled_date > todayStr
     const isUnlocked = task.is_unlocked || false
     const isBoosted = task.is_boosted || false
-    const isLocked = isScheduledFuture && !isUnlocked && !isCompleted
+    const isForceLocked = task._forceLocked || false
+    const isLocked = (isScheduledFuture || isForceLocked) && !isUnlocked && !isCompleted
     const mult = task.boost_multiplier || bonusMultiplier
     const isBeingCompleted = completing === task.task_id
 
@@ -232,7 +234,10 @@ export function PeripetiesCarousel({
               <Lock size={18} className="text-foreground/20" />
               <div className="flex items-center gap-1">
                 <Clock size={10} className="text-foreground/20" />
-                <CountdownBadge date={task.scheduled_date} />
+                {isForceLocked
+                  ? <span className="font-sans text-[9px] text-foreground/25">Prochaine</span>
+                  : <CountdownBadge date={task.scheduled_date} />
+                }
               </div>
               <button
                 onClick={() => handleUnlock(task.task_id)}
