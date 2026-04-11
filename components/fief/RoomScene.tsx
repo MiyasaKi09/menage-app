@@ -184,15 +184,18 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
       {/* ====== HEMISPHERE — warm sky / warm ground ====== */}
       <hemisphereLight args={['#f5e6c8', '#a09070', 0.4]} />
 
-      {/* ====== WINDOW GLOWS — rotated with model (0.25π) ====== */}
+      {/* ====== WINDOW GLOWS — in model space, rotated with model ====== */}
+      {/* Model original bounds: ±2.67 in X/Z, 0-3 in Y. Scale 0.55 → ±1.47.
+          Windows are in the walls, so they sit AT the wall boundary.
+          We push planes OUTSIDE the wall (offset +0.05) so they glow through. */}
       <group rotation={[0, Math.PI * 0.25, 0]}>
-        {/* Back wall windows — facing +Z (into the room) */}
-        <WindowGlow position={[-0.4, 0.9, -1.35]} rotation={[0, 0, 0]} size={[0.3, 0.55]} />
-        <WindowGlow position={[0.4, 0.9, -1.35]} rotation={[0, 0, 0]} size={[0.3, 0.55]} />
+        {/* Back wall (z = -1.47) — windows facing +Z into room */}
+        <WindowGlow position={[-0.5, 0.85, -1.50]} rotation={[0, 0, 0]} size={[0.28, 0.5]} />
+        <WindowGlow position={[0.5, 0.85, -1.50]} rotation={[0, 0, 0]} size={[0.28, 0.5]} />
 
-        {/* Left wall windows — facing +X (into the room) */}
-        <WindowGlow position={[-1.35, 0.9, -0.4]} rotation={[0, Math.PI / 2, 0]} size={[0.3, 0.55]} />
-        <WindowGlow position={[-1.35, 0.9, 0.4]} rotation={[0, Math.PI / 2, 0]} size={[0.3, 0.55]} />
+        {/* Left wall (x = -1.47) — windows facing +X into room */}
+        <WindowGlow position={[-1.50, 0.85, -0.5]} rotation={[0, Math.PI / 2, 0]} size={[0.28, 0.5]} />
+        <WindowGlow position={[-1.50, 0.85, 0.5]} rotation={[0, Math.PI / 2, 0]} size={[0.28, 0.5]} />
       </group>
 
       {/* ====== CAMERA + ORBIT ====== */}
