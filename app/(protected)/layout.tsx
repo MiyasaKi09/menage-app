@@ -36,18 +36,18 @@ export default async function ProtectedLayout({
       if (data && data.length > 0) {
         const d = data[0]
         weeklyCharacter = {
-          weekly_id: d.weekly_id,
-          avatar_id: d.avatar_id,
-          avatar_name: d.avatar_name,
-          character_class: d.character_class,
-          rarity: d.rarity,
-          color_theme: d.color_theme,
-          power_type: d.power_type,
-          power_description: d.power_description,
-          power_value: d.power_value,
-          lore_text: d.lore_text,
-          is_revealed: d.is_revealed,
-          description: '',
+          weekly_id: d.out_weekly_id,
+          avatar_id: d.out_avatar_id,
+          avatar_name: d.out_avatar_name,
+          character_class: d.out_character_class,
+          rarity: d.out_rarity,
+          color_theme: d.out_color_theme,
+          power_type: d.out_power_type,
+          power_description: d.out_power_description,
+          power_value: d.out_power_value,
+          lore_text: d.out_lore_text,
+          is_revealed: d.out_is_revealed,
+          description: d.out_description || '',
         }
       }
     }

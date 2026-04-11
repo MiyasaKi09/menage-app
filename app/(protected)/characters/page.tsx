@@ -45,8 +45,22 @@ export default async function CharactersPage() {
       }))
       debugInfo += ` | fallback: ${characters.length}`
     }
-  } else {
-    characters = rpcData || []
+  } else if (rpcData) {
+    characters = rpcData.map((d: any) => ({
+      avatar_id: d.out_avatar_id,
+      avatar_name: d.out_avatar_name,
+      description: d.out_description,
+      character_class: d.out_character_class,
+      rarity: d.out_rarity,
+      color_theme: d.out_color_theme,
+      power_type: d.out_power_type,
+      power_description: d.out_power_description,
+      power_value: d.out_power_value,
+      lore_text: d.out_lore_text,
+      times_received: d.out_times_received,
+      is_favorite: d.out_is_favorite,
+      is_collected: d.out_is_collected,
+    }))
     debugInfo = `${characters.length} personnages`
   }
 

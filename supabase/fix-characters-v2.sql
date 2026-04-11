@@ -182,12 +182,10 @@ INSERT INTO avatars (name, description, character_class, rarity, color_theme, po
 
 -- Assigner un personnage hebdomadaire
 CREATE OR REPLACE FUNCTION assign_weekly_character(p_household_id UUID, p_profile_id UUID)
-RETURNS TABLE(weekly_id UUID, avatar_id UUID, avatar_name TEXT, description TEXT, character_class VARCHAR, rarity VARCHAR, color_theme JSONB, power_type VARCHAR, power_description TEXT, power_value JSONB, lore_text TEXT, is_revealed BOOLEAN)
+RETURNS TABLE(out_weekly_id UUID, out_avatar_id UUID, out_avatar_name TEXT, out_description TEXT, out_character_class VARCHAR, out_rarity VARCHAR, out_color_theme JSONB, out_power_type VARCHAR, out_power_description TEXT, out_power_value JSONB, out_lore_text TEXT, out_is_revealed BOOLEAN)
 AS $$
 DECLARE v_week_start DATE; v_week_end DATE; v_existing_id UUID; v_avatar_id UUID;
 BEGIN
-    -- Preferer les colonnes des tables aux variables de retour
-    #variable_conflict use_column
     v_week_start := date_trunc('week', CURRENT_DATE)::date;
     v_week_end := v_week_start + 6;
 
@@ -244,10 +242,9 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Collection de personnages
 CREATE OR REPLACE FUNCTION get_character_collection(p_profile_id UUID)
-RETURNS TABLE(avatar_id UUID, avatar_name TEXT, description TEXT, character_class VARCHAR, rarity VARCHAR, color_theme JSONB, power_type VARCHAR, power_description TEXT, power_value JSONB, lore_text TEXT, times_received INT, is_favorite BOOLEAN, is_collected BOOLEAN)
+RETURNS TABLE(out_avatar_id UUID, out_avatar_name TEXT, out_description TEXT, out_character_class VARCHAR, out_rarity VARCHAR, out_color_theme JSONB, out_power_type VARCHAR, out_power_description TEXT, out_power_value JSONB, out_lore_text TEXT, out_times_received INT, out_is_favorite BOOLEAN, out_is_collected BOOLEAN)
 AS $$
 BEGIN
-    #variable_conflict use_column
     RETURN QUERY
     SELECT a.id, a.name, a.description, a.character_class, a.rarity, a.color_theme, a.power_type, a.power_description, a.power_value, a.lore_text,
            COALESCE(cc.times_received, 0), COALESCE(cc.is_favorite, false), cc.id IS NOT NULL
