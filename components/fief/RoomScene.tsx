@@ -1,12 +1,10 @@
 'use client'
 
-import { useRef, useCallback, Suspense } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { ContactShadows, useGLTF, OrbitControls } from '@react-three/drei'
+import { Suspense, useEffect } from 'react'
+import { Canvas, useThree } from '@react-three/fiber'
+import { useGLTF, OrbitControls } from '@react-three/drei'
 import { EffectComposer } from '@react-three/postprocessing'
 import * as THREE from 'three'
-import { FurnitureItem } from './FurnitureItem'
-import { RoomDecorations } from './RoomDecorations'
 import { Diorama } from './DioramaEffect'
 
 export interface RoomFurnitureData {
@@ -27,76 +25,52 @@ interface RoomSceneProps {
   onMove: (id: string, pos: [number, number, number]) => void
 }
 
-// 3D Room model loaded from GLB
+// 3D Room model loaded from GLB (original, not draco — preserves textures)
 function RoomModel() {
-  const { scene } = useGLTF('/models/chambre-draco.glb')
+  const { scene } = useGLTF('/models/chambre.glb')
 
-  // Enable shadows on all meshes in the model
-  scene.traverse((child) => {
-    if ((child as THREE.Mesh).isMesh) {
-      child.castShadow = true
-      child.receiveShadow = true
-    }
-  })
+  useEffect(() => {
+    scene.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        child.castShadow = true
+        child.receiveShadow = true
+        const mesh = child as THREE.Mesh
+        // Ensure textures use proper encoding
+        if (mesh.material) {
+          const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
+          mats.forEach((mat: any) => {
+            if (mat.map) mat.map.colorSpace = THREE.SRGBColorSpace
+          })
+        }
+      }
+    })
+  }, [scene])
 
   return (
     <primitive
       object={scene}
-      scale={1}
+      scale={0.65}
       position={[0, 0, 0]}
-      rotation={[0, Math.PI, 0]}
     />
   )
 }
 
-useGLTF.preload('/models/chambre-draco.glb')
+useGLTF.preload('/models/chambre.glb')
 
-// Ceiling pendant light with flicker
-function CeilingLight() {
-  const ref = useRef<THREE.PointLight>(null)
-  useFrame(({ clock }) => {
-    if (ref.current) {
-      const t = clock.elapsedTime
-      ref.current.intensity = 1.0 + Math.sin(t * 2) * 0.08 + Math.sin(t * 5.3) * 0.04
+// Fit camera to model on mount
+function CameraSetup() {
+  const { camera } = useThree()
+
+  useEffect(() => {
+    camera.position.set(4, 3.5, 4)
+    camera.lookAt(0, 0.8, 0)
+    if ((camera as THREE.OrthographicCamera).zoom !== undefined) {
+      (camera as THREE.OrthographicCamera).zoom = 110
+      camera.updateProjectionMatrix()
     }
-  })
+  }, [camera])
 
-  return (
-    <group position={[0, 2.7, -0.2]}>
-      <mesh>
-        <cylinderGeometry args={[0.005, 0.005, 0.6, 4]} />
-        <meshStandardMaterial color="#333" roughness={0.5} />
-      </mesh>
-      <mesh position={[0, -0.35, 0]}>
-        <cylinderGeometry args={[0.04, 0.06, 0.12, 8]} />
-        <meshStandardMaterial color="#c0a060" roughness={0.4} metalness={0.5} />
-      </mesh>
-      <mesh position={[0, -0.45, 0]}>
-        <sphereGeometry args={[0.04, 8, 6]} />
-        <meshBasicMaterial color="#ffe8aa" />
-      </mesh>
-      <pointLight ref={ref} position={[0, -0.5, 0]} color="#ffddaa" intensity={1.0} distance={5} decay={2} />
-    </group>
-  )
-}
-
-// Orbit controls — rotate around the room with touch/mouse
-function CameraControls({ isEditMode }: { isEditMode: boolean }) {
-  return (
-    <OrbitControls
-      target={[0, 0.5, 0]}
-      enablePan={false}
-      enableZoom={true}
-      minZoom={50}
-      maxZoom={160}
-      minPolarAngle={Math.PI / 6}
-      maxPolarAngle={Math.PI / 2.5}
-      enableDamping
-      dampingFactor={0.08}
-      rotateSpeed={0.5}
-      enabled={!isEditMode}
-    />
-  )
+  return null
 }
 
 function DioramaFilter() {
@@ -107,81 +81,79 @@ function DioramaFilter() {
   )
 }
 
-function SceneContent({ furniture, isEditMode, selectedId, onSelect, onMove }: RoomSceneProps) {
-  // Deselect when clicking empty space
-  const handleBackgroundClick = useCallback(() => {
-    if (isEditMode) onSelect('')
-  }, [isEditMode, onSelect])
-
+function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
   return (
     <>
-      {/* Lighting — soft, bright, diorama style */}
-      <ambientLight intensity={0.6} color="#f0e8dd" />
-      <directionalLight position={[5, 8, 4]} intensity={1.0} color="#fff5e8" castShadow shadow-mapSize={2048} shadow-bias={-0.001} />
-      <directionalLight position={[-3, 6, 2]} intensity={0.3} color="#e8e4f0" />
-      <hemisphereLight args={['#faf5ef', '#d4c8b8', 0.4]} />
+      {/* Lighting — clean diorama: bright key + soft fill + bounce */}
+      <ambientLight intensity={0.8} color="#faf5ef" />
+      <directionalLight
+        position={[4, 6, 3]}
+        intensity={1.5}
+        color="#fff8f0"
+        castShadow
+        shadow-mapSize={2048}
+        shadow-bias={-0.0005}
+        shadow-camera-near={0.1}
+        shadow-camera-far={20}
+        shadow-camera-left={-5}
+        shadow-camera-right={5}
+        shadow-camera-top={5}
+        shadow-camera-bottom={-5}
+      />
+      <directionalLight position={[-3, 4, -2]} intensity={0.4} color="#e0e4f0" />
+      <hemisphereLight args={['#ffffff', '#d8cfc4', 0.5]} />
 
-      <CeilingLight />
-      <CameraControls isEditMode={isEditMode} />
+      <CameraSetup />
 
-      {/* Click catcher for deselect */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} onPointerDown={handleBackgroundClick}>
-        <planeGeometry args={[10, 10]} />
-        <meshBasicMaterial visible={false} />
-      </mesh>
+      {/* Orbit — very constrained, just subtle rotation */}
+      <OrbitControls
+        target={[0, 0.8, 0]}
+        enablePan={false}
+        enableZoom={true}
+        minZoom={80}
+        maxZoom={150}
+        minPolarAngle={Math.PI / 4}
+        maxPolarAngle={Math.PI / 3}
+        minAzimuthAngle={-Math.PI / 4}
+        maxAzimuthAngle={Math.PI / 4}
+        enableDamping
+        dampingFactor={0.05}
+        rotateSpeed={0.3}
+        enabled={!isEditMode}
+      />
 
       <Suspense fallback={null}>
         <RoomModel />
       </Suspense>
-      <RoomDecorations />
 
-      {/* Dynamic furniture */}
-      {furniture.map((item) => (
-        <FurnitureItem
-          key={item.id}
-          id={item.id}
-          catalogId={item.catalog_id}
-          position={[item.position_x, item.position_y, item.position_z]}
-          rotationY={item.rotation_y}
-          scale={item.scale}
-          isEditMode={isEditMode}
-          isSelected={selectedId === item.id}
-          onSelect={onSelect}
-          onMove={onMove}
-        />
-      ))}
-
-      <ContactShadows position={[0, 0.02, 0]} opacity={0.25} scale={5} blur={2} far={3} />
       <DioramaFilter />
     </>
   )
 }
 
-export function RoomScene({ furniture, isEditMode, selectedId, onSelect, onMove }: RoomSceneProps) {
+export function RoomScene({ isEditMode }: RoomSceneProps) {
   return (
     <div className="relative aspect-square w-full rounded-[28px] overflow-hidden">
       <Canvas
         shadows
         orthographic
         camera={{
-          position: [5, 4, 5],
-          zoom: 95,
+          position: [4, 3.5, 4],
+          zoom: 110,
           near: 0.1,
           far: 50,
         }}
-        gl={{ antialias: true }}
-        style={{ background: '#f5f0eb' }}
+        gl={{
+          antialias: true,
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 1.2,
+        }}
+        style={{ background: '#f8f5f0' }}
         onCreated={({ camera }) => {
-          camera.lookAt(0, 0.5, 0)
+          camera.lookAt(0, 0.8, 0)
         }}
       >
-        <SceneContent
-          furniture={furniture}
-          isEditMode={isEditMode}
-          selectedId={selectedId}
-          onSelect={onSelect}
-          onMove={onMove}
-        />
+        <SceneContent isEditMode={isEditMode} />
       </Canvas>
 
       {/* Edit mode indicator */}
