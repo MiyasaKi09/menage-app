@@ -141,6 +141,39 @@ function DustMotes({ count = 200 }: { count?: number }) {
   )
 }
 
+// DEBUG: click on windows to get exact coordinates
+function DebugClickHandler() {
+  const { camera, scene, raycaster } = useThree()
+
+  useEffect(() => {
+    const canvas = document.querySelector('canvas')
+    if (!canvas) return
+
+    const handleClick = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect()
+      const mouse = new THREE.Vector2(
+        ((e.clientX - rect.left) / rect.width) * 2 - 1,
+        -((e.clientY - rect.top) / rect.height) * 2 + 1
+      )
+      raycaster.setFromCamera(mouse, camera)
+      const hits = raycaster.intersectObjects(scene.children, true)
+      if (hits[0]) {
+        const p = hits[0].point
+        const n = hits[0].face?.normal
+        console.log(
+          `CLICK pos=[${p.x.toFixed(3)}, ${p.y.toFixed(3)}, ${p.z.toFixed(3)}]`,
+          n ? `normal=[${n.x.toFixed(2)}, ${n.y.toFixed(2)}, ${n.z.toFixed(2)}]` : ''
+        )
+      }
+    }
+
+    canvas.addEventListener('click', handleClick)
+    return () => canvas.removeEventListener('click', handleClick)
+  }, [camera, scene, raycaster])
+
+  return null
+}
+
 // Camera — orthographic isometric
 function CameraSetup() {
   const { camera } = useThree()
@@ -184,19 +217,8 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
       {/* ====== HEMISPHERE — warm sky / warm ground ====== */}
       <hemisphereLight args={['#f5e6c8', '#a09070', 0.4]} />
 
-      {/* ====== WINDOW GLOWS — in model space, rotated with model ====== */}
-      {/* Model original bounds: ±2.67 in X/Z, 0-3 in Y. Scale 0.55 → ±1.47.
-          Windows are in the walls, so they sit AT the wall boundary.
-          We push planes OUTSIDE the wall (offset +0.05) so they glow through. */}
-      <group rotation={[0, Math.PI * 0.25, 0]}>
-        {/* Back wall (z = -1.47) — windows facing +Z into room */}
-        <WindowGlow position={[-0.5, 0.85, -1.50]} rotation={[0, 0, 0]} size={[0.28, 0.5]} />
-        <WindowGlow position={[0.5, 0.85, -1.50]} rotation={[0, 0, 0]} size={[0.28, 0.5]} />
-
-        {/* Left wall (x = -1.47) — windows facing +X into room */}
-        <WindowGlow position={[-1.50, 0.85, -0.5]} rotation={[0, Math.PI / 2, 0]} size={[0.28, 0.5]} />
-        <WindowGlow position={[-1.50, 0.85, 0.5]} rotation={[0, Math.PI / 2, 0]} size={[0.28, 0.5]} />
-      </group>
+      {/* ====== DEBUG: click to find window positions ====== */}
+      <DebugClickHandler />
 
       {/* ====== CAMERA + ORBIT ====== */}
       <CameraSetup />
