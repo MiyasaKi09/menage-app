@@ -43,6 +43,10 @@ function RoomModel() {
           }
           if (mat.normalMap) mat.normalMap.needsUpdate = true
           if (mat.roughnessMap) mat.roughnessMap.needsUpdate = true
+          // Lighten all materials 35% toward warm beige — softbox look
+          if (mat.color) {
+            mat.color.lerp(new THREE.Color('#f0e8d8'), 0.35)
+          }
           mat.needsUpdate = true
         })
       }
@@ -72,13 +76,13 @@ function WindowGlow({ position, rotation = [0, 0, 0], size = [0.3, 0.5] }: {
         <planeGeometry args={size} />
         <meshStandardMaterial
           color="#fff5e0"
-          emissive="#fff5e0"
-          emissiveIntensity={3.0}
+          emissive="#ffffff"
+          emissiveIntensity={4.0}
           toneMapped={false}
           side={THREE.DoubleSide}
         />
       </mesh>
-      <pointLight color="#ffe8c0" intensity={0.8} distance={5} decay={2} />
+      <pointLight color="#ffe8c0" intensity={1.0} distance={5} decay={2} />
     </group>
   )
 }
@@ -151,17 +155,17 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
   return (
     <>
       {/* ====== AMBIENT — strong warm, no area truly dark ====== */}
-      <ambientLight intensity={0.6} color="#e8d8c0" />
+      <ambientLight intensity={0.9} color="#ede0c0" />
 
       {/* ====== KEY LIGHT — warm white from upper-left-back, ~45° ====== */}
       <directionalLight
         position={[-3, 5, -2]}
-        intensity={1.3}
-        color="#ffeac0"
+        intensity={1.0}
+        color="#fff0d0"
         castShadow
         shadow-mapSize={2048}
         shadow-bias={-0.0004}
-        shadow-radius={4}
+        shadow-radius={8}
         shadow-camera-near={0.1}
         shadow-camera-far={20}
         shadow-camera-left={-5}
@@ -171,10 +175,10 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
       />
 
       {/* ====== FILL — subtle cool from front-right ====== */}
-      <directionalLight position={[4, 3, 4]} intensity={0.25} color="#c0d0e0" />
+      <directionalLight position={[4, 3, 4]} intensity={0.5} color="#f0e4d0" />
 
       {/* ====== HEMISPHERE — warm sky / warm ground ====== */}
-      <hemisphereLight args={['#f5e6c8', '#a09070', 0.4]} />
+      <hemisphereLight args={['#f5e6c8', '#c0a880', 0.6]} />
 
       {/* ====== WINDOW GLOWS — exact R3F raycasted positions, pushed behind walls ====== */}
       {/* Left wall window — push -0.2 in X (behind wall) */}
@@ -217,7 +221,7 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
           radius={0.3}
           blendFunction={BlendFunction.SCREEN}
         />
-        <Vignette offset={0.35} darkness={0.2} />
+        <Vignette offset={0.35} darkness={0.1} />
       </EffectComposer>
     </>
   )
@@ -238,7 +242,7 @@ export function RoomScene({ isEditMode }: RoomSceneProps) {
         gl={{
           antialias: true,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.2,
+          toneMappingExposure: 1.8,
         }}
         style={{
           background: 'linear-gradient(180deg, #f5e6c8 0%, #ede0c0 100%)',
