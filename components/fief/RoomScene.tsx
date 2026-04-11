@@ -61,6 +61,29 @@ function RoomModel() {
 
 useGLTF.preload('/models/chambre-web.glb')
 
+// Window glow — emissive plane + point light, placed at exact window positions
+function WindowGlow({ position, rotation = [0, 0, 0], size = [0.3, 0.5] }: {
+  position: [number, number, number]
+  rotation?: [number, number, number]
+  size?: [number, number]
+}) {
+  return (
+    <group position={position} rotation={rotation}>
+      <mesh>
+        <planeGeometry args={size} />
+        <meshStandardMaterial
+          color="#fff5e0"
+          emissive="#fff5e0"
+          emissiveIntensity={3.0}
+          toneMapped={false}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      <pointLight color="#ffe8c0" intensity={0.8} distance={5} decay={2} />
+    </group>
+  )
+}
+
 // Subtle dust motes in light beams — additive blended points
 function DustMotes({ count = 200 }: { count?: number }) {
   const pointsRef = useRef<THREE.Points>(null)
@@ -111,39 +134,6 @@ function DustMotes({ count = 200 }: { count?: number }) {
   )
 }
 
-// DEBUG: click on windows to get exact coordinates
-function DebugClickHandler() {
-  const { camera, scene, raycaster } = useThree()
-
-  useEffect(() => {
-    const canvas = document.querySelector('canvas')
-    if (!canvas) return
-
-    const handleClick = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect()
-      const mouse = new THREE.Vector2(
-        ((e.clientX - rect.left) / rect.width) * 2 - 1,
-        -((e.clientY - rect.top) / rect.height) * 2 + 1
-      )
-      raycaster.setFromCamera(mouse, camera)
-      const hits = raycaster.intersectObjects(scene.children, true)
-      if (hits[0]) {
-        const p = hits[0].point
-        const n = hits[0].face?.normal
-        console.log(
-          `CLICK pos=[${p.x.toFixed(3)}, ${p.y.toFixed(3)}, ${p.z.toFixed(3)}]`,
-          n ? `normal=[${n.x.toFixed(2)}, ${n.y.toFixed(2)}, ${n.z.toFixed(2)}]` : ''
-        )
-      }
-    }
-
-    canvas.addEventListener('click', handleClick)
-    return () => canvas.removeEventListener('click', handleClick)
-  }, [camera, scene, raycaster])
-
-  return null
-}
-
 // Camera — orthographic isometric
 function CameraSetup() {
   const { camera } = useThree()
@@ -187,8 +177,11 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
       {/* ====== HEMISPHERE — warm sky / warm ground ====== */}
       <hemisphereLight args={['#f5e6c8', '#a09070', 0.4]} />
 
-      {/* ====== DEBUG: click to find window positions ====== */}
-      <DebugClickHandler />
+      {/* ====== WINDOW GLOWS — exact positions from click debug ====== */}
+      {/* Offset slightly behind the wall surface (toward exterior) */}
+      <WindowGlow position={[-0.714, 1.920, 1.12]} rotation={[0, 0, 0]} size={[0.3, 0.55]} />
+      <WindowGlow position={[0.348, 2.277, 0.80]} rotation={[0, 0, 0]} size={[0.3, 0.55]} />
+      <WindowGlow position={[0.503, 2.162, 0.82]} rotation={[0, 0, 0]} size={[0.3, 0.55]} />
 
       {/* ====== CAMERA + ORBIT ====== */}
       <CameraSetup />
