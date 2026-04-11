@@ -3,9 +3,9 @@
 import { Suspense, useEffect } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { useGLTF, OrbitControls } from '@react-three/drei'
-import { EffectComposer } from '@react-three/postprocessing'
+// import { EffectComposer } from '@react-three/postprocessing'
 import * as THREE from 'three'
-import { Diorama } from './DioramaEffect'
+// import { Diorama } from './DioramaEffect'
 
 export interface RoomFurnitureData {
   id: string
@@ -25,9 +25,10 @@ interface RoomSceneProps {
   onMove: (id: string, pos: [number, number, number]) => void
 }
 
-// 3D Room model loaded from GLB (original, not draco — preserves textures)
+// 3D Room model loaded from GLB
 function RoomModel() {
   const { scene } = useGLTF('/models/chambre.glb')
+  const { gl } = useThree()
 
   useEffect(() => {
     scene.traverse((child) => {
@@ -35,22 +36,31 @@ function RoomModel() {
         child.castShadow = true
         child.receiveShadow = true
         const mesh = child as THREE.Mesh
-        // Ensure textures use proper encoding
-        if (mesh.material) {
-          const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
-          mats.forEach((mat: any) => {
-            if (mat.map) mat.map.colorSpace = THREE.SRGBColorSpace
-          })
-        }
+        const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
+        mats.forEach((mat: any) => {
+          // Force proper color space on all texture maps
+          if (mat.map) {
+            mat.map.colorSpace = THREE.SRGBColorSpace
+            mat.map.needsUpdate = true
+          }
+          if (mat.normalMap) mat.normalMap.needsUpdate = true
+          if (mat.roughnessMap) mat.roughnessMap.needsUpdate = true
+          if (mat.metalnessMap) mat.metalnessMap.needsUpdate = true
+          if (mat.aoMap) mat.aoMap.needsUpdate = true
+          mat.needsUpdate = true
+        })
       }
     })
-  }, [scene])
+    gl.render(gl.domElement as any, scene as any) // force re-render
+  }, [scene, gl])
 
+  // Rotate so the open face (cutaway) faces the camera
   return (
     <primitive
       object={scene}
       scale={0.65}
       position={[0, 0, 0]}
+      rotation={[0, -Math.PI / 2, 0]}
     />
   )
 }
@@ -62,10 +72,11 @@ function CameraSetup() {
   const { camera } = useThree()
 
   useEffect(() => {
-    camera.position.set(4, 3.5, 4)
-    camera.lookAt(0, 0.8, 0)
+    // Front-left isometric view — looking into the open cutaway
+    camera.position.set(-4, 3, 4)
+    camera.lookAt(0, 0.6, 0)
     if ((camera as THREE.OrthographicCamera).zoom !== undefined) {
-      (camera as THREE.OrthographicCamera).zoom = 110
+      (camera as THREE.OrthographicCamera).zoom = 105
       camera.updateProjectionMatrix()
     }
   }, [camera])
@@ -73,13 +84,12 @@ function CameraSetup() {
   return null
 }
 
-function DioramaFilter() {
-  return (
-    <EffectComposer>
-      <Diorama />
-    </EffectComposer>
-  )
-}
+// Post-processing disabled temporarily to debug textures
+// function DioramaFilter() {
+//   return (
+//     <EffectComposer><Diorama /></EffectComposer>
+//   )
+// }
 
 function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
   return (
@@ -107,15 +117,15 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
 
       {/* Orbit — very constrained, just subtle rotation */}
       <OrbitControls
-        target={[0, 0.8, 0]}
+        target={[0, 0.6, 0]}
         enablePan={false}
         enableZoom={true}
-        minZoom={80}
-        maxZoom={150}
-        minPolarAngle={Math.PI / 4}
-        maxPolarAngle={Math.PI / 3}
-        minAzimuthAngle={-Math.PI / 4}
-        maxAzimuthAngle={Math.PI / 4}
+        minZoom={70}
+        maxZoom={160}
+        minPolarAngle={Math.PI / 5}
+        maxPolarAngle={Math.PI / 2.8}
+        minAzimuthAngle={Math.PI / 2}
+        maxAzimuthAngle={Math.PI}
         enableDamping
         dampingFactor={0.05}
         rotateSpeed={0.3}
@@ -126,7 +136,7 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
         <RoomModel />
       </Suspense>
 
-      <DioramaFilter />
+      {/* <DioramaFilter /> */}
     </>
   )
 }
@@ -138,8 +148,8 @@ export function RoomScene({ isEditMode }: RoomSceneProps) {
         shadows
         orthographic
         camera={{
-          position: [4, 3.5, 4],
-          zoom: 110,
+          position: [-4, 3, 4],
+          zoom: 105,
           near: 0.1,
           far: 50,
         }}
@@ -150,7 +160,7 @@ export function RoomScene({ isEditMode }: RoomSceneProps) {
         }}
         style={{ background: '#f8f5f0' }}
         onCreated={({ camera }) => {
-          camera.lookAt(0, 0.8, 0)
+          camera.lookAt(0, 0.6, 0)
         }}
       >
         <SceneContent isEditMode={isEditMode} />
