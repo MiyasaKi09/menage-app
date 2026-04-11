@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion'
 import { RotateCcw } from 'lucide-react'
 import { CharacterActionPopup } from './CharacterActionPopup'
@@ -26,28 +26,71 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
   const rarityColor = RARITY_COLORS[character.rarity] || '#C4A35A'
   const rarityLabel = RARITY_LABELS[character.rarity] || character.rarity
 
-  // 3D tilt effect
-  const mouseX = useMotionValue(0)
-  const mouseY = useMotionValue(0)
+  // Raw tilt values (normalized -0.5 to 0.5)
+  const tiltX = useMotionValue(0)
+  const tiltY = useMotionValue(0)
 
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [8, -8]), { stiffness: 200, damping: 20 })
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-8, 8]), { stiffness: 200, damping: 20 })
-  const glareX = useTransform(mouseX, [-0.5, 0.5], [0, 100])
-  const glareY = useTransform(mouseY, [-0.5, 0.5], [0, 100])
+  // Spring-animated rotations
+  const rotateX = useSpring(useTransform(tiltY, [-0.5, 0.5], [12, -12]), { stiffness: 150, damping: 15 })
+  const rotateY3d = useSpring(useTransform(tiltX, [-0.5, 0.5], [-12, 12]), { stiffness: 150, damping: 15 })
+  const glareX = useTransform(tiltX, [-0.5, 0.5], [0, 100])
+  const glareY = useTransform(tiltY, [-0.5, 0.5], [0, 100])
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!cardRef.current || isFlipped) return
-    const rect = cardRef.current.getBoundingClientRect()
-    const x = (e.clientX - rect.left) / rect.width - 0.5
-    const y = (e.clientY - rect.top) / rect.height - 0.5
-    mouseX.set(x)
-    mouseY.set(y)
-  }
+  // Mouse tracking on entire page (not just card)
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!cardRef.current) return
+      const rect = cardRef.current.getBoundingClientRect()
+      const centerX = rect.left + rect.width / 2
+      const centerY = rect.top + rect.height / 2
+      // Use distance from card center, clamped
+      const x = Math.max(-0.5, Math.min(0.5, (e.clientX - centerX) / (rect.width * 1.5)))
+      const y = Math.max(-0.5, Math.min(0.5, (e.clientY - centerY) / (rect.height * 1.5)))
+      tiltX.set(x)
+      tiltY.set(y)
+    }
 
-  const handleMouseLeave = () => {
-    mouseX.set(0)
-    mouseY.set(0)
-  }
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [tiltX, tiltY])
+
+  // Gyroscope / accelerometer for mobile
+  const handleOrientation = useCallback((e: DeviceOrientationEvent) => {
+    const gamma = e.gamma || 0 // left-right tilt (-90 to 90)
+    const beta = e.beta || 0   // front-back tilt (-180 to 180)
+    // Normalize to -0.5 to 0.5 range, with limited range for comfort
+    tiltX.set(Math.max(-0.5, Math.min(0.5, gamma / 40)))
+    tiltY.set(Math.max(-0.5, Math.min(0.5, (beta - 45) / 40))) // offset by 45 deg for natural phone holding
+  }, [tiltX, tiltY])
+
+  useEffect(() => {
+    // Check for permission API (iOS 13+)
+    const startListening = () => {
+      window.addEventListener('deviceorientation', handleOrientation)
+    }
+
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+      // iOS - needs user gesture, we'll listen on first tap
+      const requestOnTap = () => {
+        (DeviceOrientationEvent as any).requestPermission()
+          .then((response: string) => {
+            if (response === 'granted') startListening()
+          })
+          .catch(() => {})
+        window.removeEventListener('click', requestOnTap)
+      }
+      window.addEventListener('click', requestOnTap, { once: true })
+      return () => {
+        window.removeEventListener('deviceorientation', handleOrientation)
+        window.removeEventListener('click', requestOnTap)
+      }
+    } else {
+      // Android / others
+      startListening()
+      return () => window.removeEventListener('deviceorientation', handleOrientation)
+    }
+  }, [handleOrientation])
 
   return (
     <>
@@ -56,8 +99,6 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
         className="relative w-full max-w-sm cursor-pointer"
         style={{ perspective: '1200px' }}
         onClick={() => setIsFlipped(!isFlipped)}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
       >
         {/* Flip hint */}
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
@@ -72,8 +113,8 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
           transition={{ duration: 0.6, type: 'spring', stiffness: 100, damping: 20 }}
           style={{
             transformStyle: 'preserve-3d',
-            rotateX: isFlipped ? 0 : rotateX,
-            rotateY: isFlipped ? 180 : rotateY,
+            rotateX,
+            rotateY: isFlipped ? 180 : rotateY3d,
           }}
           className="relative aspect-[3/4.5] w-full"
         >
