@@ -214,6 +214,41 @@ export default async function MaisonPage() {
     ? { title: `${favoriteCharacter.name}`, subtitle: `Specialiste ${topTask}` }
     : null
 
+  // === Phase 1: Daily XP (not total) ===
+  let dailyXp = 0
+  if (user?.id) {
+    const todayStart = new Date()
+    todayStart.setHours(0, 0, 0, 0)
+    const { data: dailyXpData } = await supabase
+      .from('task_history')
+      .select('points_earned')
+      .eq('profile_id', user.id)
+      .gte('completed_at', todayStart.toISOString())
+    dailyXp = dailyXpData?.reduce((sum, t: any) => sum + (t.points_earned || 0), 0) || 0
+  }
+
+  // === Phase 2: Level progression data ===
+  let levelName = 'Debutant'
+  let levelProgress = 0
+  try {
+    const { data: levels } = await supabase
+      .from('levels')
+      .select('level, name, points_required')
+      .order('level')
+    if (levels && levels.length > 0) {
+      const totalPts = profile?.total_points || 0
+      const currentLevelData = levels.filter((l: any) => l.points_required <= totalPts).pop()
+      const nextLevelData = levels.find((l: any) => l.level === ((currentLevelData as any)?.level || 0) + 1)
+      levelName = (currentLevelData as any)?.name || 'Debutant'
+      if (nextLevelData) {
+        const currentReq = (currentLevelData as any)?.points_required || 0
+        levelProgress = Math.min(100, Math.round(((totalPts - currentReq) / (nextLevelData.points_required - currentReq)) * 100))
+      } else {
+        levelProgress = 100
+      }
+    }
+  } catch { /* levels table may not exist */ }
+
   // Format today's date in French
   const todayFormatted = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())
 
@@ -265,18 +300,21 @@ export default async function MaisonPage() {
 
         {/* Bento Stats */}
         <XpHeroCard
+          dailyXp={dailyXp}
           totalXp={profile?.total_points || 0}
           done={weekTasks.filter((t: any) => t.status === 'completed').length}
           total={weekTasks.length}
           streak={profile?.current_streak || 0}
           level={profile?.current_level || 1}
+          levelName={levelName}
+          levelProgress={levelProgress}
           habitants={leaderboard.length}
           habitantInitials={leaderboard.slice(0, 3).map((m: any) => ((m.profiles as any)?.display_name || '?')[0].toUpperCase())}
         />
 
         {/* Corvée (carte au trésor) + Péripéties (carousel) */}
         {(() => {
-          // Filter péripéties: today's completed + today's pending + 5 next future
+          // Filter péripéties: today's completed + today's pending + 1 next future (locked/paid)
           const todayDate = new Date().toISOString().split('T')[0]
           const todayDone = weekTasks.filter((t: any) =>
             (t.status === 'completed' || t.status === 'skipped') && t.scheduled_date <= todayDate
@@ -286,13 +324,37 @@ export default async function MaisonPage() {
           )
           const futureLocked = weekTasks
             .filter((t: any) => t.status === 'pending' && t.scheduled_date > todayDate)
-            .slice(0, 5)
+            .slice(0, 1)
           const peripetiesForCarousel = [...todayDone, ...todayPending, ...futureLocked]
 
-          return (corveeData.length > 0 || peripetiesForCarousel.length > 0) ? (
-            <MaisonQuestsSection corveeData={corveeData} peripeties={peripetiesForCarousel} userId={user?.id || ''} householdId={householdId || ''} />
-          ) : null
+          const allDoneToday = todayPending.length === 0 && todayDone.length > 0
+
+          return (
+            <>
+              {(corveeData.length > 0 || peripetiesForCarousel.length > 0) && (
+                <MaisonQuestsSection corveeData={corveeData} peripeties={peripetiesForCarousel} userId={user?.id || ''} householdId={householdId || ''} userPoints={profile?.total_points || 0} />
+              )}
+              {allDoneToday && (
+                <div className="text-center py-4 rounded-xl bg-green/[0.04] border border-green/[0.1]">
+                  <p className="font-sans text-[13px] font-semibold text-green/50">Toutes les quetes du jour sont terminees !</p>
+                  <p className="font-sans text-[10px] text-foreground/25 mt-1">Revenez demain pour de nouvelles aventures</p>
+                </div>
+              )}
+            </>
+          )
         })()}
+
+        {/* Quick links to schedule & history */}
+        {householdId && (
+          <div className="flex gap-2">
+            <Link href="/tasks/schedule" className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/60 border border-border/60 font-sans text-[12px] font-semibold text-foreground/40 hover:text-foreground/60 hover:bg-white/80 transition-colors">
+              <span className="text-sm">📅</span> Voir le planning
+            </Link>
+            <Link href="/tasks/history" className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/60 border border-border/60 font-sans text-[12px] font-semibold text-foreground/40 hover:text-foreground/60 hover:bg-white/80 transition-colors">
+              <span className="text-sm">📜</span> Historique
+            </Link>
+          </div>
+        )}
 
         {/* Consecration carousel - validate others' tasks */}
         {pendingValidation.length > 0 && user?.id && (

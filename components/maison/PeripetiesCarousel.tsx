@@ -26,6 +26,7 @@ interface PeripetiesCarouselProps {
   tasks: PeripetieTask[]
   userId: string
   householdId: string
+  userPoints?: number
   unlockCost?: number
   bonusMultiplier?: number
 }
@@ -54,6 +55,7 @@ export function PeripetiesCarousel({
   tasks,
   userId,
   householdId,
+  userPoints = 0,
   unlockCost = 15,
   bonusMultiplier = 1.5,
 }: PeripetiesCarouselProps) {
@@ -135,7 +137,28 @@ export function PeripetiesCarousel({
     }
   }
 
+  const [localPoints, setLocalPoints] = useState(userPoints)
+  const [unlockError, setUnlockError] = useState<string | null>(null)
+
   const handleUnlock = async (taskId: string) => {
+    setUnlockError(null)
+
+    if (localPoints < unlockCost) {
+      setUnlockError('Points insuffisants')
+      return
+    }
+
+    // Deduct points first
+    const { data: success, error: deductError } = await supabase.rpc('deduct_points', {
+      p_profile_id: userId,
+      p_amount: unlockCost,
+    })
+
+    if (deductError || !success) {
+      setUnlockError('Points insuffisants')
+      return
+    }
+
     const { error } = await supabase
       .from('scheduled_tasks')
       .update({
@@ -148,12 +171,14 @@ export function PeripetiesCarousel({
       .eq('id', taskId)
 
     if (!error) {
+      setLocalPoints(prev => prev - unlockCost)
       setLocalTasks(prev =>
         prev.map(t => t.task_id === taskId
           ? { ...t, is_unlocked: true, is_boosted: true, boost_multiplier: bonusMultiplier }
           : t
         )
       )
+      router.refresh()
     }
   }
 
@@ -211,12 +236,18 @@ export function PeripetiesCarousel({
               </div>
               <button
                 onClick={() => handleUnlock(task.task_id)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow/[0.1] border border-yellow/20 text-yellow/60 font-sans font-semibold text-[10px] hover:bg-yellow/[0.2] transition-colors"
+                disabled={localPoints < unlockCost}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-sans font-semibold text-[10px] transition-colors ${
+                  localPoints < unlockCost
+                    ? 'bg-foreground/[0.05] border-foreground/10 text-foreground/20 cursor-not-allowed'
+                    : 'bg-yellow/[0.1] border-yellow/20 text-yellow/60 hover:bg-yellow/[0.2]'
+                }`}
               >
                 <Coins size={10} />
                 {unlockCost} or
               </button>
-              <span className="font-sans text-[8px] text-foreground/15">Bonus x{bonusMultiplier}</span>
+              {unlockError && <span className="font-sans text-[8px] text-red/60">{unlockError}</span>}
+              {!unlockError && <span className="font-sans text-[8px] text-foreground/15">Bonus x{bonusMultiplier}</span>}
             </div>
           </div>
         </CarouselCard>

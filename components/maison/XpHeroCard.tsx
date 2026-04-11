@@ -25,16 +25,19 @@ function AnimNum({ value }: { value: number }) {
 }
 
 interface XpHeroCardProps {
+  dailyXp: number
   totalXp: number
   done: number
   total: number
   streak: number
   level: number
+  levelName: string
+  levelProgress: number
   habitants: number
   habitantInitials: string[]
 }
 
-export function XpHeroCard({ totalXp, done, total, streak, level, habitants, habitantInitials }: XpHeroCardProps) {
+export function XpHeroCard({ dailyXp, totalXp, done, total, streak, level, levelName, levelProgress, habitants, habitantInitials }: XpHeroCardProps) {
   const pct = total > 0 ? Math.round((done / total) * 100) : 0
 
   return (
@@ -57,10 +60,11 @@ export function XpHeroCard({ totalXp, done, total, streak, level, habitants, hab
             </p>
             <div className="flex items-baseline gap-1.5">
               <span className="font-serif text-[52px] font-black text-[#F5ECD7] leading-none tracking-tight">
-                <AnimNum value={totalXp} />
+                <AnimNum value={dailyXp} />
               </span>
               <span className="font-serif text-lg text-white/30 italic">xp</span>
             </div>
+            <p className="font-sans text-[10px] text-white/20 mt-1">Total : {totalXp} xp</p>
           </div>
           <div className="flex items-center gap-1.5 bg-white/[0.08] rounded-[10px] px-3 py-1.5">
             <span className="text-sm">🔥</span>
@@ -88,10 +92,10 @@ export function XpHeroCard({ totalXp, done, total, streak, level, habitants, hab
         <p className="font-sans text-[9px] font-bold text-foreground/30 uppercase tracking-[0.12em]">Niveau</p>
         <div className="flex items-baseline gap-1 mt-1.5">
           <span className="font-serif text-4xl font-extrabold text-foreground leading-none">{level}</span>
-          <span className="font-serif text-[13px] text-yellow italic">seigneur</span>
+          <span className="font-serif text-[13px] text-yellow italic">{levelName}</span>
         </div>
         <div className="mt-2 h-1 rounded-full bg-[#EDE6DA] overflow-hidden">
-          <div className="h-full w-[72%] rounded-full" style={{ background: 'linear-gradient(90deg, hsl(24,50%,60%), hsl(24,55%,50%))' }} />
+          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${levelProgress}%`, background: 'linear-gradient(90deg, hsl(24,50%,60%), hsl(24,55%,50%))' }} />
         </div>
       </div>
 

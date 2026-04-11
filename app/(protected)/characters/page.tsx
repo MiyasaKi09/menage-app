@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { CharacterGallery } from '@/components/characters/CharacterGallery'
 import { WeeklyCharacterHero } from '@/components/characters/WeeklyCharacterHero'
+import Link from 'next/link'
 
 export default async function CharactersPage() {
   const supabase = await createClient()
@@ -71,6 +72,14 @@ export default async function CharactersPage() {
 
         {/* Hero: Weekly Character */}
         <WeeklyCharacterHero />
+
+        {/* Link to detailed character page */}
+        <Link
+          href="/personnage"
+          className="block text-center py-2.5 rounded-xl bg-white/60 border border-border/60 font-sans text-[12px] font-semibold text-foreground/40 hover:text-foreground/60 hover:bg-white/80 transition-colors"
+        >
+          Voir le personnage de la semaine en detail
+        </Link>
 
         {/* Separator */}
         <div className="flex items-center gap-4">

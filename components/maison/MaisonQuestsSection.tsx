@@ -9,9 +9,10 @@ interface MaisonQuestsSectionProps {
   peripeties: any[]
   userId: string
   householdId: string
+  userPoints?: number
 }
 
-export function MaisonQuestsSection({ corveeData, peripeties, userId, householdId }: MaisonQuestsSectionProps) {
+export function MaisonQuestsSection({ corveeData, peripeties, userId, householdId, userPoints = 0 }: MaisonQuestsSectionProps) {
   // Group corvee rows by corvee_id → one QuestCard per corvée
   // The RPC returns one row per step, so we group them
   const corvee = useMemo(() => {
@@ -72,7 +73,7 @@ export function MaisonQuestsSection({ corveeData, peripeties, userId, householdI
 
       {/* Péripéties en carousel */}
       {peripeties.length > 0 && (
-        <PeripetiesCarousel tasks={peripeties} userId={userId} householdId={householdId} />
+        <PeripetiesCarousel tasks={peripeties} userId={userId} householdId={householdId} userPoints={userPoints} />
       )}
     </div>
   )

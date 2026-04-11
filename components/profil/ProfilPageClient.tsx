@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { LogOut, Bell, BellOff, Briefcase, Shield, Pencil, Check } from 'lucide-react'
+import { LogOut, Bell, BellOff, Briefcase, Shield, Pencil, Check, Swords, CalendarDays, ScrollText } from 'lucide-react'
+import Link from 'next/link'
 
 interface ProfilPageClientProps {
   profile: any
@@ -102,7 +103,11 @@ export function ProfilPageClient({ profile, email, achievements }: ProfilPageCli
           label="Notifications"
           description="Recevoir des rappels de quetes"
           value={notifications}
-          onChange={() => setNotifications(!notifications)}
+          onChange={async () => {
+            const next = !notifications
+            setNotifications(next)
+            await supabase.from('profiles').update({ notifications_enabled: next }).eq('id', profile.id)
+          }}
         />
 
         <ToggleRow
@@ -110,7 +115,11 @@ export function ProfilPageClient({ profile, email, achievements }: ProfilPageCli
           label="Mode travail"
           description="Adapter les horaires de quetes"
           value={workMode}
-          onChange={() => setWorkMode(!workMode)}
+          onChange={async () => {
+            const next = !workMode
+            setWorkMode(next)
+            await supabase.from('profiles').update({ work_mode: next }).eq('id', profile.id)
+          }}
         />
       </div>
 
@@ -160,6 +169,67 @@ export function ProfilPageClient({ profile, email, achievements }: ProfilPageCli
           </div>
         </div>
       )}
+
+      {/* Stats */}
+      <div className="space-y-3">
+        <p className="font-sans text-[11px] text-foreground/25 tracking-widest uppercase">
+          Statistiques
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="p-3 bg-white/40 rounded-xl border border-border/60 text-center">
+            <p className="font-serif text-2xl font-bold text-foreground">{profile.total_points || 0}</p>
+            <p className="font-sans text-[10px] text-foreground/30">XP total</p>
+          </div>
+          <div className="p-3 bg-white/40 rounded-xl border border-border/60 text-center">
+            <p className="font-serif text-2xl font-bold text-foreground">{profile.tasks_completed || 0}</p>
+            <p className="font-sans text-[10px] text-foreground/30">Quetes</p>
+          </div>
+          <div className="p-3 bg-white/40 rounded-xl border border-border/60 text-center">
+            <p className="font-serif text-2xl font-bold text-foreground">{profile.current_streak || 0}j</p>
+            <p className="font-sans text-[10px] text-foreground/30">Serie</p>
+          </div>
+          <div className="p-3 bg-white/40 rounded-xl border border-border/60 text-center">
+            <p className="font-serif text-2xl font-bold text-foreground">{profile.longest_streak || 0}j</p>
+            <p className="font-sans text-[10px] text-foreground/30">Record</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Raccourcis */}
+      <div className="space-y-3">
+        <p className="font-sans text-[11px] text-foreground/25 tracking-widest uppercase">
+          Raccourcis
+        </p>
+        <div className="space-y-1">
+          <Link href="/characters">
+            <div className="group flex items-center gap-3 py-3 border-b border-border/40 transition-colors">
+              <Swords size={16} className="text-foreground/30 group-hover:text-foreground/50 transition-colors" />
+              <div>
+                <p className="font-sans font-semibold text-[13px] text-foreground/60 group-hover:text-foreground transition-colors">Ma collection</p>
+                <p className="font-sans text-[11px] text-foreground/20">Personnages collectes</p>
+              </div>
+            </div>
+          </Link>
+          <Link href="/tasks/schedule">
+            <div className="group flex items-center gap-3 py-3 border-b border-border/40 transition-colors">
+              <CalendarDays size={16} className="text-foreground/30 group-hover:text-foreground/50 transition-colors" />
+              <div>
+                <p className="font-sans font-semibold text-[13px] text-foreground/60 group-hover:text-foreground transition-colors">Planning</p>
+                <p className="font-sans text-[11px] text-foreground/20">Quetes de la semaine</p>
+              </div>
+            </div>
+          </Link>
+          <Link href="/tasks/history">
+            <div className="group flex items-center gap-3 py-3 border-b border-border/40 transition-colors">
+              <ScrollText size={16} className="text-foreground/30 group-hover:text-foreground/50 transition-colors" />
+              <div>
+                <p className="font-sans font-semibold text-[13px] text-foreground/60 group-hover:text-foreground transition-colors">Historique</p>
+                <p className="font-sans text-[11px] text-foreground/20">Quetes passees</p>
+              </div>
+            </div>
+          </Link>
+        </div>
+      </div>
 
       {/* Sign out */}
       <button

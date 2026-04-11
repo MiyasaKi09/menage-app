@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 
@@ -29,74 +28,57 @@ export default async function TaskHistoryPage() {
     .limit(50)
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-app mx-auto px-3.5 py-6 pb-24 space-y-6">
         <div>
-          <Link href="/tasks" className="text-sm text-muted-foreground hover:underline mb-2 block">
-            ← Retour aux tâches
+          <Link href="/maison" className="font-sans text-[11px] text-foreground/25 hover:text-foreground/40 transition-colors">
+            ← Retour
           </Link>
-          <h1 className="text-3xl font-serif font-bold">Historique des Quetes</h1>
-          <p className="text-muted-foreground">
-            Les 50 dernières tâches complétées
+          <h1 className="font-serif text-[28px] font-black text-foreground mt-1">Historique</h1>
+          <p className="font-sans text-[12px] text-foreground/30">
+            Les 50 dernieres quetes completees
           </p>
         </div>
-      </div>
 
-      {!history || history.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Aucune tâche complétée</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">
-              Vous n'avez pas encore complété de tâche. Commencez dès maintenant !
-            </p>
-            <Link href="/tasks">
-              <Button>Voir les tâches disponibles</Button>
+        {!history || history.length === 0 ? (
+          <div className="text-center py-16 space-y-3">
+            <div className="text-3xl opacity-30">📜</div>
+            <p className="font-sans text-[14px] text-foreground/30">Aucune quete completee</p>
+            <Link href="/maison">
+              <Button className="mt-2">Retour aux quetes</Button>
             </Link>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardContent className="p-0">
-            <div className="divide-y">
-              {history.map((entry: any) => (
-                <div
-                  key={entry.id}
-                  className="flex items-center justify-between p-4 hover:bg-muted/30 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="text-2xl">📋</div>
-                    <div>
-                      <p className="font-medium">
-                        {entry.task_name || 'Tâche'}
-                      </p>
-                      <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-                        {entry.category_name && <span>{entry.category_name}</span>}
-                        {entry.households?.name && <span>🏠 {entry.households.name}</span>}
-                        <span>
-                          {new Date(entry.completed_at).toLocaleDateString('fr-FR', {
-                            day: 'numeric',
-                            month: 'short',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-green-600">
-                      +{entry.points_earned}
-                    </p>
-                    <p className="text-xs text-muted-foreground">or</p>
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            {history.map((entry: any) => (
+              <div
+                key={entry.id}
+                className="flex items-center justify-between p-3.5 rounded-xl bg-white/60 border border-border/50 transition-colors"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="font-sans font-semibold text-[13px] text-foreground/60 truncate">
+                    {entry.task_name || 'Quete'}
+                  </p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {entry.category_name && <span className="font-sans text-[10px] text-foreground/25">{entry.category_name}</span>}
+                    <span className="font-sans text-[10px] text-foreground/20">
+                      {new Date(entry.completed_at).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                <span className="font-sans font-bold text-[13px] text-yellow/60 ml-3">
+                  +{entry.points_earned} or
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

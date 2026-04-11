@@ -7,7 +7,7 @@ import { Home, Compass, Users, User } from 'lucide-react'
 const tabs = [
   { href: '/maison', label: 'Maison', icon: Home },
   { href: '/fief', label: 'Fief', icon: Compass },
-  { href: '/personnage', label: 'Personnages', icon: Users },
+  { href: '/characters', label: 'Personnages', icon: Users },
   { href: '/profil', label: 'Profil', icon: User },
 ]
 
