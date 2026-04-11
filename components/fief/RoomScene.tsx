@@ -2,12 +2,12 @@
 
 import { useRef, useCallback, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { ContactShadows, useGLTF } from '@react-three/drei'
+import { ContactShadows, useGLTF, OrbitControls } from '@react-three/drei'
 import { EffectComposer } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { FurnitureItem } from './FurnitureItem'
 import { RoomDecorations } from './RoomDecorations'
-import { Watercolor } from './WatercolorEffect'
+import { Diorama } from './DioramaEffect'
 
 export interface RoomFurnitureData {
   id: string
@@ -44,6 +44,7 @@ function RoomModel() {
       object={scene}
       scale={1}
       position={[0, 0, 0]}
+      rotation={[0, Math.PI, 0]}
     />
   )
 }
@@ -79,26 +80,29 @@ function CeilingLight() {
   )
 }
 
-// Gentle camera sway — disabled in edit mode
-function CameraSway({ enabled }: { enabled: boolean }) {
-  useFrame(({ camera, clock }) => {
-    if (!enabled) {
-      camera.position.set(5, 4, 5)
-      camera.lookAt(0, 0.5, 0)
-      return
-    }
-    const t = clock.elapsedTime
-    camera.position.x = 5 + Math.sin(t * 0.12) * 0.06
-    camera.position.z = 5 + Math.cos(t * 0.09) * 0.06
-    camera.lookAt(0, 0.5, 0)
-  })
-  return null
+// Orbit controls — rotate around the room with touch/mouse
+function CameraControls({ isEditMode }: { isEditMode: boolean }) {
+  return (
+    <OrbitControls
+      target={[0, 0.5, 0]}
+      enablePan={false}
+      enableZoom={true}
+      minZoom={50}
+      maxZoom={160}
+      minPolarAngle={Math.PI / 6}
+      maxPolarAngle={Math.PI / 2.5}
+      enableDamping
+      dampingFactor={0.08}
+      rotateSpeed={0.5}
+      enabled={!isEditMode}
+    />
+  )
 }
 
-function WatercolorFilter() {
+function DioramaFilter() {
   return (
     <EffectComposer>
-      <Watercolor />
+      <Diorama />
     </EffectComposer>
   )
 }
@@ -111,13 +115,14 @@ function SceneContent({ furniture, isEditMode, selectedId, onSelect, onMove }: R
 
   return (
     <>
-      {/* Lighting — boosted for PBR GLB materials */}
-      <ambientLight intensity={0.4} color="#b8a898" />
-      <directionalLight position={[5, 8, 4]} intensity={0.8} color="#d8d0c8" castShadow shadow-mapSize={1024} />
-      <hemisphereLight args={['#ffe4c4', '#3d2b1f', 0.3]} />
+      {/* Lighting — soft, bright, diorama style */}
+      <ambientLight intensity={0.6} color="#f0e8dd" />
+      <directionalLight position={[5, 8, 4]} intensity={1.0} color="#fff5e8" castShadow shadow-mapSize={2048} shadow-bias={-0.001} />
+      <directionalLight position={[-3, 6, 2]} intensity={0.3} color="#e8e4f0" />
+      <hemisphereLight args={['#faf5ef', '#d4c8b8', 0.4]} />
 
       <CeilingLight />
-      <CameraSway enabled={!isEditMode} />
+      <CameraControls isEditMode={isEditMode} />
 
       {/* Click catcher for deselect */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} onPointerDown={handleBackgroundClick}>
@@ -147,7 +152,7 @@ function SceneContent({ furniture, isEditMode, selectedId, onSelect, onMove }: R
       ))}
 
       <ContactShadows position={[0, 0.02, 0]} opacity={0.25} scale={5} blur={2} far={3} />
-      <WatercolorFilter />
+      <DioramaFilter />
     </>
   )
 }
@@ -165,7 +170,7 @@ export function RoomScene({ furniture, isEditMode, selectedId, onSelect, onMove 
           far: 50,
         }}
         gl={{ antialias: true }}
-        style={{ background: '#ddd0be' }}
+        style={{ background: '#f5f0eb' }}
         onCreated={({ camera }) => {
           camera.lookAt(0, 0.5, 0)
         }}
