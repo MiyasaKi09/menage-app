@@ -220,21 +220,7 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
             style={{ background: 'linear-gradient(to top, rgb(var(--background)), transparent)' }}
           />
 
-          {/* "En direct" live badge — only when NOT in edit mode */}
-          {!isEditMode && (
-            <div
-              className="absolute top-3.5 left-3.5 z-20 flex items-center gap-2 px-3 py-1.5 rounded-[14px] border border-white/[0.08]"
-              style={{ background: 'rgba(26, 20, 16, 0.55)', backdropFilter: 'blur(12px)' }}
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF6830] opacity-60" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF6830]" style={{ boxShadow: '0 0 8px rgba(255,104,48,0.5)' }} />
-              </span>
-              <span className="font-sans text-[10px] font-bold text-white/70 tracking-[0.1em] uppercase">
-                En direct
-              </span>
-            </div>
-          )}
+          {/* En direct badge removed */}
         </div>
       </div>
 
