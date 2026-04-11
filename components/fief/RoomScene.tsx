@@ -59,7 +59,7 @@ function RoomModel() {
       object={scene}
       scale={0.55}
       position={[0, 0, 0]}
-      rotation={[0, Math.PI * 0.75, 0]}
+      rotation={[0, Math.PI * 0.25, 0]}
     />
   )
 }
