@@ -61,36 +61,6 @@ function RoomModel() {
 
 useGLTF.preload('/models/chambre-web.glb')
 
-// Blown-out emissive window + point light pushing into the room
-function WindowGlow({ position, rotation = [0, 0, 0], size = [0.35, 0.6] }: {
-  position: [number, number, number]
-  rotation?: [number, number, number]
-  size?: [number, number]
-}) {
-  return (
-    <group position={position} rotation={rotation}>
-      {/* Bright emissive plane — the "overexposed sky" behind the window */}
-      <mesh>
-        <planeGeometry args={size} />
-        <meshStandardMaterial
-          color="#fff5e0"
-          emissive="#fff5e0"
-          emissiveIntensity={3.0}
-          toneMapped={false}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-      {/* Point light casting warm light into the room */}
-      <pointLight
-        color="#ffe8c0"
-        intensity={0.8}
-        distance={5}
-        decay={2}
-      />
-    </group>
-  )
-}
-
 // Subtle dust motes in light beams — additive blended points
 function DustMotes({ count = 200 }: { count?: number }) {
   const pointsRef = useRef<THREE.Points>(null)
