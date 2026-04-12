@@ -161,9 +161,8 @@ function SceneSetup() {
     // Subtle atmospheric fog
     scene.fog = new THREE.FogExp2(0xede0c8, 0.05)
 
-    // Camera — 45° to the left from previous isometric
-    // Previous (5,4,5) at azimuth π/4. Going left → azimuth 0 → position (7.07, 4, 0)
-    camera.position.set(7.07, 4, 0)
+    // Camera — at center of orbit freedom (azimuth 0 = position on +Z axis)
+    camera.position.set(0, 4, 7.07)
     camera.lookAt(0, 0.8, 0)
     if ((camera as THREE.OrthographicCamera).zoom !== undefined) {
       (camera as THREE.OrthographicCamera).zoom = 180
@@ -283,7 +282,7 @@ export function RoomScene({ isEditMode }: RoomSceneProps) {
         shadows
         orthographic
         camera={{
-          position: [7.07, 4, 0],
+          position: [0, 4, 7.07],
           zoom: 180,
           near: 0.1,
           far: 50,
