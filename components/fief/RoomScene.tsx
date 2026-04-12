@@ -180,17 +180,59 @@ function SceneSetup() {
   return null
 }
 
+// Bias matrix: NDC [-1,1] → UV [0,1]
+const BIAS_MATRIX = new THREE.Matrix4().set(
+  0.5, 0.0, 0.0, 0.5,
+  0.0, 0.5, 0.0, 0.5,
+  0.0, 0.0, 0.5, 0.5,
+  0.0, 0.0, 0.0, 1.0,
+)
+
 function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
-  const { camera } = useThree()
+  const { camera, scene, gl } = useThree()
   const keyLightRef = useRef<THREE.DirectionalLight>(null)
   const [volumetric, setVolumetric] = useState<VolumetricLightEffectImpl | null>(null)
 
-  // Create volumetric effect once the key light is mounted
+  // Custom light depth render target + camera (independent of Three.js shadow map)
+  const lightDepthRef = useRef<{
+    rt: THREE.WebGLRenderTarget
+    camera: THREE.OrthographicCamera
+    overrideMat: THREE.MeshBasicMaterial
+    shadowMatrix: THREE.Matrix4
+    lightDir: THREE.Vector3
+  } | null>(null)
+
   useEffect(() => {
-    if (!keyLightRef.current) return
+    // Build depth render target with DepthTexture attached
+    const rt = new THREE.WebGLRenderTarget(1024, 1024, {
+      minFilter: THREE.NearestFilter,
+      magFilter: THREE.NearestFilter,
+    })
+    rt.depthTexture = new THREE.DepthTexture(1024, 1024)
+    rt.depthTexture.type = THREE.UnsignedIntType
+    rt.depthTexture.format = THREE.DepthFormat
+
+    const lightCam = new THREE.OrthographicCamera(-8, 8, 8, -8, 0.1, 30)
+
+    lightDepthRef.current = {
+      rt,
+      camera: lightCam,
+      overrideMat: new THREE.MeshBasicMaterial(),
+      shadowMatrix: new THREE.Matrix4(),
+      lightDir: new THREE.Vector3(),
+    }
+
+    return () => {
+      rt.dispose()
+      rt.depthTexture?.dispose()
+    }
+  }, [])
+
+  // Create volumetric effect
+  useEffect(() => {
     const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|Android/i.test(navigator.userAgent)
-    const fx = new VolumetricLightEffectImpl(keyLightRef.current, camera, {
-      density: 0.03,           // boosted for validation (tune down to 0.015 after visual check)
+    const fx = new VolumetricLightEffectImpl(camera, {
+      density: 0.03,
       scattering: 0.4,
       maxDistance: 12.0,
       steps: isMobile ? 24 : 48,
@@ -199,7 +241,6 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
       debugMode: 0,
     })
     setVolumetric(fx)
-    // Expose debug toggle via window for console tuning
     if (typeof window !== 'undefined') {
       (window as any).volumetric = fx
     }
@@ -208,6 +249,47 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
       if (typeof window !== 'undefined') delete (window as any).volumetric
     }
   }, [camera])
+
+  // Each frame BEFORE the composer: render scene depth from light's POV
+  useFrame(() => {
+    const light = keyLightRef.current
+    const ld = lightDepthRef.current
+    if (!light || !ld || !volumetric) return
+
+    // Position the light camera at the light's world position, looking at origin
+    const lightWorldPos = new THREE.Vector3()
+    light.getWorldPosition(lightWorldPos)
+    ld.camera.position.copy(lightWorldPos)
+    ld.camera.lookAt(0, 0, 0)
+    ld.camera.updateMatrixWorld(true)
+    ld.camera.updateProjectionMatrix()
+
+    // Render scene depth from light POV
+    const prevRT = gl.getRenderTarget()
+    const prevOverride = scene.overrideMaterial
+
+    scene.overrideMaterial = ld.overrideMat
+    gl.setRenderTarget(ld.rt)
+    gl.clear()
+    gl.render(scene, ld.camera)
+
+    scene.overrideMaterial = prevOverride
+    gl.setRenderTarget(prevRT)
+
+    // Build shadow matrix: world → light clip → UV [0,1]
+    ld.shadowMatrix
+      .copy(BIAS_MATRIX)
+      .multiply(ld.camera.projectionMatrix)
+      .multiply(ld.camera.matrixWorldInverse)
+
+    // Light direction (from origin toward light)
+    ld.lightDir.copy(lightWorldPos).normalize()
+
+    // Feed to effect
+    if (ld.rt.depthTexture) {
+      volumetric.setShadowData(ld.rt.depthTexture, ld.shadowMatrix, ld.lightDir)
+    }
+  }, 1) // priority 1 → runs before the default (0) render
 
   return (
     <>
