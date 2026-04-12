@@ -1,11 +1,12 @@
 'use client'
 
-import { Suspense, useEffect, useRef, useMemo } from 'react'
+import { Suspense, useEffect, useRef, useMemo, useState } from 'react'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
 import { useGLTF, OrbitControls } from '@react-three/drei'
 import { EffectComposer, Bloom, N8AO, Vignette } from '@react-three/postprocessing'
 import { BlendFunction } from 'postprocessing'
 import * as THREE from 'three'
+import { VolumetricLightEffectImpl } from './VolumetricLightEffect'
 
 export interface RoomFurnitureData {
   id: string
@@ -180,26 +181,48 @@ function SceneSetup() {
 }
 
 function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
+  const { camera } = useThree()
+  const keyLightRef = useRef<THREE.DirectionalLight>(null)
+  const [volumetric, setVolumetric] = useState<VolumetricLightEffectImpl | null>(null)
+
+  // Create volumetric effect once the key light is mounted
+  useEffect(() => {
+    if (!keyLightRef.current) return
+    const fx = new VolumetricLightEffectImpl(keyLightRef.current, camera, {
+      density: 0.012,
+      scattering: 0.25,
+      maxDistance: 12.0,
+      steps: 48,
+      phaseG: 0.6,
+      lightColor: [1.0, 0.94, 0.78],
+    })
+    setVolumetric(fx)
+    return () => {
+      fx.dispose?.()
+    }
+  }, [camera])
+
   return (
     <>
       {/* ====== GI-SIMULATED LIGHTING ====== */}
 
-      {/* 1. Key directional — warm sun, soft shadows */}
+      {/* 1. Key directional — warm sun, soft shadows (source of volumetric rays) */}
       <directionalLight
+        ref={keyLightRef}
         position={[-5, 8, -3]}
         intensity={2.0}
         color="#fff4e0"
         castShadow
-        shadow-mapSize={2048}
+        shadow-mapSize={[2048, 2048]}
         shadow-bias={-0.0005}
         shadow-normalBias={0.02}
         shadow-radius={6}
         shadow-camera-near={0.1}
-        shadow-camera-far={25}
-        shadow-camera-left={-5}
-        shadow-camera-right={5}
-        shadow-camera-top={5}
-        shadow-camera-bottom={-5}
+        shadow-camera-far={30}
+        shadow-camera-left={-6}
+        shadow-camera-right={6}
+        shadow-camera-top={6}
+        shadow-camera-bottom={-6}
       />
 
       {/* 2. Camera-direction fill — lights the walls facing camera */}
@@ -253,7 +276,7 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
       <DustMotes count={180} />
 
       {/* ====== POST-PROCESSING ====== */}
-      <EffectComposer>
+      <EffectComposer key={volumetric ? 'with-vol' : 'no-vol'}>
         {/* SSAO — contact shadows in stone joints and corners */}
         <N8AO
           aoRadius={0.5}
@@ -261,7 +284,9 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
           distanceFalloff={0.3}
           color={new THREE.Color('#8a7a60')}
         />
-        {/* Bloom — window glow + dusty haze */}
+        {/* Volumetric light rays — ray-marched through shadow map */}
+        {volumetric ? <primitive object={volumetric} dispose={null} /> : <></>}
+        {/* Bloom — window glow + ray highlights */}
         <Bloom
           intensity={0.2}
           luminanceThreshold={0.85}
