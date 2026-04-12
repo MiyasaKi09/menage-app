@@ -161,11 +161,11 @@ function SceneSetup() {
     // Subtle atmospheric fog
     scene.fog = new THREE.FogExp2(0xede0c8, 0.05)
 
-    // Camera
+    // Camera — zoomed in, classic isometric
     camera.position.set(5, 4, 5)
-    camera.lookAt(0, 0.5, 0)
+    camera.lookAt(0, 0.8, 0)
     if ((camera as THREE.OrthographicCamera).zoom !== undefined) {
-      (camera as THREE.OrthographicCamera).zoom = 115
+      (camera as THREE.OrthographicCamera).zoom = 180
       camera.updateProjectionMatrix()
     }
 
@@ -228,11 +228,11 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
       {/* ====== CAMERA + ORBIT ====== */}
       <SceneSetup />
       <OrbitControls
-        target={[0, 0.5, 0]}
+        target={[0, 0.8, 0]}
         enablePan={false}
         enableZoom={true}
-        minZoom={80}
-        maxZoom={170}
+        minZoom={120}
+        maxZoom={260}
         minPolarAngle={Math.PI / 4}
         maxPolarAngle={Math.PI / 3}
         minAzimuthAngle={-Math.PI / 6 + (30 * Math.PI / 180)}
@@ -282,7 +282,7 @@ export function RoomScene({ isEditMode }: RoomSceneProps) {
         orthographic
         camera={{
           position: [5, 4, 5],
-          zoom: 115,
+          zoom: 180,
           near: 0.1,
           far: 50,
         }}
@@ -293,7 +293,7 @@ export function RoomScene({ isEditMode }: RoomSceneProps) {
         }}
         style={{ background: 'transparent' }}
         onCreated={({ camera }) => {
-          camera.lookAt(0, 0.5, 0)
+          camera.lookAt(0, 0.8, 0)
         }}
       >
         <SceneContent isEditMode={isEditMode} />
