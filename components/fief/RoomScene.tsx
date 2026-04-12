@@ -289,7 +289,7 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
     if (ld.rt.depthTexture) {
       volumetric.setShadowData(ld.rt.depthTexture, ld.shadowMatrix, ld.lightDir)
     }
-  }, 1) // priority 1 → runs before the default (0) render
+  }, -1) // priority -1 → runs BEFORE the auto-render (priority > 0 would take over)
 
   return (
     <>
