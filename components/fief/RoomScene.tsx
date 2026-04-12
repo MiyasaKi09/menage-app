@@ -188,17 +188,24 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
   // Create volumetric effect once the key light is mounted
   useEffect(() => {
     if (!keyLightRef.current) return
+    const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|Android/i.test(navigator.userAgent)
     const fx = new VolumetricLightEffectImpl(keyLightRef.current, camera, {
-      density: 0.012,
-      scattering: 0.25,
+      density: 0.03,           // boosted for validation (tune down to 0.015 after visual check)
+      scattering: 0.4,
       maxDistance: 12.0,
-      steps: 48,
-      phaseG: 0.6,
+      steps: isMobile ? 24 : 48,
+      phaseG: 0.65,
       lightColor: [1.0, 0.94, 0.78],
+      debugMode: 0,
     })
     setVolumetric(fx)
+    // Expose debug toggle via window for console tuning
+    if (typeof window !== 'undefined') {
+      (window as any).volumetric = fx
+    }
     return () => {
       fx.dispose?.()
+      if (typeof window !== 'undefined') delete (window as any).volumetric
     }
   }, [camera])
 

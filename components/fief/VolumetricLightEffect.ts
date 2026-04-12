@@ -7,9 +7,20 @@ import {
   Camera,
   DirectionalLight,
   Texture,
+  DataTexture,
+  RedFormat,
+  UnsignedByteType,
   WebGLRenderer,
   WebGLRenderTarget,
 } from 'three'
+
+// Fallback white 1x1 texture for initial frames before shadow map exists
+const fallbackShadowTexture = (() => {
+  const data = new Uint8Array([255])
+  const tex = new DataTexture(data, 1, 1, RedFormat, UnsignedByteType)
+  tex.needsUpdate = true
+  return tex
+})()
 
 /**
  * Real-time volumetric light pass using ray marching through the shadow map.
@@ -31,6 +42,7 @@ uniform float uPhaseG;
 uniform int uNumSteps;
 uniform vec2 resolution;
 uniform float time;
+uniform int uDebugMode;  // 0=normal, 1=worldPos, 2=shadow, 3=depth, 4=lightDir
 
 // Interleaved gradient noise — for jitter to reduce banding
 float ign(vec2 p) {
@@ -74,6 +86,23 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, const in float depth,
   // World pos of the fragment the camera sees
   vec3 worldEnd = worldPosFromDepth(uv, depth);
 
+  // ===== DEBUG MODES =====
+  if (uDebugMode == 1) {
+    // World position as color — should show XYZ gradient
+    outputColor = vec4(fract(worldEnd * 0.3 + 0.5), 1.0);
+    return;
+  }
+  if (uDebugMode == 3) {
+    // Depth as grayscale
+    outputColor = vec4(vec3(depth), 1.0);
+    return;
+  }
+  if (uDebugMode == 4) {
+    // Light direction as color
+    outputColor = vec4(lightDir * 0.5 + 0.5, 1.0);
+    return;
+  }
+
   vec3 rayDir = normalize(worldEnd - cameraPos);
   float rayLen = min(length(worldEnd - cameraPos), uMaxDistance);
 
@@ -88,6 +117,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, const in float depth,
   vec3 scattered = vec3(0.0);
   float transmittance = 1.0;
 
+  float shadowAvg = 0.0;
   for (int i = 0; i < 128; i++) {
     if (i >= steps) break;
     float t = float(i) * stepSize + jitter;
@@ -96,6 +126,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, const in float depth,
     vec3 samplePos = cameraPos + rayDir * t;
 
     float lit = sampleShadow(samplePos);
+    shadowAvg += lit;
 
     // Dustier near the floor
     float heightFactor = 1.0 + 0.4 * (1.0 - smoothstep(0.0, 2.5, samplePos.y));
@@ -104,6 +135,13 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, const in float depth,
     vec3 inScatter = lightColor * uScattering * phase * lit * localDensity;
     transmittance *= exp(-localDensity * stepSize);
     scattered += inScatter * transmittance * stepSize;
+  }
+
+  if (uDebugMode == 2) {
+    // Average shadow sample — should show silhouette of shadowed vs lit regions
+    shadowAvg /= float(steps);
+    outputColor = vec4(vec3(shadowAvg), 1.0);
+    return;
   }
 
   // Additive composite
@@ -118,6 +156,7 @@ interface VolumetricParams {
   steps?: number
   phaseG?: number
   lightColor?: [number, number, number]
+  debugMode?: 0 | 1 | 2 | 3 | 4
 }
 
 export class VolumetricLightEffectImpl extends Effect {
@@ -128,7 +167,7 @@ export class VolumetricLightEffectImpl extends Effect {
     super('VolumetricLight', fragmentShader, {
       attributes: EffectAttribute.DEPTH,
       uniforms: new Map<string, Uniform>([
-        ['tShadowMap', new Uniform<Texture | null>(null)],
+        ['tShadowMap', new Uniform<Texture>(fallbackShadowTexture)],
         ['shadowMatrix', new Uniform(new Matrix4())],
         ['inverseProjection', new Uniform(new Matrix4())],
         ['cameraMatrix', new Uniform(new Matrix4())],
@@ -142,11 +181,14 @@ export class VolumetricLightEffectImpl extends Effect {
         ['uNumSteps', new Uniform(params.steps ?? 48)],
         ['resolution', new Uniform(new Vector2(1, 1))],
         ['time', new Uniform(0)],
+        ['uDebugMode', new Uniform(params.debugMode ?? 0)],
       ]),
     })
     this.light = light
     this.camera = camera
   }
+
+  private _lightWorldPos = new Vector3()
 
   update(_renderer: WebGLRenderer, _inputBuffer: WebGLRenderTarget, deltaTime?: number) {
     const u = this.uniforms
@@ -160,6 +202,7 @@ export class VolumetricLightEffectImpl extends Effect {
     if (shadow.map) {
       u.get('tShadowMap')!.value = shadow.map.texture
     }
+    // else: keep the fallback white texture (means "always lit")
 
     // Shadow matrix: world → light clip space
     shadow.camera.updateMatrixWorld()
@@ -171,8 +214,13 @@ export class VolumetricLightEffectImpl extends Effect {
     ;(u.get('cameraMatrix')!.value as Matrix4).copy(this.camera.matrixWorld)
     ;(u.get('cameraPos')!.value as Vector3).setFromMatrixPosition(this.camera.matrixWorld)
 
-    // Light direction — from scene point toward light source
-    ;(u.get('lightDir')!.value as Vector3).copy(this.light.position).normalize()
+    // Light direction — use world position (scene graph might transform the light)
+    this.light.getWorldPosition(this._lightWorldPos)
+    ;(u.get('lightDir')!.value as Vector3).copy(this._lightWorldPos).normalize()
+  }
+
+  setDebugMode(mode: 0 | 1 | 2 | 3 | 4) {
+    this.uniforms.get('uDebugMode')!.value = mode
   }
 
   setSize(width: number, height: number) {
