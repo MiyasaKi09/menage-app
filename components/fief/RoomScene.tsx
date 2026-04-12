@@ -161,8 +161,9 @@ function SceneSetup() {
     // Subtle atmospheric fog
     scene.fog = new THREE.FogExp2(0xede0c8, 0.05)
 
-    // Camera — zoomed in, classic isometric
-    camera.position.set(5, 4, 5)
+    // Camera — rotated 45° left from base isometric
+    // Base was (5,4,5) at azimuth π/4. New azimuth π/2 = position (0, 4, 7.07)
+    camera.position.set(0, 4, 7.07)
     camera.lookAt(0, 0.8, 0)
     if ((camera as THREE.OrthographicCamera).zoom !== undefined) {
       (camera as THREE.OrthographicCamera).zoom = 180
@@ -235,8 +236,8 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
         maxZoom={260}
         minPolarAngle={Math.PI / 4}
         maxPolarAngle={Math.PI / 3}
-        minAzimuthAngle={Math.PI / 4 - Math.PI / 4}
-        maxAzimuthAngle={Math.PI / 4 + Math.PI / 4}
+        minAzimuthAngle={Math.PI / 2 - Math.PI / 4}
+        maxAzimuthAngle={Math.PI / 2 + Math.PI / 4}
         enableDamping
         dampingFactor={0.05}
         rotateSpeed={0.3}
@@ -281,7 +282,7 @@ export function RoomScene({ isEditMode }: RoomSceneProps) {
         shadows
         orthographic
         camera={{
-          position: [5, 4, 5],
+          position: [0, 4, 7.07],
           zoom: 180,
           near: 0.1,
           far: 50,
