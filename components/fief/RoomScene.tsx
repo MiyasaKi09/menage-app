@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useRef, useMemo } from 'react'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
-import { useGLTF, OrbitControls, Environment } from '@react-three/drei'
+import { useGLTF, OrbitControls } from '@react-three/drei'
 import { EffectComposer, Bloom, N8AO, Vignette } from '@react-three/postprocessing'
 import { BlendFunction } from 'postprocessing'
 import * as THREE from 'three'
@@ -138,13 +138,28 @@ function DustMotes({ count = 200 }: { count?: number }) {
   )
 }
 
-// Scene setup — fog + environment
+// Scene setup — warm environment map + fog + camera
 function SceneSetup() {
-  const { scene, camera } = useThree()
+  const { scene, camera, gl } = useThree()
 
   useEffect(() => {
-    // Fog — subtle atmospheric dust
-    scene.fog = new THREE.FogExp2(0xede0c8, 0.06)
+    // Build a warm environment map from a solid color sphere — simulates GI
+    const pmrem = new THREE.PMREMGenerator(gl)
+    const envScene = new THREE.Scene()
+    const sphere = new THREE.Mesh(
+      new THREE.SphereGeometry(50),
+      new THREE.MeshBasicMaterial({
+        color: new THREE.Color(0xf0e0c8),
+        side: THREE.BackSide,
+      })
+    )
+    envScene.add(sphere)
+    const envRT = pmrem.fromScene(envScene)
+    scene.environment = envRT.texture
+    pmrem.dispose()
+
+    // Subtle atmospheric fog
+    scene.fog = new THREE.FogExp2(0xede0c8, 0.05)
 
     // Camera
     camera.position.set(5, 4, 5)
@@ -153,7 +168,13 @@ function SceneSetup() {
       (camera as THREE.OrthographicCamera).zoom = 115
       camera.updateProjectionMatrix()
     }
-  }, [scene, camera])
+
+    return () => {
+      envRT.dispose()
+      sphere.geometry.dispose()
+      ;(sphere.material as THREE.Material).dispose()
+    }
+  }, [scene, camera, gl])
 
   return null
 }
@@ -161,18 +182,9 @@ function SceneSetup() {
 function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
   return (
     <>
-      {/* ====== ENVIRONMENT MAP — warm indirect light on all surfaces ====== */}
-      <Environment
-        preset="apartment"
-        environmentIntensity={0.3}
-      />
+      {/* ====== GI-SIMULATED LIGHTING ====== */}
 
-      {/* ====== 6-LIGHT GI SIMULATION ====== */}
-
-      {/* 1. Ambient — low, let the other lights do the work */}
-      <ambientLight intensity={0.3} color="#c8b898" />
-
-      {/* 2. Key directional — warm sun, soft shadows */}
+      {/* 1. Key directional — warm sun, soft shadows */}
       <directionalLight
         position={[-5, 8, -3]}
         intensity={2.0}
@@ -190,17 +202,23 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
         shadow-camera-bottom={-5}
       />
 
-      {/* 3. Fill directional — warm, no shadows, simulates 1st bounce */}
-      <directionalLight position={[4, 3, 5]} intensity={0.8} color="#e8d8c0" />
+      {/* 2. Camera-direction fill — lights the walls facing camera */}
+      <directionalLight position={[5, 5, 5]} intensity={1.5} color="#f0e0c0" />
 
-      {/* 4. Back fill — simulates wall bounce from behind */}
+      {/* 3. Side fill */}
+      <directionalLight position={[4, 3, -2]} intensity={0.8} color="#e8d8c0" />
+
+      {/* 4. Back fill — simulates wall bounce */}
       <directionalLight position={[0, 2, -5]} intensity={0.4} color="#d0c0a0" />
 
-      {/* 5. Ground bounce — point light below floor pointing up */}
-      <pointLight position={[0, -0.5, 0]} intensity={0.3} color="#d4c4a0" distance={5} decay={1} />
+      {/* 5. Ground bounce */}
+      <pointLight position={[0, -0.5, 0]} intensity={0.4} color="#d4c4a0" distance={5} decay={1} />
 
       {/* 6. Hemisphere — warm sky + warm ground */}
-      <hemisphereLight args={['#f0e0c8', '#b0a080', 0.5]} />
+      <hemisphereLight args={['#f0e0c8', '#b0a080', 0.6]} />
+
+      {/* 7. Ambient — low, env map does most indirect */}
+      <ambientLight intensity={0.25} color="#c8b898" />
 
       {/* ====== WINDOW GLOWS ====== */}
       <WindowGlow position={[-1.55, 0.962, -0.337]} rotation={[0, Math.PI / 2, 0]} size={[0.3, 0.5]} />
@@ -258,7 +276,7 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
 
 export function RoomScene({ isEditMode }: RoomSceneProps) {
   return (
-    <div className="relative aspect-square w-full rounded-[28px] overflow-hidden">
+    <div className="relative w-full h-full">
       <Canvas
         shadows
         orthographic
@@ -271,11 +289,9 @@ export function RoomScene({ isEditMode }: RoomSceneProps) {
         gl={{
           antialias: true,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 2.0,
+          toneMappingExposure: 2.5,
         }}
-        style={{
-          background: 'linear-gradient(180deg, #f5e6c8 0%, #ede0c0 100%)',
-        }}
+        style={{ background: 'transparent' }}
         onCreated={({ camera }) => {
           camera.lookAt(0, 0.5, 0)
         }}

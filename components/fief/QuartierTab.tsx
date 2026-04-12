@@ -13,7 +13,7 @@ const RoomScene = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="aspect-square max-w-md mx-auto bg-white/40 rounded-[28px] border border-border/60 flex items-center justify-center">
+      <div className="w-full h-full flex items-center justify-center">
         <div className="text-center space-y-2">
           <div className="w-8 h-8 border-2 border-foreground/20 border-t-foreground/50 rounded-full animate-spin mx-auto" />
           <p className="font-sans text-[12px] text-foreground/25">Chargement de la chambre...</p>
@@ -194,125 +194,155 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
   const filteredCatalog = catalog.filter(c => c.category === activeCategory)
 
   return (
-    <motion.div
-      className="space-y-5"
-      initial={{ opacity: 0, y: 20, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {/* 3D Room with enhanced container */}
-      <div className="relative max-w-md mx-auto">
-        <div
-          className="relative rounded-[28px] overflow-hidden"
-          style={{ boxShadow: '0 12px 50px hsla(30, 30%, 20%, 0.18), 0 2px 8px hsla(30, 30%, 20%, 0.08)' }}
-        >
-          <RoomScene
-            furniture={furniture}
-            isEditMode={isEditMode}
-            selectedId={selectedId}
-            onSelect={handleSelect}
-            onMove={handleMove}
-          />
+    <>
+      {/* Immersive fullscreen 3D scene — fixed behind everything */}
+      <motion.div
+        className="fixed inset-0 z-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        style={{ background: 'linear-gradient(180deg, #f5e6c8 0%, #ede0c0 100%)' }}
+      >
+        <RoomScene
+          furniture={furniture}
+          isEditMode={isEditMode}
+          selectedId={selectedId}
+          onSelect={handleSelect}
+          onMove={handleMove}
+        />
+      </motion.div>
 
-          {/* Gradient fade at bottom */}
-          <div
-            className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-10"
-            style={{ background: 'linear-gradient(to top, rgb(var(--background)), transparent)' }}
-          />
-
-          {/* En direct badge removed */}
-        </div>
-      </div>
-
-      {/* Edit toolbar */}
-      <div className="flex items-center justify-center gap-2">
-        {!isEditMode ? (
-          <button
-            onClick={() => setIsEditMode(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-[14px] bg-white border border-[#E8E0D4] text-foreground/50 font-sans text-[12px] font-medium hover:bg-white hover:shadow-sm transition-all"
-          >
-            <Pencil size={14} />
-            Editer
-          </button>
-        ) : (
-          <>
-            {selectedId && (
-              <>
-                <button
-                  onClick={handleRotate}
-                  className="flex items-center gap-1 px-3 py-2 rounded-[14px] bg-white border border-[#E8E0D4] text-foreground/40 font-sans text-[11px] hover:shadow-sm transition-all"
-                >
-                  <RotateCw size={12} />
-                  Tourner
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="flex items-center gap-1 px-3 py-2 rounded-[14px] bg-red/[0.08] border border-red/15 text-red/50 font-sans text-[11px] hover:bg-red/[0.15] transition-colors"
-                >
-                  <Trash2 size={12} />
-                </button>
-              </>
-            )}
+      {/* Floating UI overlays */}
+      <div className="relative z-10 pointer-events-none">
+        {/* Edit toolbar — floats bottom of viewport */}
+        <div className="fixed bottom-24 left-0 right-0 flex items-center justify-center gap-2 px-4 pointer-events-auto">
+          {!isEditMode ? (
             <button
-              onClick={handleSave}
-              disabled={saving}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-[14px] bg-green/[0.1] border border-green/20 text-green/60 font-sans text-[12px] font-medium hover:bg-green/[0.2] transition-colors disabled:opacity-30"
+              onClick={() => setIsEditMode(true)}
+              className="flex items-center gap-1.5 px-5 py-2.5 rounded-[14px] font-sans text-[12px] font-medium transition-all shadow-lg"
+              style={{
+                background: 'rgba(255,245,230,0.75)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: '1px solid rgba(232,224,212,0.6)',
+                color: 'hsl(30, 30%, 30%)',
+              }}
             >
-              <Save size={14} />
-              {saving ? 'Sauvegarde...' : 'Sauvegarder'}
+              <Pencil size={14} />
+              Editer
             </button>
-          </>
+          ) : (
+            <>
+              {selectedId && (
+                <>
+                  <button
+                    onClick={handleRotate}
+                    className="flex items-center gap-1 px-3 py-2 rounded-[14px] font-sans text-[11px] shadow-lg"
+                    style={{
+                      background: 'rgba(255,245,230,0.75)',
+                      backdropFilter: 'blur(12px)',
+                      border: '1px solid rgba(232,224,212,0.6)',
+                      color: 'hsl(30, 30%, 40%)',
+                    }}
+                  >
+                    <RotateCw size={12} />
+                    Tourner
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="flex items-center gap-1 px-3 py-2 rounded-[14px] font-sans text-[11px] shadow-lg"
+                    style={{
+                      background: 'rgba(240,200,200,0.7)',
+                      backdropFilter: 'blur(12px)',
+                      border: '1px solid rgba(200,120,120,0.4)',
+                      color: 'hsl(0, 40%, 40%)',
+                    }}
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </>
+              )}
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-[14px] font-sans text-[12px] font-medium shadow-lg disabled:opacity-30"
+                style={{
+                  background: 'rgba(200,230,200,0.75)',
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(130,180,130,0.4)',
+                  color: 'hsl(140, 30%, 30%)',
+                }}
+              >
+                <Save size={14} />
+                {saving ? 'Sauvegarde...' : 'Sauvegarder'}
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Catalog panel — floats from bottom in edit mode */}
+        {isEditMode && (
+          <motion.div
+            className="fixed bottom-36 left-0 right-0 px-4 pointer-events-auto"
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.4 }}
+          >
+            <div
+              className="max-w-md mx-auto rounded-[20px] p-3 space-y-3"
+              style={{
+                background: 'rgba(255,245,230,0.85)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                border: '1px solid rgba(232,224,212,0.6)',
+                boxShadow: '0 8px 32px rgba(30,20,10,0.12)',
+              }}
+            >
+              <p className="font-sans text-[11px] text-foreground/35 tracking-widest uppercase">
+                Ajouter
+              </p>
+
+              <div className="flex gap-1.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+                {CATEGORIES.map((cat) => (
+                  <button
+                    key={cat.key}
+                    onClick={() => setActiveCategory(cat.key)}
+                    className={`flex-shrink-0 px-3 py-1.5 rounded-[10px] font-sans text-[10px] font-medium transition-colors ${
+                      activeCategory === cat.key
+                        ? 'bg-yellow/[0.2] border border-yellow/30 text-yellow/80'
+                        : 'bg-white/60 border border-[#E8E0D4] text-foreground/40 hover:text-foreground/60'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
+                {filteredCatalog.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => handleAddItem(item.id)}
+                    className="flex-shrink-0 w-20 h-24 rounded-[14px] bg-white/70 border border-[#E8E0D4] flex flex-col items-center justify-center gap-1.5 hover:bg-white transition-all"
+                  >
+                    <Plus size={14} className="text-foreground/30" />
+                    <span className="font-sans text-[9px] text-foreground/50 text-center leading-tight px-1">{item.name}</span>
+                    {item.price > 0 && (
+                      <span className="flex items-center gap-0.5 font-sans font-semibold text-[8px] text-yellow/60">
+                        <Coins size={8} />
+                        {item.price}
+                      </span>
+                    )}
+                  </button>
+                ))}
+                {filteredCatalog.length === 0 && (
+                  <p className="font-sans text-[11px] text-foreground/30 py-4 px-2">Aucun objet</p>
+                )}
+              </div>
+            </div>
+          </motion.div>
         )}
       </div>
-
-      {/* Catalog (visible in edit mode) */}
-      {isEditMode && (
-        <div className="space-y-3">
-          <p className="font-sans text-[11px] text-foreground/25 tracking-widest uppercase">
-            Ajouter
-          </p>
-
-          {/* Category tabs */}
-          <div className="flex gap-1.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat.key}
-                onClick={() => setActiveCategory(cat.key)}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-[10px] font-sans text-[10px] font-medium transition-colors ${
-                  activeCategory === cat.key
-                    ? 'bg-yellow/[0.12] border border-yellow/20 text-yellow/70'
-                    : 'bg-white border border-[#E8E0D4] text-foreground/30 hover:text-foreground/45'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Items grid */}
-          <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
-            {filteredCatalog.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => handleAddItem(item.id)}
-                className="flex-shrink-0 w-20 h-24 rounded-[14px] bg-white border border-[#E8E0D4] flex flex-col items-center justify-center gap-1.5 hover:shadow-sm hover:-translate-y-0.5 transition-all"
-              >
-                <Plus size={14} className="text-foreground/20" />
-                <span className="font-sans text-[9px] text-foreground/35 text-center leading-tight px-1">{item.name}</span>
-                {item.price > 0 && (
-                  <span className="flex items-center gap-0.5 font-sans font-semibold text-[8px] text-yellow/50">
-                    <Coins size={8} />
-                    {item.price}
-                  </span>
-                )}
-              </button>
-            ))}
-            {filteredCatalog.length === 0 && (
-              <p className="font-sans text-[11px] text-foreground/20 py-4 px-2">Aucun objet dans cette categorie</p>
-            )}
-          </div>
-        </div>
-      )}
-    </motion.div>
+    </>
   )
 }
