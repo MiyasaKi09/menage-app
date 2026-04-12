@@ -59,20 +59,28 @@ vec3 worldPosFromDepth(vec2 uv, float depth) {
   return world.xyz;
 }
 
+// Unpack RGBA-packed depth (Three.js shadow map format)
+float unpackRGBAToDepth(vec4 v) {
+  return dot(v, vec4(1.0, 1.0/255.0, 1.0/65025.0, 1.0/16581375.0));
+}
+
 // Sample shadow map — returns 1.0 if lit, 0.0 if in shadow
+// NOTE: uses light.shadow.matrix which already includes the [0,1] bias,
+// so we do NOT apply * 0.5 + 0.5 ourselves.
 float sampleShadow(vec3 worldPos) {
   vec4 sc = shadowMatrix * vec4(worldPos, 1.0);
-  sc.xyz /= sc.w;
-  sc.xyz = sc.xyz * 0.5 + 0.5;
+  vec3 shadowCoord = sc.xyz / sc.w;
 
   // Outside shadow frustum → considered lit
-  if (sc.x < 0.0 || sc.x > 1.0 || sc.y < 0.0 || sc.y > 1.0 || sc.z < 0.0 || sc.z > 1.0) {
+  if (shadowCoord.x < 0.0 || shadowCoord.x > 1.0 ||
+      shadowCoord.y < 0.0 || shadowCoord.y > 1.0 ||
+      shadowCoord.z < 0.0 || shadowCoord.z > 1.0) {
     return 1.0;
   }
 
-  float shadowDepth = texture2D(tShadowMap, sc.xy).r;
-  float bias = 0.003;
-  return sc.z - bias < shadowDepth ? 1.0 : 0.0;
+  float shadowDepth = unpackRGBAToDepth(texture2D(tShadowMap, shadowCoord.xy));
+  float bias = 0.005;
+  return shadowCoord.z - bias <= shadowDepth ? 1.0 : 0.0;
 }
 
 // Henyey-Greenstein phase — controls scatter direction
@@ -204,10 +212,11 @@ export class VolumetricLightEffectImpl extends Effect {
     }
     // else: keep the fallback white texture (means "always lit")
 
-    // Shadow matrix: world → light clip space
+    // Shadow matrix: world → shadow UV space [0,1]
+    // Three.js light.shadow.matrix already includes the bias matrix for [0,1] remapping
     shadow.camera.updateMatrixWorld()
     const sm = u.get('shadowMatrix')!.value as Matrix4
-    sm.multiplyMatrices(shadow.camera.projectionMatrix, shadow.camera.matrixWorldInverse)
+    sm.copy(shadow.matrix)
 
     // Camera matrices
     ;(u.get('inverseProjection')!.value as Matrix4).copy(this.camera.projectionMatrix).invert()
