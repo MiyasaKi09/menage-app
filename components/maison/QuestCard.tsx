@@ -44,7 +44,10 @@ export function QuestCard({ questName, categoryEmoji, steps, totalPoints }: Ques
   const allDone = completedCount === localSteps.length
 
   return (
-    <div className="bg-white/60 border border-border/60 rounded-xl p-4 space-y-4">
+    <div className="rounded-xl p-4 space-y-4" style={{
+      background: 'linear-gradient(135deg, rgb(var(--card)) 0%, rgb(var(--primary)/0.04) 100%)',
+      border: '1px solid rgb(var(--primary)/0.15)',
+    }}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">

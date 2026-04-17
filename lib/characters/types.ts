@@ -44,12 +44,13 @@ export const RARITY_COLORS: Record<string, string> = {
 export const RARITY_LABELS: Record<string, string> = {
   common: 'Commun',
   rare: 'Rare',
-  epic: 'Epique',
-  legendary: 'Legendaire',
+  epic: 'Épique',
+  legendary: 'Légendaire',
 }
 
-// French display names for each character class (keys = DB character_class)
+// Supports both English DB keys (new rows) and French DB keys (legacy rows)
 export const CLASS_LABELS: Record<string, string> = {
+  // English keys
   wizard:      'Sorcier',
   angel:       'Ange',
   bard:        'Barde',
@@ -65,10 +66,24 @@ export const CLASS_LABELS: Record<string, string> = {
   dragon:      'Dragon',
   monk:        'Moine',
   wanderer:    'Vagabond',
+  // French legacy keys
+  mage:        'Sorcier',
+  ange:        'Ange',
+  boheme:      'Barde',
+  lavandiere:  'Lavandière',
+  sentinelle:  'Gardien',
+  imperatrice: 'Noble Dame',
+  devin:       'Oracle',
+  chevalier:   'Chevalier',
+  fee:         'Fée',
+  alchimiste:  'Alchimiste',
+  druide:      'Druide',
+  moine:       'Moine',
+  vagabond:    'Vagabond',
 }
 
-// Keys match character_class values stored in the database (English)
 export const CLASS_EMOJIS: Record<string, string> = {
+  // English keys
   wizard:      '🧙',
   angel:       '👼',
   bard:        '🪘',
@@ -84,9 +99,24 @@ export const CLASS_EMOJIS: Record<string, string> = {
   dragon:      '🐉',
   monk:        '🧘',
   wanderer:    '🗺️',
+  // French legacy keys
+  mage:        '🧙',
+  ange:        '👼',
+  boheme:      '🪘',
+  lavandiere:  '👗',
+  sentinelle:  '🏰',
+  imperatrice: '👑',
+  devin:       '🔮',
+  chevalier:   '⚔️',
+  fee:         '🧚',
+  alchimiste:  '⚗️',
+  druide:      '🌿',
+  moine:       '🧘',
+  vagabond:    '🗺️',
 }
 
 export const CLASS_IMAGES: Record<string, string> = {
+  // English keys
   wizard:      '/characters/mage.png',
   angel:       '/characters/ange.png',
   bard:        '/characters/boheme.png',
@@ -95,4 +125,12 @@ export const CLASS_IMAGES: Record<string, string> = {
   noblewoman:  '/characters/imperatrice.png',
   oracle:      '/characters/devin.png',
   pirate:      '/characters/pirate.png',
+  // French legacy keys (same files)
+  mage:        '/characters/mage.png',
+  ange:        '/characters/ange.png',
+  boheme:      '/characters/boheme.png',
+  lavandiere:  '/characters/lavandiere.png',
+  sentinelle:  '/characters/sentinelle.png',
+  imperatrice: '/characters/imperatrice.png',
+  devin:       '/characters/devin.png',
 }

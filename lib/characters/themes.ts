@@ -514,3 +514,19 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '242 195 155',
   },
 }
+
+// French legacy key aliases — maps old DB slugs to the same theme objects
+// This supports production DBs seeded before the English rename migration.
+CHARACTER_THEMES.mage        = CHARACTER_THEMES.wizard
+CHARACTER_THEMES.ange        = CHARACTER_THEMES.angel
+CHARACTER_THEMES.boheme      = CHARACTER_THEMES.bard
+CHARACTER_THEMES.lavandiere  = CHARACTER_THEMES.washerwoman
+CHARACTER_THEMES.sentinelle  = CHARACTER_THEMES.guardian
+CHARACTER_THEMES.imperatrice = CHARACTER_THEMES.noblewoman
+CHARACTER_THEMES.devin       = CHARACTER_THEMES.oracle
+CHARACTER_THEMES.chevalier   = CHARACTER_THEMES.knight
+CHARACTER_THEMES.fee         = CHARACTER_THEMES.fairy
+CHARACTER_THEMES.alchimiste  = CHARACTER_THEMES.alchemist
+CHARACTER_THEMES.druide      = CHARACTER_THEMES.druid
+CHARACTER_THEMES.moine       = CHARACTER_THEMES.monk
+CHARACTER_THEMES.vagabond    = CHARACTER_THEMES.wanderer
