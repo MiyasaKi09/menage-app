@@ -23,34 +23,51 @@ export function useCharacterTheme() {
 }
 
 function applyTheme(theme: FullTheme) {
-  const root = document.documentElement
-  // Deep backgrounds (for hero cards, dark accents)
-  root.style.setProperty('--deep-green', theme.deepBg1)
-  root.style.setProperty('--deep-blue', theme.deepBg2)
-  root.style.setProperty('--deep-purple', theme.deepBg1)
-  root.style.setProperty('--deep-orange', theme.deepBg1)
-  // Accent colors
-  root.style.setProperty('--yellow', theme.accent)
-  root.style.setProperty('--orange', theme.warm)
-  root.style.setProperty('--green', theme.secondary)
-  root.style.setProperty('--blue', theme.secondarySoft)
-  root.style.setProperty('--purple', theme.accentSoft)
-  root.style.setProperty('--pink', theme.warm)
-  // Neutrals
-  root.style.setProperty('--cream', theme.cream)
-  root.style.setProperty('--off-white', theme.offWhite)
-  root.style.setProperty('--charcoal', theme.charcoal)
-  root.style.setProperty('--ink', theme.ink)
-  // Semantic (light palette)
-  root.style.setProperty('--background', theme.cream)
-  root.style.setProperty('--foreground', theme.charcoal)
-  root.style.setProperty('--card', theme.offWhite)
-  root.style.setProperty('--card-foreground', theme.charcoal)
-  root.style.setProperty('--black', theme.charcoal)
-  // Character-specific
-  root.style.setProperty('--character-primary', theme.accent)
-  root.style.setProperty('--character-accent', theme.accentSoft)
-  root.style.setProperty('--character-glow', theme.glow)
+  const r = document.documentElement
+
+  // ── Dark backgrounds ─────────────────────────────────────────────────
+  r.style.setProperty('--deep-blue',    theme.deepBg1)
+  r.style.setProperty('--deep-green',   theme.deepBg2)
+  r.style.setProperty('--deep-purple',  theme.deepBg1)
+  r.style.setProperty('--deep-orange',  theme.deepBg2)
+
+  // ── Light backgrounds ────────────────────────────────────────────────
+  r.style.setProperty('--cream',        theme.cream)
+  r.style.setProperty('--off-white',    theme.offWhite)
+
+  // ── Text ─────────────────────────────────────────────────────────────
+  r.style.setProperty('--charcoal',     theme.charcoal)
+  r.style.setProperty('--black',        theme.charcoal)
+  r.style.setProperty('--ink',          theme.ink)
+
+  // ── Borders & inputs ─────────────────────────────────────────────────
+  r.style.setProperty('--border',       theme.border)
+  r.style.setProperty('--input',        theme.input)
+  r.style.setProperty('--ring',         theme.ring)
+
+  // ── Semantic ─────────────────────────────────────────────────────────
+  r.style.setProperty('--background',        theme.cream)
+  r.style.setProperty('--foreground',        theme.charcoal)
+  r.style.setProperty('--card',              theme.offWhite)
+  r.style.setProperty('--card-foreground',   theme.charcoal)
+
+  // ── Named accent palette ─────────────────────────────────────────────
+  r.style.setProperty('--yellow',       theme.yellow)
+  r.style.setProperty('--orange',       theme.orange)
+  r.style.setProperty('--red',          theme.red)
+  r.style.setProperty('--green',        theme.green)
+  r.style.setProperty('--blue',         theme.blue)
+  r.style.setProperty('--purple',       theme.purple)
+  r.style.setProperty('--pink',         theme.pink)
+
+  // ── Accent (primary) ─────────────────────────────────────────────────
+  r.style.setProperty('--primary',      theme.accent)
+  r.style.setProperty('--accent',       theme.accent)
+
+  // ── Character-specific ───────────────────────────────────────────────
+  r.style.setProperty('--character-primary', theme.accent)
+  r.style.setProperty('--character-accent',  theme.accentSoft)
+  r.style.setProperty('--character-glow',    theme.glow)
 }
 
 interface CharacterThemeProviderProps {
@@ -58,7 +75,10 @@ interface CharacterThemeProviderProps {
   initialCharacter?: WeeklyCharacter | null
 }
 
-export function CharacterThemeProvider({ children, initialCharacter = null }: CharacterThemeProviderProps) {
+export function CharacterThemeProvider({
+  children,
+  initialCharacter = null,
+}: CharacterThemeProviderProps) {
   const [character, setCharacter] = useState<WeeklyCharacter | null>(initialCharacter)
 
   const charClass = character?.character_class || ''
