@@ -56,14 +56,14 @@
 
 /* Selection */
 ::selection {
-  background: rgba(196, 163, 90, 0.15);
+  background: rgb(var(--yellow) / 0.15);
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; display: none; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(26, 23, 20, 0.1); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(26, 23, 20, 0.18); }
+::-webkit-scrollbar-thumb { background: rgb(var(--charcoal) / 0.10); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgb(var(--charcoal) / 0.18); }
 
 /* Animations */
 @keyframes float {
@@ -72,8 +72,8 @@
 }
 
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 6px rgba(196, 163, 90, 0.1); }
-  50% { box-shadow: 0 0 20px rgba(196, 163, 90, 0.2); }
+  0%, 100% { box-shadow: 0 0 6px rgb(var(--yellow) / 0.1); }
+  50% { box-shadow: 0 0 20px rgb(var(--yellow) / 0.2); }
 }
 
 @keyframes reveal {
