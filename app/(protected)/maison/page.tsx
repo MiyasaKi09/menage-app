@@ -267,7 +267,7 @@ export default async function MaisonPage() {
             </h1>
           </div>
           <div className="relative mb-1">
-            <div className="w-[46px] h-[46px] rounded-2xl flex items-center justify-center font-sans text-base font-extrabold shadow-md" style={{ background: 'linear-gradient(145deg, hsl(24,55%,80%), hsl(20,50%,72%))', color: 'hsl(24,45%,38%)' }}>
+            <div className="w-[46px] h-[46px] rounded-2xl flex items-center justify-center font-sans text-base font-extrabold shadow-md" style={{ background: 'linear-gradient(145deg, rgb(var(--yellow)/0.55), rgb(var(--yellow)/0.35))', color: 'rgb(var(--charcoal)/0.6)' }}>
               {(profile?.display_name || 'A')[0].toUpperCase()}
             </div>
             <div className="absolute top-[-2px] right-[-2px] w-3 h-3 rounded-full bg-green border-[2.5px] border-background" />
