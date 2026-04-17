@@ -7,9 +7,11 @@ import { CharacterActionPopup } from './CharacterActionPopup'
 import {
   CLASS_IMAGES,
   CLASS_EMOJIS,
+  CLASS_LABELS,
   RARITY_COLORS,
   RARITY_LABELS,
 } from '@/lib/characters/types'
+import { CHARACTER_THEMES, DEFAULT_THEME } from '@/lib/characters/themes'
 import type { WeeklyCharacter } from '@/lib/characters/types'
 
 const POWER_ICONS: Record<string, typeof Sparkles> = {
@@ -30,9 +32,14 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
 
   const image = CLASS_IMAGES[character.character_class]
   const emoji = CLASS_EMOJIS[character.character_class] || '🃏'
+  const classLabel = CLASS_LABELS[character.character_class] || character.character_class
   const rarityColor = RARITY_COLORS[character.rarity] || '#C4A35A'
   const rarityLabel = RARITY_LABELS[character.rarity] || character.rarity
   const PowerIcon = POWER_ICONS[character.power_type] || Sparkles
+  const charTheme = CHARACTER_THEMES[character.character_class] || DEFAULT_THEME
+  const deepBg1 = `rgb(${charTheme.deepBg1})`
+  const deepBg2 = `rgb(${charTheme.deepBg2})`
+  const accentRgb = charTheme.accent
 
   // Raw tilt values (normalized -0.5 to 0.5)
   const tiltX = useMotionValue(0)
@@ -200,7 +207,16 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
                 >
                   {rarityLabel}
                 </span>
-                <span className="font-sans text-[13px] drop-shadow-md">{emoji}</span>
+                <span
+                  className="inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-sans font-medium backdrop-blur-sm"
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.12)',
+                    color: 'rgba(255,255,255,0.75)',
+                    border: '1px solid rgba(255,255,255,0.18)',
+                  }}
+                >
+                  {emoji} {classLabel}
+                </span>
               </div>
             </div>
           </div>
@@ -219,7 +235,7 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
             <div
               className="absolute inset-0 p-5 flex flex-col"
               style={{
-                background: `linear-gradient(145deg, #1a1714 0%, #2d2520 40%, #1a1714 100%)`,
+                background: `linear-gradient(145deg, ${deepBg1} 0%, ${deepBg2} 40%, ${deepBg1} 100%)`,
               }}
             >
               {/* Decorative top accent */}
@@ -234,12 +250,20 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
                 <h2 className="font-serif text-xl text-white/90 font-bold mt-2">
                   {character.avatar_name}
                 </h2>
-                <span
-                  className="inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-sans font-medium mt-1.5"
-                  style={{ backgroundColor: `${rarityColor}25`, color: rarityColor, border: `1px solid ${rarityColor}30` }}
-                >
-                  {rarityLabel}
-                </span>
+                <div className="flex items-center justify-center gap-1.5 mt-1.5">
+                  <span
+                    className="inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-sans font-medium"
+                    style={{ backgroundColor: `${rarityColor}25`, color: rarityColor, border: `1px solid ${rarityColor}30` }}
+                  >
+                    {rarityLabel}
+                  </span>
+                  <span
+                    className="inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-sans font-medium"
+                    style={{ backgroundColor: `rgb(${accentRgb}/0.15)`, color: `rgb(${accentRgb})`, border: `1px solid rgb(${accentRgb}/0.25)` }}
+                  >
+                    {classLabel}
+                  </span>
+                </div>
               </div>
 
               {/* Separator */}

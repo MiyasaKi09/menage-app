@@ -9,21 +9,22 @@ export function ProgressRing({
   progress,
   size = 60,
   strokeWidth = 6,
-  color = '#C4A35A'
+  color = 'rgb(var(--yellow))'
 }: ProgressRingProps) {
   const radius = (size - strokeWidth) / 2
   const circumference = radius * 2 * Math.PI
   const offset = circumference - (progress / 100) * circumference
 
   return (
-    <svg width={size} height={size} className="transform -rotate-90">
+    <svg width={size} height={size} className="transform -rotate-90" style={{ color }}>
       {/* Background circle */}
       <circle
         cx={size / 2}
         cy={size / 2}
         r={radius}
         fill="none"
-        stroke="rgba(196,163,90,0.12)"
+        stroke="currentColor"
+        strokeOpacity={0.12}
         strokeWidth={strokeWidth}
       />
       {/* Progress circle */}
@@ -32,7 +33,7 @@ export function ProgressRing({
         cy={size / 2}
         r={radius}
         fill="none"
-        stroke={color}
+        stroke="currentColor"
         strokeWidth={strokeWidth}
         strokeDasharray={circumference}
         strokeDashoffset={offset}

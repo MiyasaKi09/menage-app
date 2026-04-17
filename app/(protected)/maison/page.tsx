@@ -255,6 +255,14 @@ export default async function MaisonPage() {
   return (
     <div className="min-h-screen relative bg-background">
 
+      {/* Ambient background glow — shifts with character theme */}
+      <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true" style={{
+        backgroundImage: [
+          'radial-gradient(ellipse 60% 40% at 15% 10%, rgb(var(--yellow)/0.06) 0%, transparent 70%)',
+          'radial-gradient(ellipse 50% 35% at 85% 80%, rgb(var(--primary)/0.05) 0%, transparent 70%)',
+        ].join(', '),
+      }} />
+
       <div className="relative z-10 max-w-app mx-auto px-3.5 pb-10">
         {/* Header */}
         <header className="pt-5 pb-3 flex justify-between items-end">
@@ -267,7 +275,7 @@ export default async function MaisonPage() {
             </h1>
           </div>
           <div className="relative mb-1">
-            <div className="w-[46px] h-[46px] rounded-2xl flex items-center justify-center font-sans text-base font-extrabold shadow-md" style={{ background: 'linear-gradient(145deg, hsl(24,55%,80%), hsl(20,50%,72%))', color: 'hsl(24,45%,38%)' }}>
+            <div className="w-[46px] h-[46px] rounded-2xl flex items-center justify-center font-sans text-base font-extrabold shadow-md" style={{ background: 'linear-gradient(145deg, rgb(var(--yellow)/0.55), rgb(var(--yellow)/0.35))', color: 'rgb(var(--charcoal)/0.6)' }}>
               {(profile?.display_name || 'A')[0].toUpperCase()}
             </div>
             <div className="absolute top-[-2px] right-[-2px] w-3 h-3 rounded-full bg-green border-[2.5px] border-background" />
