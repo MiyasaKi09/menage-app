@@ -98,6 +98,8 @@ const config: Config = {
         'rise': 'rise 0.6s cubic-bezier(.22,1,.36,1) forwards',
         'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
         'grad-shift': 'grad-shift 8s ease infinite',
+        'slide-up': 'slide-up 0.5s cubic-bezier(.22,1,.36,1) forwards',
+        'scale-in': 'scale-in 0.4s cubic-bezier(.22,1,.36,1) forwards',
       },
       maxWidth: {
         'app': '440px',
