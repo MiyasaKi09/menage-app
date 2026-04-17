@@ -1,5 +1,6 @@
 // Each character replaces EVERY CSS variable — the whole site transforms.
 // RGB triplets ("R G B") unless noted.
+// Keys MUST match character_class values stored in the database (English).
 
 export interface FullTheme {
   // ── Dark backgrounds (hero cards, CTA blocks) ──────────────────────────
@@ -16,31 +17,31 @@ export interface FullTheme {
 
   // ── Borders & inputs ──────────────────────────────────────────────────
   border: string       // default border
-  input: string        // input border (often same as border)
+  input: string        // input border
   ring: string         // focus ring (accent color)
 
   // ── Accent (primary CTA, highlights) ──────────────────────────────────
-  accent: string       // e.g. gold, purple, emerald…
-  accentSoft: string   // lighter accent (hover, subtle highlights)
-  accentMuted: string  // very muted (tint backgrounds)
-  accentFg: string     // text on solid accent bg (usually charcoal or white)
+  accent: string
+  accentSoft: string
+  accentMuted: string
+  accentFg: string     // text on solid accent bg
 
   // ── Secondary palette ─────────────────────────────────────────────────
   secondary: string
   secondarySoft: string
 
-  // ── Named accents (mapped to tailwind color names) ─────────────────────
-  yellow: string       // maps to --yellow
-  orange: string       // maps to --orange
-  red: string          // maps to --red (destructive)
-  green: string        // maps to --green
-  blue: string         // maps to --blue
-  purple: string       // maps to --purple
-  pink: string         // maps to --pink
+  // ── Named accents (mapped to Tailwind color names) ─────────────────────
+  yellow: string
+  orange: string
+  red: string
+  green: string
+  blue: string
+  purple: string
+  pink: string
 
   // ── Warm tint & glow ──────────────────────────────────────────────────
-  warm: string         // warm accent (badges, notifications)
-  glow: string         // glow animations
+  warm: string
+  glow: string
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -74,13 +75,13 @@ export const DEFAULT_THEME: FullTheme = {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CHARACTER THEMES
+// CHARACTER THEMES — keys match character_class in DB
 // ─────────────────────────────────────────────────────────────────────────────
 export const CHARACTER_THEMES: Record<string, FullTheme> = {
 
-  // ── ANGE — Céleste / Divin ─────────────────────────────────────────────
+  // ── ANGEL — Céleste / Divin ────────────────────────────────────────────
   // Ivoire chaud, or pâle, lumière divine
-  ange: {
+  angel: {
     deepBg1:      '40 32 12',
     deepBg2:      '58 46 18',
     cream:        '251 248 238',
@@ -107,9 +108,9 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '255 242 185',
   },
 
-  // ── MAGE — Arcane / Mystique ───────────────────────────────────────────
+  // ── WIZARD — Arcane / Mystique ─────────────────────────────────────────
   // Violet profond, lavande, nuit étoilée
-  mage: {
+  wizard: {
     deepBg1:      '18 12 38',
     deepBg2:      '28 20 55',
     cream:        '244 241 252',
@@ -136,9 +137,9 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '205 185 245',
   },
 
-  // ── IMPÉRATRICE — Jardin Royal / Émeraude ─────────────────────────────
+  // ── NOBLEWOMAN — Jardin Royal / Émeraude ──────────────────────────────
   // Vert forêt, rose poudré, feuillage
-  imperatrice: {
+  noblewoman: {
     deepBg1:      '10 32 18',
     deepBg2:      '18 48 28',
     cream:        '240 248 242',
@@ -165,9 +166,9 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '140 210 155',
   },
 
-  // ── SENTINELLE — Pierre / Ambre ────────────────────────────────────────
+  // ── GUARDIAN — Pierre / Ambre ──────────────────────────────────────────
   // Ocre, rouille, pierre chaude, medieval stone
-  sentinelle: {
+  guardian: {
     deepBg1:      '52 28 10',
     deepBg2:      '72 42 15',
     cream:        '250 244 234',
@@ -194,9 +195,9 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '245 200 128',
   },
 
-  // ── DEVIN — Nuit / Prophétique ─────────────────────────────────────────
+  // ── ORACLE — Nuit / Prophétique ────────────────────────────────────────
   // Bleu nuit, ardoise, argent, mystère
-  devin: {
+  oracle: {
     deepBg1:      '8 12 32',
     deepBg2:      '15 20 48',
     cream:        '236 239 250',
@@ -223,9 +224,9 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '158 178 225',
   },
 
-  // ── BOHÈME — Prairie / Rose Poudré ─────────────────────────────────────
+  // ── BARD — Prairie / Rose Poudré ───────────────────────────────────────
   // Rose, pêche, sauge douce, liberté créative
-  boheme: {
+  bard: {
     deepBg1:      '42 18 24',
     deepBg2:      '62 28 36',
     cream:        '252 244 246',
@@ -252,9 +253,9 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '248 195 205',
   },
 
-  // ── LAVANDIÈRE — Eaux Cristal / Sarcelle ──────────────────────────────
+  // ── WASHERWOMAN — Eaux Cristal / Sarcelle ─────────────────────────────
   // Sarcelle vif, aqua, eau douce, propreté lumineuse
-  lavandiere: {
+  washerwoman: {
     deepBg1:      '5 28 25',
     deepBg2:      '10 42 38',
     cream:        '235 248 246',
@@ -281,7 +282,7 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '122 215 200',
   },
 
-  // ── PIRATE (Capitaine Recure) — Terre Cuite / Corail ──────────────────
+  // ── PIRATE — Terre Cuite / Corail ─────────────────────────────────────
   // Corail vif, sable chaud, aventure audacieuse
   pirate: {
     deepBg1:      '42 15 8',
@@ -308,5 +309,208 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     pink:         '215 148 130',
     warm:         '215 120 72',
     glow:         '248 178 148',
+  },
+
+  // ── KNIGHT — Acier / Argent ────────────────────────────────────────────
+  // Métal poli, ardoise froide, honneur chevaleresque
+  knight: {
+    deepBg1:      '18 20 28',
+    deepBg2:      '28 32 42',
+    cream:        '242 244 248',
+    offWhite:     '250 251 255',
+    charcoal:     '20 22 32',
+    ink:          '38 42 58',
+    border:       '205 210 225',
+    input:        '205 210 225',
+    ring:         '105 118 155',
+    accent:       '105 118 155',
+    accentSoft:   '135 148 182',
+    accentMuted:  '105 118 155',
+    accentFg:     '255 255 255',
+    secondary:    '148 130 95',
+    secondarySoft:'172 158 122',
+    yellow:       '195 178 112',
+    orange:       '168 135 88',
+    red:          '165 75 75',
+    green:        '88 142 108',
+    blue:         '105 118 155',
+    purple:       '122 105 158',
+    pink:         '165 130 145',
+    warm:         '175 148 105',
+    glow:         '195 205 228',
+  },
+
+  // ── FAIRY — Féerique / Étincelles ─────────────────────────────────────
+  // Lilas rosé, menthe, magie scintillante
+  fairy: {
+    deepBg1:      '32 15 42',
+    deepBg2:      '48 22 62',
+    cream:        '250 244 255',
+    offWhite:     '255 251 255',
+    charcoal:     '28 15 38',
+    ink:          '52 30 68',
+    border:       '228 210 240',
+    input:        '228 210 240',
+    ring:         '175 108 215',
+    accent:       '175 108 215',
+    accentSoft:   '198 138 232',
+    accentMuted:  '175 108 215',
+    accentFg:     '255 255 255',
+    secondary:    '88 175 158',
+    secondarySoft:'115 198 182',
+    yellow:       '215 188 88',
+    orange:       '215 135 108',
+    red:          '198 88 118',
+    green:        '88 175 158',
+    blue:         '108 155 210',
+    purple:       '175 108 215',
+    pink:         '218 148 188',
+    warm:         '215 135 108',
+    glow:         '225 185 255',
+  },
+
+  // ── ALCHEMIST — Cuivre / Ambre savant ─────────────────────────────────
+  // Cuivre chaud, ambre doré, science & mystère
+  alchemist: {
+    deepBg1:      '35 22 8',
+    deepBg2:      '52 35 12',
+    cream:        '252 246 235',
+    offWhite:     '255 252 244',
+    charcoal:     '32 20 8',
+    ink:          '55 38 15',
+    border:       '235 218 185',
+    input:        '235 218 185',
+    ring:         '188 120 45',
+    accent:       '188 120 45',
+    accentSoft:   '212 148 72',
+    accentMuted:  '188 120 45',
+    accentFg:     '255 255 255',
+    secondary:    '128 155 95',
+    secondarySoft:'155 178 122',
+    yellow:       '188 120 45',
+    orange:       '205 95 55',
+    red:          '195 72 58',
+    green:        '108 155 88',
+    blue:         '88 128 168',
+    purple:       '148 105 175',
+    pink:         '205 145 125',
+    warm:         '205 95 55',
+    glow:         '245 210 135',
+  },
+
+  // ── DRUID — Forêt / Mousse & Racines ──────────────────────────────────
+  // Vert mousse profond, écorce brune, nature ancienne
+  druid: {
+    deepBg1:      '12 28 15',
+    deepBg2:      '20 42 22',
+    cream:        '238 246 238',
+    offWhite:     '246 254 246',
+    charcoal:     '12 26 14',
+    ink:          '25 48 28',
+    border:       '188 220 192',
+    input:        '188 220 192',
+    ring:         '62 118 68',
+    accent:       '62 118 68',
+    accentSoft:   '88 148 95',
+    accentMuted:  '62 118 68',
+    accentFg:     '255 255 255',
+    secondary:    '128 100 65',
+    secondarySoft:'158 128 92',
+    yellow:       '148 168 62',
+    orange:       '158 112 62',
+    red:          '165 72 65',
+    green:        '62 118 68',
+    blue:         '62 118 108',
+    purple:       '108 88 138',
+    pink:         '162 118 108',
+    warm:         '158 112 62',
+    glow:         '138 208 142',
+  },
+
+  // ── DRAGON — Braise / Feu & Cendres ───────────────────────────────────
+  // Rouge cramoisi, orange braise, cendre sombre
+  dragon: {
+    deepBg1:      '35 8 5',
+    deepBg2:      '55 12 8',
+    cream:        '255 242 240',
+    offWhite:     '255 248 247',
+    charcoal:     '38 8 5',
+    ink:          '62 15 10',
+    border:       '240 205 200',
+    input:        '240 205 200',
+    ring:         '205 52 35',
+    accent:       '205 52 35',
+    accentSoft:   '225 85 65',
+    accentMuted:  '205 52 35',
+    accentFg:     '255 255 255',
+    secondary:    '158 105 42',
+    secondarySoft:'182 132 68',
+    yellow:       '225 165 38',
+    orange:       '215 105 38',
+    red:          '205 52 35',
+    green:        '95 138 75',
+    blue:         '88 112 152',
+    purple:       '138 78 138',
+    pink:         '218 128 118',
+    warm:         '215 105 38',
+    glow:         '255 175 120',
+  },
+
+  // ── MONK — Zen / Sable & Bambou ───────────────────────────────────────
+  // Beige sable, vert pâle, sérénité apaisante
+  monk: {
+    deepBg1:      '25 22 15',
+    deepBg2:      '38 34 22',
+    cream:        '250 248 240',
+    offWhite:     '255 254 248',
+    charcoal:     '25 22 14',
+    ink:          '45 40 28',
+    border:       '228 220 198',
+    input:        '228 220 198',
+    ring:         '148 138 92',
+    accent:       '148 138 92',
+    accentSoft:   '172 162 118',
+    accentMuted:  '148 138 92',
+    accentFg:     '255 255 255',
+    secondary:    '105 138 108',
+    secondarySoft:'132 162 135',
+    yellow:       '175 158 88',
+    orange:       '175 128 78',
+    red:          '168 82 75',
+    green:        '105 138 108',
+    blue:         '95 128 148',
+    purple:       '132 112 148',
+    pink:         '188 148 138',
+    warm:         '175 128 78',
+    glow:         '215 205 165',
+  },
+
+  // ── WANDERER — Crépuscule / Route & Horizon ────────────────────────────
+  // Brun voyage, terracotta, coucher de soleil
+  wanderer: {
+    deepBg1:      '30 18 12',
+    deepBg2:      '45 28 18',
+    cream:        '252 245 238',
+    offWhite:     '255 252 247',
+    charcoal:     '32 20 12',
+    ink:          '55 35 22',
+    border:       '232 215 198',
+    input:        '232 215 198',
+    ring:         '172 108 65',
+    accent:       '172 108 65',
+    accentSoft:   '198 135 92',
+    accentMuted:  '172 108 65',
+    accentFg:     '255 255 255',
+    secondary:    '125 148 108',
+    secondarySoft:'152 172 135',
+    yellow:       '200 162 62',
+    orange:       '188 118 58',
+    red:          '188 75 65',
+    green:        '112 148 88',
+    blue:         '95 128 162',
+    purple:       '145 108 158',
+    pink:         '210 148 128',
+    warm:         '195 125 65',
+    glow:         '242 195 155',
   },
 }

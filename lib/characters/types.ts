@@ -48,24 +48,32 @@ export const RARITY_LABELS: Record<string, string> = {
   legendary: 'Legendaire',
 }
 
+// Keys match character_class values stored in the database (English)
 export const CLASS_EMOJIS: Record<string, string> = {
-  pirate: '🏴‍☠️',
-  lavandiere: '👗',
-  mage: '🧙',
-  boheme: '🪘',
-  devin: '🔮',
-  imperatrice: '👑',
-  sentinelle: '🏰',
-  ange: '👼',
+  wizard:      '🧙',
+  angel:       '👼',
+  bard:        '🪘',
+  washerwoman: '👗',
+  guardian:    '🏰',
+  noblewoman:  '👑',
+  oracle:      '🔮',
+  pirate:      '🏴‍☠️',
+  knight:      '⚔️',
+  fairy:       '🧚',
+  alchemist:   '⚗️',
+  druid:       '🌿',
+  dragon:      '🐉',
+  monk:        '🧘',
+  wanderer:    '🗺️',
 }
 
 export const CLASS_IMAGES: Record<string, string> = {
-  pirate: '/characters/pirate.png',
-  lavandiere: '/characters/lavandiere.png',
-  mage: '/characters/mage.png',
-  boheme: '/characters/boheme.png',
-  devin: '/characters/devin.png',
-  imperatrice: '/characters/imperatrice.png',
-  sentinelle: '/characters/sentinelle.png',
-  ange: '/characters/ange.png',
+  wizard:      '/characters/mage.png',
+  angel:       '/characters/ange.png',
+  bard:        '/characters/boheme.png',
+  washerwoman: '/characters/lavandiere.png',
+  guardian:    '/characters/sentinelle.png',
+  noblewoman:  '/characters/imperatrice.png',
+  oracle:      '/characters/devin.png',
+  pirate:      '/characters/pirate.png',
 }
