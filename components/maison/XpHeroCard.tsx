@@ -49,72 +49,113 @@ export function XpHeroCard({
 
       {/* ── XP Hero Card ─────────────────────── */}
       <div
-        className="col-span-2 rounded-3xl p-5 relative overflow-hidden shadow-lg"
+        className="col-span-2 rounded-3xl p-5 relative overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, rgb(var(--deep-blue)), rgb(var(--deep-green)), rgb(var(--deep-blue)))',
+          background: 'linear-gradient(135deg, rgb(var(--deep-blue)), rgb(var(--deep-green)) 50%, rgb(var(--deep-blue)))',
           backgroundSize: '200% 200%',
           animation: 'grad-shift 8s ease infinite',
+          boxShadow: '0 8px 40px rgb(var(--deep-blue)/0.5), 0 2px 0 inset rgb(255 255 255/0.04)',
         }}
       >
-        {/* Glow orbs */}
-        <div className="absolute top-[-20px] right-[-20px] w-[120px] h-[120px] rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(var(--character-glow),0.18), transparent 70%)' }} />
-        <div className="absolute bottom-[-30px] left-[-20px] w-[100px] h-[100px] rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(var(--yellow),0.10), transparent 70%)' }} />
+        {/* Glow orbs — large & vivid */}
+        <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgb(var(--character-glow)/0.25), transparent 70%)' }} />
+        <div className="absolute -bottom-10 -left-8 w-44 h-44 rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgb(var(--yellow)/0.18), transparent 70%)' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-32 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse, rgb(var(--primary)/0.07), transparent 70%)' }} />
+
+        {/* Subtle top highlight line */}
+        <div className="absolute top-0 left-8 right-8 h-px"
+          style={{ background: 'linear-gradient(90deg, transparent, rgb(var(--character-glow)/0.4), transparent)' }} />
 
         <div className="flex justify-between items-end relative">
           <div>
-            <p className="font-sans text-[10px] font-bold text-white/30 uppercase tracking-[0.15em] mb-1.5">
+            <p className="font-sans text-[10px] font-bold text-white/30 uppercase tracking-[0.18em] mb-2">
               Expérience du jour
             </p>
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-serif text-[52px] font-black leading-none tracking-tight"
-                style={{ color: 'rgb(var(--character-glow))' }}>
+            <div className="flex items-baseline gap-2">
+              <span
+                className="font-serif font-black leading-none tracking-tight"
+                style={{
+                  fontSize: 'clamp(48px, 14vw, 64px)',
+                  color: 'rgb(var(--character-glow))',
+                  textShadow: '0 0 40px rgb(var(--character-glow)/0.5), 0 0 80px rgb(var(--character-glow)/0.2)',
+                }}
+              >
                 <AnimNum value={dailyXp} />
               </span>
-              <span className="font-serif text-lg text-white/30 italic">xp</span>
+              <span className="font-serif text-xl text-white/25 italic">xp</span>
             </div>
-            <p className="font-sans text-[10px] text-white/20 mt-1">Total : {totalXp} xp</p>
+            <p className="font-sans text-[11px] text-white/20 mt-1.5">
+              Total : <span className="text-white/35 font-semibold">{totalXp} xp</span>
+            </p>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-white/[0.08] rounded-[10px] px-3 py-1.5">
-            <Flame size={14} strokeWidth={1.5} style={{ color: 'rgb(var(--yellow))' }} />
-            <span className="font-sans text-[13px] font-bold" style={{ color: 'rgb(var(--yellow))' }}>
+          <div
+            className="flex items-center gap-1.5 rounded-xl px-3 py-2"
+            style={{
+              background: 'rgb(var(--yellow)/0.12)',
+              border: '1px solid rgb(var(--yellow)/0.2)',
+            }}
+          >
+            <Flame size={15} strokeWidth={1.5} style={{ color: 'rgb(var(--yellow))' }} />
+            <span className="font-sans text-[14px] font-bold" style={{ color: 'rgb(var(--yellow))' }}>
               {streak}j
             </span>
           </div>
         </div>
 
         {/* Progress bar */}
-        <div className="mt-3.5 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
+        <div className="mt-4 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgb(255 255 255/0.07)' }}>
           <div
             className="h-full rounded-full transition-all duration-700"
             style={{
               width: `${pct}%`,
               background: 'linear-gradient(90deg, rgb(var(--green)), rgb(var(--yellow)))',
-              boxShadow: '0 0 12px rgba(var(--yellow),0.25)',
+              boxShadow: '0 0 16px rgb(var(--yellow)/0.4)',
             }}
           />
         </div>
         <div className="flex justify-between mt-1.5">
-          <span className="font-sans text-[10px] font-semibold text-white/20">{done}/{total} quêtes</span>
-          <span className="font-sans text-[10px] font-semibold text-white/20">{pct}%</span>
+          <span className="font-sans text-[10px] font-medium text-white/20">{done}/{total} quêtes</span>
+          <span className="font-sans text-[10px] font-semibold" style={{ color: 'rgb(var(--yellow)/0.5)' }}>{pct}%</span>
         </div>
       </div>
 
       {/* ── Level Card ───────────────────────── */}
-      <div className="rounded-[20px] bg-card border border-border p-[18px_16px] shadow-sm">
-        <p className="font-sans text-[9px] font-bold text-foreground/30 uppercase tracking-[0.12em]">Niveau</p>
-        <div className="flex items-baseline gap-1 mt-1.5">
-          <span className="font-serif text-4xl font-extrabold text-foreground leading-none">{level}</span>
-          <span className="font-serif text-[13px] text-yellow italic">{levelName}</span>
+      <div
+        className="rounded-[20px] p-[18px_16px] relative overflow-hidden"
+        style={{
+          background: 'linear-gradient(145deg, rgb(var(--yellow)/0.1), rgb(var(--yellow)/0.04))',
+          border: '1px solid rgb(var(--yellow)/0.18)',
+          boxShadow: '0 2px 12px rgb(var(--yellow)/0.08)',
+        }}
+      >
+        <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgb(var(--yellow)/0.15), transparent 70%)' }} />
+        <p
+          className="font-sans text-[9px] font-bold uppercase tracking-[0.15em]"
+          style={{ color: 'rgb(var(--yellow)/0.6)' }}
+        >
+          Niveau
+        </p>
+        <div className="flex items-baseline gap-1.5 mt-1.5">
+          <span
+            className="font-serif text-4xl font-extrabold leading-none"
+            style={{ color: 'rgb(var(--charcoal))', textShadow: '0 0 20px rgb(var(--yellow)/0.2)' }}
+          >
+            {level}
+          </span>
+          <span className="font-serif text-[13px] italic" style={{ color: 'rgb(var(--yellow))' }}>{levelName}</span>
         </div>
-        <div className="mt-2 h-1 rounded-full bg-border overflow-hidden">
+        <div className="mt-2.5 h-1 rounded-full overflow-hidden" style={{ background: 'rgb(var(--yellow)/0.1)' }}>
           <div
             className="h-full rounded-full transition-all duration-700"
             style={{
               width: `${levelProgress}%`,
-              background: 'linear-gradient(90deg, rgb(var(--yellow)), rgb(var(--accentSoft, var(--yellow))))',
+              background: 'linear-gradient(90deg, rgb(var(--yellow)/0.6), rgb(var(--yellow)))',
+              boxShadow: '0 0 8px rgb(var(--yellow)/0.4)',
             }}
           />
         </div>
@@ -122,23 +163,29 @@ export function XpHeroCard({
 
       {/* ── Village Card ─────────────────────── */}
       <div
-        className="rounded-[20px] p-[18px_16px] border"
+        className="rounded-[20px] p-[18px_16px] relative overflow-hidden"
         style={{
-          background: 'linear-gradient(145deg, rgb(var(--deep-green)/0.12), rgb(var(--deep-green)/0.06))',
-          borderColor: 'rgb(var(--green)/0.15)',
+          background: 'linear-gradient(145deg, rgb(var(--deep-green)/0.15), rgb(var(--green)/0.06))',
+          border: '1px solid rgb(var(--green)/0.18)',
+          boxShadow: '0 2px 12px rgb(var(--green)/0.08)',
         }}
       >
-        <p className="font-sans text-[9px] font-bold uppercase tracking-[0.12em]"
-          style={{ color: 'rgb(var(--green)/0.7)' }}>
+        <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgb(var(--green)/0.2), transparent 70%)' }} />
+        <p
+          className="font-sans text-[9px] font-bold uppercase tracking-[0.15em]"
+          style={{ color: 'rgb(var(--green)/0.7)' }}
+        >
           Village
         </p>
         <div className="flex items-baseline gap-1 mt-1.5">
-          <span className="font-serif text-4xl font-extrabold leading-none"
-            style={{ color: 'rgb(var(--charcoal))' }}>
+          <span
+            className="font-serif text-4xl font-extrabold leading-none"
+            style={{ color: 'rgb(var(--charcoal))' }}
+          >
             {habitants}
           </span>
-          <span className="font-serif text-[13px] italic"
-            style={{ color: 'rgb(var(--green))' }}>
+          <span className="font-serif text-[13px] italic" style={{ color: 'rgb(var(--green))' }}>
             habitants
           </span>
         </div>

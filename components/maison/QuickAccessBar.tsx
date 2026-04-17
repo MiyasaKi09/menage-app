@@ -43,25 +43,41 @@ export function QuickAccessBar({
   const [activeOverlay, setActiveOverlay] = useState<OverlayType>(null)
 
   const buttons = [
-    { id: 'fief' as const, icon: Bell, label: 'Fief' },
-    { id: 'negoce' as const, icon: Coins, label: 'Negoce' },
-    { id: 'tournoi' as const, icon: Swords, label: 'Tournoi' },
-    { id: 'stats' as const, icon: BarChart3, label: 'Stats' },
+    { id: 'fief' as const,    icon: Bell,     label: 'Fief',    color: '--yellow' },
+    { id: 'negoce' as const,  icon: Coins,    label: 'Négoce',  color: '--green'  },
+    { id: 'tournoi' as const, icon: Swords,   label: 'Tournoi', color: '--red'    },
+    { id: 'stats' as const,   icon: BarChart3, label: 'Stats',  color: '--blue'   },
   ]
 
   return (
     <>
-      <div className="flex items-center justify-center gap-3">
+      <div className="grid grid-cols-4 gap-2.5">
         {buttons.map((btn) => {
           const Icon = btn.icon
+          const c = btn.color
           return (
             <button
               key={btn.id}
               onClick={() => setActiveOverlay(btn.id)}
-              className="flex flex-col items-center gap-1 px-4 py-2.5 rounded-xl bg-white/80 border border-border hover:bg-white transition-all duration-200"
+              className="flex flex-col items-center gap-2 py-3.5 rounded-2xl cursor-pointer transition-all duration-200 hover:scale-[1.04] active:scale-[0.97]"
+              style={{
+                background: `linear-gradient(145deg, rgb(var(${c})/0.12), rgb(var(${c})/0.06))`,
+                border: `1px solid rgb(var(${c})/0.2)`,
+                boxShadow: `0 2px 12px rgb(var(${c})/0.08)`,
+              }}
             >
-              <Icon size={18} className="text-yellow/70" />
-              <span className="font-sans text-[10px] text-foreground/40">{btn.label}</span>
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ background: `rgb(var(${c})/0.15)` }}
+              >
+                <Icon size={19} strokeWidth={1.6} style={{ color: `rgb(var(${c}))` }} />
+              </div>
+              <span
+                className="font-sans text-[10px] font-semibold tracking-wide"
+                style={{ color: `rgb(var(${c})/0.75)` }}
+              >
+                {btn.label}
+              </span>
             </button>
           )
         })}
@@ -81,7 +97,7 @@ export function QuickAccessBar({
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="w-full max-w-md max-h-[80vh] bg-white rounded-[22px] border border-border shadow-xl overflow-hidden"
+              className="w-full max-w-md max-h-[80vh] bg-card rounded-[22px] border border-border shadow-xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}

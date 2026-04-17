@@ -255,6 +255,14 @@ export default async function MaisonPage() {
   return (
     <div className="min-h-screen relative bg-background">
 
+      {/* Ambient background glow — shifts with character theme */}
+      <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true" style={{
+        backgroundImage: [
+          'radial-gradient(ellipse 60% 40% at 15% 10%, rgb(var(--yellow)/0.06) 0%, transparent 70%)',
+          'radial-gradient(ellipse 50% 35% at 85% 80%, rgb(var(--primary)/0.05) 0%, transparent 70%)',
+        ].join(', '),
+      }} />
+
       <div className="relative z-10 max-w-app mx-auto px-3.5 pb-10">
         {/* Header */}
         <header className="pt-5 pb-3 flex justify-between items-end">
