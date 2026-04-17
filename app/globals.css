@@ -122,6 +122,13 @@
     @apply border-border;
   }
 
+  /* Smooth colour transitions when character theme changes */
+  *, *::before, *::after {
+    transition-property: background-color, border-color, color, box-shadow;
+    transition-duration: 0.5s;
+    transition-timing-function: ease;
+  }
+
   html {
     margin: 0;
     padding: 0;

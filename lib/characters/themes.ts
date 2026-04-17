@@ -1,36 +1,24 @@
 // Each character replaces EVERY CSS variable — the whole site transforms.
 // RGB triplets ("R G B") unless noted.
 // Keys MUST match character_class values stored in the database (English).
+// cream/offWhite/border are intentionally saturated so the background visibly shifts.
 
 export interface FullTheme {
-  // ── Dark backgrounds (hero cards, CTA blocks) ──────────────────────────
-  deepBg1: string      // main deep bg (gradient start)
-  deepBg2: string      // gradient end
-
-  // ── Light backgrounds ──────────────────────────────────────────────────
-  cream: string        // page background
-  offWhite: string     // card / surface background
-
-  // ── Text ──────────────────────────────────────────────────────────────
-  charcoal: string     // primary text (very dark)
-  ink: string          // secondary text / subtle elements
-
-  // ── Borders & inputs ──────────────────────────────────────────────────
-  border: string       // default border
-  input: string        // input border
-  ring: string         // focus ring (accent color)
-
-  // ── Accent (primary CTA, highlights) ──────────────────────────────────
+  deepBg1: string
+  deepBg2: string
+  cream: string        // page background — clearly tinted
+  offWhite: string     // card / surface — tinted
+  charcoal: string
+  ink: string
+  border: string       // clearly tinted border
+  input: string
+  ring: string
   accent: string
   accentSoft: string
   accentMuted: string
-  accentFg: string     // text on solid accent bg
-
-  // ── Secondary palette ─────────────────────────────────────────────────
+  accentFg: string
   secondary: string
   secondarySoft: string
-
-  // ── Named accents (mapped to Tailwind color names) ─────────────────────
   yellow: string
   orange: string
   red: string
@@ -38,14 +26,12 @@ export interface FullTheme {
   blue: string
   purple: string
   pink: string
-
-  // ── Warm tint & glow ──────────────────────────────────────────────────
   warm: string
   glow: string
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DEFAULT THEME — gold/parchment (no character active)
+// DEFAULT THEME — gold/parchment
 // ─────────────────────────────────────────────────────────────────────────────
 export const DEFAULT_THEME: FullTheme = {
   deepBg1:      '26 23 20',
@@ -75,21 +61,22 @@ export const DEFAULT_THEME: FullTheme = {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CHARACTER THEMES — keys match character_class in DB
+// CHARACTER THEMES
+// cream & offWhite are now strongly tinted so the page background visibly
+// shifts colour — "le monde de la carte qui déborde sur le site".
 // ─────────────────────────────────────────────────────────────────────────────
 export const CHARACTER_THEMES: Record<string, FullTheme> = {
 
-  // ── ANGEL — Céleste / Divin ────────────────────────────────────────────
-  // Ivoire chaud, or pâle, lumière divine
+  // ── ANGEL — Or pâle / Lumière divine ──────────────────────────────────────
   angel: {
     deepBg1:      '40 32 12',
     deepBg2:      '58 46 18',
-    cream:        '251 248 238',
-    offWhite:     '255 254 248',
+    cream:        '248 240 210',   // ivoire doré clairement visible
+    offWhite:     '255 250 228',
     charcoal:     '30 24 10',
     ink:          '52 42 20',
-    border:       '232 220 188',
-    input:        '232 220 188',
+    border:       '228 208 158',
+    input:        '228 208 158',
     ring:         '210 182 95',
     accent:       '210 182 95',
     accentSoft:   '228 205 130',
@@ -108,17 +95,16 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '255 242 185',
   },
 
-  // ── WIZARD — Arcane / Mystique ─────────────────────────────────────────
-  // Violet profond, lavande, nuit étoilée
+  // ── WIZARD — Violet arcane / Nuit étoilée ─────────────────────────────────
   wizard: {
     deepBg1:      '18 12 38',
     deepBg2:      '28 20 55',
-    cream:        '244 241 252',
-    offWhite:     '250 248 255',
+    cream:        '220 212 248',   // fond clairement violet
+    offWhite:     '234 228 255',
     charcoal:     '22 16 42',
     ink:          '42 32 68',
-    border:       '210 202 235',
-    input:        '210 202 235',
+    border:       '185 170 232',
+    input:        '185 170 232',
     ring:         '128 95 200',
     accent:       '128 95 200',
     accentSoft:   '155 128 220',
@@ -137,17 +123,16 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '205 185 245',
   },
 
-  // ── NOBLEWOMAN — Jardin Royal / Émeraude ──────────────────────────────
-  // Vert forêt, rose poudré, feuillage
+  // ── NOBLEWOMAN — Émeraude / Jardin royal ──────────────────────────────────
   noblewoman: {
     deepBg1:      '10 32 18',
     deepBg2:      '18 48 28',
-    cream:        '240 248 242',
-    offWhite:     '248 254 250',
+    cream:        '208 238 218',   // fond clairement vert émeraude
+    offWhite:     '224 248 232',
     charcoal:     '14 30 18',
     ink:          '28 52 35',
-    border:       '192 222 202',
-    input:        '192 222 202',
+    border:       '165 215 185',
+    input:        '165 215 185',
     ring:         '52 128 78',
     accent:       '52 128 78',
     accentSoft:   '80 155 105',
@@ -166,17 +151,16 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '140 210 155',
   },
 
-  // ── GUARDIAN — Pierre / Ambre ──────────────────────────────────────────
-  // Ocre, rouille, pierre chaude, medieval stone
+  // ── GUARDIAN — Ambre / Pierre médiévale ───────────────────────────────────
   guardian: {
     deepBg1:      '52 28 10',
     deepBg2:      '72 42 15',
-    cream:        '250 244 234',
-    offWhite:     '255 252 245',
+    cream:        '252 232 205',   // fond ambre chaud
+    offWhite:     '255 244 222',
     charcoal:     '38 22 8',
     ink:          '62 40 18',
-    border:       '232 210 180',
-    input:        '232 210 180',
+    border:       '228 198 155',
+    input:        '228 198 155',
     ring:         '195 118 38',
     accent:       '195 118 38',
     accentSoft:   '215 148 65',
@@ -195,17 +179,16 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '245 200 128',
   },
 
-  // ── ORACLE — Nuit / Prophétique ────────────────────────────────────────
-  // Bleu nuit, ardoise, argent, mystère
+  // ── ORACLE — Bleu nuit / Prophétique ──────────────────────────────────────
   oracle: {
     deepBg1:      '8 12 32',
     deepBg2:      '15 20 48',
-    cream:        '236 239 250',
-    offWhite:     '244 246 255',
+    cream:        '215 222 245',   // fond bleu nuit clair
+    offWhite:     '228 235 255',
     charcoal:     '18 22 48',
     ink:          '35 42 72',
-    border:       '198 205 232',
-    input:        '198 205 232',
+    border:       '178 192 228',
+    input:        '178 192 228',
     ring:         '88 112 172',
     accent:       '88 112 172',
     accentSoft:   '118 140 198',
@@ -224,17 +207,16 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '158 178 225',
   },
 
-  // ── BARD — Prairie / Rose Poudré ───────────────────────────────────────
-  // Rose, pêche, sauge douce, liberté créative
+  // ── BARD — Rose / Prairie créative ────────────────────────────────────────
   bard: {
     deepBg1:      '42 18 24',
     deepBg2:      '62 28 36',
-    cream:        '252 244 246',
-    offWhite:     '255 250 252',
+    cream:        '248 218 228',   // fond rose clairement visible
+    offWhite:     '255 232 240',
     charcoal:     '38 18 24',
     ink:          '65 35 42',
-    border:       '232 208 215',
-    input:        '232 208 215',
+    border:       '222 185 200',
+    input:        '222 185 200',
     ring:         '188 88 105',
     accent:       '188 88 105',
     accentSoft:   '212 118 132',
@@ -253,17 +235,16 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '248 195 205',
   },
 
-  // ── WASHERWOMAN — Eaux Cristal / Sarcelle ─────────────────────────────
-  // Sarcelle vif, aqua, eau douce, propreté lumineuse
+  // ── WASHERWOMAN — Sarcelle / Eaux cristal ─────────────────────────────────
   washerwoman: {
     deepBg1:      '5 28 25',
     deepBg2:      '10 42 38',
-    cream:        '235 248 246',
-    offWhite:     '244 254 252',
+    cream:        '205 238 234',   // fond turquoise clairement visible
+    offWhite:     '220 250 246',
     charcoal:     '8 30 27',
     ink:          '18 52 46',
-    border:       '185 225 218',
-    input:        '185 225 218',
+    border:       '158 215 208',
+    input:        '158 215 208',
     ring:         '35 138 120',
     accent:       '35 138 120',
     accentSoft:   '62 165 148',
@@ -282,17 +263,16 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '122 215 200',
   },
 
-  // ── PIRATE — Terre Cuite / Corail ─────────────────────────────────────
-  // Corail vif, sable chaud, aventure audacieuse
+  // ── PIRATE — Corail / Terre cuite ─────────────────────────────────────────
   pirate: {
     deepBg1:      '42 15 8',
     deepBg2:      '62 22 12',
-    cream:        '252 244 238',
-    offWhite:     '255 251 247',
+    cream:        '252 222 208',   // fond corail chaud
+    offWhite:     '255 238 228',
     charcoal:     '40 18 10',
     ink:          '65 30 15',
-    border:       '235 212 198',
-    input:        '235 212 198',
+    border:       '232 195 172',
+    input:        '232 195 172',
     ring:         '198 78 52',
     accent:       '198 78 52',
     accentSoft:   '218 108 82',
@@ -311,17 +291,16 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '248 178 148',
   },
 
-  // ── KNIGHT — Acier / Argent ────────────────────────────────────────────
-  // Métal poli, ardoise froide, honneur chevaleresque
+  // ── KNIGHT — Acier / Argent chevaleresque ─────────────────────────────────
   knight: {
     deepBg1:      '18 20 28',
     deepBg2:      '28 32 42',
-    cream:        '242 244 248',
-    offWhite:     '250 251 255',
+    cream:        '218 222 238',   // fond bleu acier
+    offWhite:     '232 235 250',
     charcoal:     '20 22 32',
     ink:          '38 42 58',
-    border:       '205 210 225',
-    input:        '205 210 225',
+    border:       '188 195 225',
+    input:        '188 195 225',
     ring:         '105 118 155',
     accent:       '105 118 155',
     accentSoft:   '135 148 182',
@@ -340,17 +319,16 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '195 205 228',
   },
 
-  // ── FAIRY — Féerique / Étincelles ─────────────────────────────────────
-  // Lilas rosé, menthe, magie scintillante
+  // ── FAIRY — Lilas / Étincelles féeriques ──────────────────────────────────
   fairy: {
     deepBg1:      '32 15 42',
     deepBg2:      '48 22 62',
-    cream:        '250 244 255',
-    offWhite:     '255 251 255',
+    cream:        '242 218 252',   // fond lilas clairement visible
+    offWhite:     '250 232 255',
     charcoal:     '28 15 38',
     ink:          '52 30 68',
-    border:       '228 210 240',
-    input:        '228 210 240',
+    border:       '215 178 238',
+    input:        '215 178 238',
     ring:         '175 108 215',
     accent:       '175 108 215',
     accentSoft:   '198 138 232',
@@ -369,17 +347,16 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '225 185 255',
   },
 
-  // ── ALCHEMIST — Cuivre / Ambre savant ─────────────────────────────────
-  // Cuivre chaud, ambre doré, science & mystère
+  // ── ALCHEMIST — Cuivre / Ambre savant ─────────────────────────────────────
   alchemist: {
     deepBg1:      '35 22 8',
     deepBg2:      '52 35 12',
-    cream:        '252 246 235',
-    offWhite:     '255 252 244',
+    cream:        '252 230 205',   // fond cuivre ambré
+    offWhite:     '255 244 222',
     charcoal:     '32 20 8',
     ink:          '55 38 15',
-    border:       '235 218 185',
-    input:        '235 218 185',
+    border:       '232 200 162',
+    input:        '232 200 162',
     ring:         '188 120 45',
     accent:       '188 120 45',
     accentSoft:   '212 148 72',
@@ -398,17 +375,16 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '245 210 135',
   },
 
-  // ── DRUID — Forêt / Mousse & Racines ──────────────────────────────────
-  // Vert mousse profond, écorce brune, nature ancienne
+  // ── DRUID — Forêt / Mousse & Racines ──────────────────────────────────────
   druid: {
     deepBg1:      '12 28 15',
     deepBg2:      '20 42 22',
-    cream:        '238 246 238',
-    offWhite:     '246 254 246',
+    cream:        '212 235 212',   // fond vert forêt
+    offWhite:     '228 248 228',
     charcoal:     '12 26 14',
     ink:          '25 48 28',
-    border:       '188 220 192',
-    input:        '188 220 192',
+    border:       '172 215 175',
+    input:        '172 215 175',
     ring:         '62 118 68',
     accent:       '62 118 68',
     accentSoft:   '88 148 95',
@@ -427,17 +403,16 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '138 208 142',
   },
 
-  // ── DRAGON — Braise / Feu & Cendres ───────────────────────────────────
-  // Rouge cramoisi, orange braise, cendre sombre
+  // ── DRAGON — Braise / Feu & Cendres ───────────────────────────────────────
   dragon: {
     deepBg1:      '35 8 5',
     deepBg2:      '55 12 8',
-    cream:        '255 242 240',
-    offWhite:     '255 248 247',
+    cream:        '252 215 212',   // fond cramoisi clair
+    offWhite:     '255 232 228',
     charcoal:     '38 8 5',
     ink:          '62 15 10',
-    border:       '240 205 200',
-    input:        '240 205 200',
+    border:       '235 185 180',
+    input:        '235 185 180',
     ring:         '205 52 35',
     accent:       '205 52 35',
     accentSoft:   '225 85 65',
@@ -456,17 +431,16 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '255 175 120',
   },
 
-  // ── MONK — Zen / Sable & Bambou ───────────────────────────────────────
-  // Beige sable, vert pâle, sérénité apaisante
+  // ── MONK — Zen / Sable & Bambou ───────────────────────────────────────────
   monk: {
     deepBg1:      '25 22 15',
     deepBg2:      '38 34 22',
-    cream:        '250 248 240',
-    offWhite:     '255 254 248',
+    cream:        '242 235 210',   // fond sable doré
+    offWhite:     '252 246 228',
     charcoal:     '25 22 14',
     ink:          '45 40 28',
-    border:       '228 220 198',
-    input:        '228 220 198',
+    border:       '218 205 172',
+    input:        '218 205 172',
     ring:         '148 138 92',
     accent:       '148 138 92',
     accentSoft:   '172 162 118',
@@ -485,17 +459,16 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
     glow:         '215 205 165',
   },
 
-  // ── WANDERER — Crépuscule / Route & Horizon ────────────────────────────
-  // Brun voyage, terracotta, coucher de soleil
+  // ── WANDERER — Crépuscule / Terracotta ────────────────────────────────────
   wanderer: {
     deepBg1:      '30 18 12',
     deepBg2:      '45 28 18',
-    cream:        '252 245 238',
-    offWhite:     '255 252 247',
+    cream:        '252 228 212',   // fond terracotta chaud
+    offWhite:     '255 242 228',
     charcoal:     '32 20 12',
     ink:          '55 35 22',
-    border:       '232 215 198',
-    input:        '232 215 198',
+    border:       '228 198 168',
+    input:        '228 198 168',
     ring:         '172 108 65',
     accent:       '172 108 65',
     accentSoft:   '198 135 92',
@@ -516,7 +489,6 @@ export const CHARACTER_THEMES: Record<string, FullTheme> = {
 }
 
 // French legacy key aliases — maps old DB slugs to the same theme objects
-// This supports production DBs seeded before the English rename migration.
 CHARACTER_THEMES.mage        = CHARACTER_THEMES.wizard
 CHARACTER_THEMES.ange        = CHARACTER_THEMES.angel
 CHARACTER_THEMES.boheme      = CHARACTER_THEMES.bard
