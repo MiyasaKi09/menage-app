@@ -255,11 +255,12 @@ export default async function MaisonPage() {
   return (
     <div className="min-h-screen relative bg-background">
 
-      {/* Ambient background glow — shifts with character theme */}
+      {/* Ambient background — shifts color with character theme */}
       <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true" style={{
         backgroundImage: [
-          'radial-gradient(ellipse 60% 40% at 15% 10%, rgb(var(--yellow)/0.06) 0%, transparent 70%)',
-          'radial-gradient(ellipse 50% 35% at 85% 80%, rgb(var(--primary)/0.05) 0%, transparent 70%)',
+          'radial-gradient(ellipse 70% 50% at 10% 5%, rgb(var(--primary)/0.10) 0%, transparent 65%)',
+          'radial-gradient(ellipse 60% 45% at 90% 85%, rgb(var(--yellow)/0.08) 0%, transparent 65%)',
+          'radial-gradient(ellipse 40% 30% at 50% 40%, rgb(var(--primary)/0.04) 0%, transparent 60%)',
         ].join(', '),
       }} />
 
@@ -267,15 +268,32 @@ export default async function MaisonPage() {
         {/* Header */}
         <header className="pt-5 pb-3 flex justify-between items-end">
           <div>
-            <p className="font-sans text-[11px] font-semibold text-foreground/30 uppercase tracking-[0.15em]">
+            <p className="font-sans text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: 'rgb(var(--primary)/0.45)' }}>
               {todayFormatted}
             </p>
-            <h1 className="font-serif text-[38px] font-black leading-none mt-0.5 bg-gradient-to-br from-foreground to-foreground/60 bg-clip-text text-transparent" style={{ letterSpacing: '-0.03em' }}>
+            <h1
+              className="font-serif font-black leading-none mt-0.5"
+              style={{
+                fontSize: '38px',
+                letterSpacing: '-0.03em',
+                background: 'linear-gradient(135deg, rgb(var(--foreground)) 0%, rgb(var(--primary)/0.8) 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
               the keep
             </h1>
           </div>
           <div className="relative mb-1">
-            <div className="w-[46px] h-[46px] rounded-2xl flex items-center justify-center font-sans text-base font-extrabold shadow-md" style={{ background: 'linear-gradient(145deg, rgb(var(--yellow)/0.55), rgb(var(--yellow)/0.35))', color: 'rgb(var(--charcoal)/0.6)' }}>
+            <div
+              className="w-[46px] h-[46px] rounded-2xl flex items-center justify-center font-sans text-base font-extrabold shadow-md"
+              style={{
+                background: 'linear-gradient(145deg, rgb(var(--primary)/0.55), rgb(var(--primary)/0.3))',
+                color: 'rgb(var(--charcoal)/0.7)',
+                boxShadow: '0 4px 16px rgb(var(--primary)/0.2)',
+              }}
+            >
               {(profile?.display_name || 'A')[0].toUpperCase()}
             </div>
             <div className="absolute top-[-2px] right-[-2px] w-3 h-3 rounded-full bg-green border-[2.5px] border-background" />
