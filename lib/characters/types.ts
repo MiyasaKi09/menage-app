@@ -48,6 +48,25 @@ export const RARITY_LABELS: Record<string, string> = {
   legendary: 'Legendaire',
 }
 
+// French display names for each character class (keys = DB character_class)
+export const CLASS_LABELS: Record<string, string> = {
+  wizard:      'Sorcier',
+  angel:       'Ange',
+  bard:        'Barde',
+  washerwoman: 'Lavandière',
+  guardian:    'Gardien',
+  noblewoman:  'Noble Dame',
+  oracle:      'Oracle',
+  pirate:      'Pirate',
+  knight:      'Chevalier',
+  fairy:       'Fée',
+  alchemist:   'Alchimiste',
+  druid:       'Druide',
+  dragon:      'Dragon',
+  monk:        'Moine',
+  wanderer:    'Vagabond',
+}
+
 // Keys match character_class values stored in the database (English)
 export const CLASS_EMOJIS: Record<string, string> = {
   wizard:      '🧙',
