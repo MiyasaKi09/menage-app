@@ -130,6 +130,12 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
         style={{ perspective: '1200px' }}
         onClick={handleCardClick}
       >
+        {/* Ambient glow halo behind the card */}
+        <div
+          className="absolute inset-[-30px] rounded-3xl pointer-events-none blur-3xl opacity-60"
+          style={{ background: `radial-gradient(ellipse, rgb(${accentRgb}/0.4) 0%, transparent 70%)` }}
+        />
+
         {/* Flip hint */}
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
           <RotateCcw size={12} className="text-foreground/20" />
@@ -148,11 +154,11 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
         >
           {/* FRONT - Character Image */}
           <div
-            className="absolute inset-0 rounded-2xl overflow-hidden border-2 shadow-xl"
+            className="absolute inset-0 rounded-2xl overflow-hidden border-2"
             style={{
               backfaceVisibility: 'hidden',
-              borderColor: `${rarityColor}40`,
-              boxShadow: `0 8px 40px ${rarityColor}20, 0 0 60px ${rarityColor}10`,
+              borderColor: `rgb(${accentRgb}/0.5)`,
+              boxShadow: `0 8px 50px rgb(${accentRgb}/0.3), 0 0 0 1px rgb(${accentRgb}/0.1) inset`,
             }}
           >
             {image ? (
@@ -163,11 +169,29 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
                 className="absolute inset-0 w-full h-full object-cover"
               />
             ) : (
+              /* Rich fallback — full theme gradient + glowing emoji */
               <div
-                className="absolute inset-0 flex items-center justify-center"
-                style={{ background: `linear-gradient(to bottom, ${rarityColor}20, ${rarityColor}05)` }}
+                className="absolute inset-0 flex flex-col items-center justify-center"
+                style={{
+                  background: `linear-gradient(160deg, ${deepBg1} 0%, ${deepBg2} 60%, ${deepBg1} 100%)`,
+                }}
               >
-                <span className="text-8xl">{emoji}</span>
+                <div
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full"
+                  style={{ background: `radial-gradient(circle, rgb(${accentRgb}/0.22) 0%, transparent 70%)` }}
+                />
+                <span
+                  className="relative text-[96px] leading-none"
+                  style={{ filter: `drop-shadow(0 0 32px rgb(${accentRgb}/0.6)) drop-shadow(0 0 64px rgb(${accentRgb}/0.3))` }}
+                >
+                  {emoji}
+                </span>
+                <p
+                  className="relative mt-4 font-sans text-[11px] uppercase tracking-[0.2em] font-bold"
+                  style={{ color: `rgb(${accentRgb}/0.5)` }}
+                >
+                  {classLabel}
+                </p>
               </div>
             )}
 
@@ -183,26 +207,28 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
             />
 
             {/* Name overlay at bottom */}
-            <div className="absolute bottom-0 left-0 right-0 p-5 pt-20"
-              style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)' }}
+            <div
+              className="absolute bottom-0 left-0 right-0 p-5 pt-24"
+              style={{
+                background: `linear-gradient(to top, rgb(${charTheme.deepBg1}) 0%, rgb(${charTheme.deepBg1}/0.85) 40%, transparent 100%)`,
+              }}
             >
               <h2
-                className="font-serif text-2xl font-bold drop-shadow-lg"
+                className="font-serif text-2xl font-bold"
                 style={{
                   color: '#fff',
-                  textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.3)',
+                  textShadow: `0 2px 12px rgba(0,0,0,0.7), 0 0 30px rgb(${accentRgb}/0.4)`,
                 }}
               >
                 {character.avatar_name}
               </h2>
-              <div className="flex items-center gap-2 mt-1.5">
+              <div className="flex items-center gap-2 mt-2">
                 <span
-                  className="inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-sans font-medium backdrop-blur-sm"
+                  className="inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-sans font-semibold backdrop-blur-sm"
                   style={{
-                    backgroundColor: `${rarityColor}30`,
-                    color: '#fff',
-                    border: `1px solid ${rarityColor}40`,
-                    textShadow: '0 1px 3px rgba(0,0,0,0.4)',
+                    backgroundColor: `rgb(${accentRgb}/0.25)`,
+                    color: `rgb(${charTheme.glow})`,
+                    border: `1px solid rgb(${accentRgb}/0.4)`,
                   }}
                 >
                   {rarityLabel}
@@ -210,12 +236,12 @@ export function FlippableCharacterCard({ character }: FlippableCharacterCardProp
                 <span
                   className="inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-sans font-medium backdrop-blur-sm"
                   style={{
-                    backgroundColor: 'rgba(255,255,255,0.12)',
-                    color: 'rgba(255,255,255,0.75)',
-                    border: '1px solid rgba(255,255,255,0.18)',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    color: 'rgba(255,255,255,0.7)',
+                    border: '1px solid rgba(255,255,255,0.15)',
                   }}
                 >
-                  {emoji} {classLabel}
+                  {classLabel}
                 </span>
               </div>
             </div>
