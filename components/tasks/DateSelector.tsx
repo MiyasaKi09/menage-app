@@ -42,7 +42,7 @@ export function DateSelector({ currentDate }: DateSelectorProps) {
   })
 
   return (
-    <div className="bg-white border border-border p-4 rounded-2xl shadow-sm transition-opacity duration-200" style={{ opacity: isPending ? 0.6 : 1 }}>
+    <div className="bg-card border border-border p-4 rounded-2xl shadow-sm transition-opacity duration-200" style={{ opacity: isPending ? 0.6 : 1 }}>
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         {/* Left: Previous Day Button */}
         <Button

@@ -100,8 +100,20 @@ export default async function ProtectedLayout({
     <CharacterThemeProvider initialCharacter={weeklyCharacter}>
       {/* Inject theme CSS vars on first paint — beats @layer base in globals.css */}
       <style dangerouslySetInnerHTML={{ __html: buildThemeStyle(theme) }} />
-      <div className="min-h-screen flex flex-col">
-        <main className="flex-1 pb-20">
+      <div className="min-h-screen flex flex-col bg-background relative">
+        {/* Ambient glow — visible on every protected page, shifts with character theme */}
+        <div
+          aria-hidden="true"
+          className="fixed inset-0 pointer-events-none z-0"
+          style={{
+            backgroundImage: [
+              'radial-gradient(ellipse 70% 50% at 10% 5%, rgb(var(--primary)/0.12) 0%, transparent 65%)',
+              'radial-gradient(ellipse 60% 45% at 90% 85%, rgb(var(--yellow)/0.09) 0%, transparent 65%)',
+              'radial-gradient(ellipse 40% 30% at 50% 40%, rgb(var(--primary)/0.05) 0%, transparent 60%)',
+            ].join(', '),
+          }}
+        />
+        <main className="relative z-10 flex-1 pb-20">
           {children}
         </main>
         <BottomTabBar />

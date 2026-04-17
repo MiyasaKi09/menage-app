@@ -84,7 +84,7 @@ export function TaskCompletionModal({ taskName, points, onClose }: TaskCompletio
         </div>
 
         {/* Content */}
-        <div className="relative z-10 bg-white p-8 text-foreground text-center rounded-t-xl border-t border-border">
+        <div className="relative z-10 bg-card p-8 text-foreground text-center rounded-t-xl border-t border-border">
           <p className="font-sans text-xs opacity-50 tracking-wider mb-2">
             Quete accomplie
           </p>

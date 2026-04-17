@@ -253,18 +253,8 @@ export default async function MaisonPage() {
   const todayFormatted = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())
 
   return (
-    <div className="min-h-screen relative bg-background">
-
-      {/* Ambient background — shifts color with character theme */}
-      <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true" style={{
-        backgroundImage: [
-          'radial-gradient(ellipse 70% 50% at 10% 5%, rgb(var(--primary)/0.10) 0%, transparent 65%)',
-          'radial-gradient(ellipse 60% 45% at 90% 85%, rgb(var(--yellow)/0.08) 0%, transparent 65%)',
-          'radial-gradient(ellipse 40% 30% at 50% 40%, rgb(var(--primary)/0.04) 0%, transparent 60%)',
-        ].join(', '),
-      }} />
-
-      <div className="relative z-10 max-w-app mx-auto px-3.5 pb-10">
+    <div className="min-h-screen">
+      <div className="max-w-app mx-auto px-3.5 pb-10">
         {/* Header */}
         <header className="pt-5 pb-3 flex justify-between items-end">
           <div>

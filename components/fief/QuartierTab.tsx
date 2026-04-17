@@ -201,7 +201,7 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        style={{ background: 'linear-gradient(180deg, #f5e6c8 0%, #ede0c0 100%)' }}
+        style={{ background: 'linear-gradient(180deg, rgb(var(--cream)) 0%, rgb(var(--background)) 100%)' }}
       >
         <RoomScene
           furniture={furniture}
@@ -221,11 +221,11 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
               onClick={() => setIsEditMode(true)}
               className="flex items-center gap-1.5 px-5 py-2.5 rounded-[14px] font-sans text-[12px] font-medium transition-all shadow-lg"
               style={{
-                background: 'rgba(255,245,230,0.75)',
+                background: 'rgb(var(--cream)/0.75)',
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)',
-                border: '1px solid rgba(232,224,212,0.6)',
-                color: 'hsl(30, 30%, 30%)',
+                border: '1px solid rgb(var(--border)/0.6)',
+                color: 'rgb(var(--charcoal))',
               }}
             >
               <Pencil size={14} />
@@ -239,10 +239,10 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
                     onClick={handleRotate}
                     className="flex items-center gap-1 px-3 py-2 rounded-[14px] font-sans text-[11px] shadow-lg"
                     style={{
-                      background: 'rgba(255,245,230,0.75)',
+                      background: 'rgb(var(--cream)/0.75)',
                       backdropFilter: 'blur(12px)',
-                      border: '1px solid rgba(232,224,212,0.6)',
-                      color: 'hsl(30, 30%, 40%)',
+                      border: '1px solid rgb(var(--border)/0.6)',
+                      color: 'rgb(var(--ink))',
                     }}
                   >
                     <RotateCw size={12} />
@@ -252,10 +252,10 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
                     onClick={handleDelete}
                     className="flex items-center gap-1 px-3 py-2 rounded-[14px] font-sans text-[11px] shadow-lg"
                     style={{
-                      background: 'rgba(240,200,200,0.7)',
+                      background: 'rgb(var(--red)/0.15)',
                       backdropFilter: 'blur(12px)',
-                      border: '1px solid rgba(200,120,120,0.4)',
-                      color: 'hsl(0, 40%, 40%)',
+                      border: '1px solid rgb(var(--red)/0.3)',
+                      color: 'rgb(var(--red))',
                     }}
                   >
                     <Trash2 size={12} />
@@ -267,10 +267,10 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
                 disabled={saving}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-[14px] font-sans text-[12px] font-medium shadow-lg disabled:opacity-30"
                 style={{
-                  background: 'rgba(200,230,200,0.75)',
+                  background: 'rgb(var(--green)/0.15)',
                   backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(130,180,130,0.4)',
-                  color: 'hsl(140, 30%, 30%)',
+                  border: '1px solid rgb(var(--green)/0.4)',
+                  color: 'rgb(var(--green))',
                 }}
               >
                 <Save size={14} />
@@ -291,11 +291,11 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
             <div
               className="max-w-md mx-auto rounded-[20px] p-3 space-y-3"
               style={{
-                background: 'rgba(255,245,230,0.85)',
+                background: 'rgb(var(--cream)/0.85)',
                 backdropFilter: 'blur(16px)',
                 WebkitBackdropFilter: 'blur(16px)',
-                border: '1px solid rgba(232,224,212,0.6)',
-                boxShadow: '0 8px 32px rgba(30,20,10,0.12)',
+                border: '1px solid rgb(var(--border)/0.6)',
+                boxShadow: '0 8px 32px rgb(var(--charcoal)/0.12)',
               }}
             >
               <p className="font-sans text-[11px] text-foreground/35 tracking-widest uppercase">
@@ -310,7 +310,7 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
                     className={`flex-shrink-0 px-3 py-1.5 rounded-[10px] font-sans text-[10px] font-medium transition-colors ${
                       activeCategory === cat.key
                         ? 'bg-yellow/[0.2] border border-yellow/30 text-yellow/80'
-                        : 'bg-white/60 border border-[#E8E0D4] text-foreground/40 hover:text-foreground/60'
+                        : 'bg-card/60 border border-border text-foreground/40 hover:text-foreground/60'
                     }`}
                   >
                     {cat.label}
@@ -323,7 +323,7 @@ export function QuartierTab({ householdId, userId }: QuartierTabProps) {
                   <button
                     key={item.id}
                     onClick={() => handleAddItem(item.id)}
-                    className="flex-shrink-0 w-20 h-24 rounded-[14px] bg-white/70 border border-[#E8E0D4] flex flex-col items-center justify-center gap-1.5 hover:bg-white transition-all"
+                    className="flex-shrink-0 w-20 h-24 rounded-[14px] bg-card/70 border border-border flex flex-col items-center justify-center gap-1.5 hover:bg-card transition-all"
                   >
                     <Plus size={14} className="text-foreground/30" />
                     <span className="font-sans text-[9px] text-foreground/50 text-center leading-tight px-1">{item.name}</span>

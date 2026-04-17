@@ -141,7 +141,7 @@ export function TaskList({ tasks, householdId, userId, onTaskCompleted }: TaskLi
                 onMouseEnter={() => setHoveredId(task.id)}
                 onMouseLeave={() => setHoveredId(null)}
                 className={cn(
-                  "flex items-center border border-border bg-white rounded-2xl transition-all cursor-pointer overflow-hidden",
+                  "flex items-center border border-border bg-card rounded-2xl transition-all cursor-pointer overflow-hidden",
                   hoveredId === task.id && "-translate-y-0.5 shadow-watercolor-sm"
                 )}
               >
