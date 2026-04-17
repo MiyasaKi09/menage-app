@@ -128,9 +128,9 @@ export function ProfilPageClient({ profile, email, achievements }: ProfilPageCli
         <p className="font-sans text-[11px] text-foreground/25 tracking-widest uppercase">
           Blason
         </p>
-        <div className="flex items-center gap-4 p-4 bg-white/40 rounded-xl border border-border/60">
+        <div className="flex items-center gap-4 p-4 bg-card/40 rounded-xl border border-border/60">
           {/* Blason preview */}
-          <div className="w-20 h-24 rounded-lg bg-white/80 border border-border flex items-center justify-center">
+          <div className="w-20 h-24 rounded-lg bg-card/80 border border-border flex items-center justify-center">
             <Shield size={32} className="text-yellow/40" />
           </div>
           <div className="flex-1">
@@ -157,7 +157,7 @@ export function ProfilPageClient({ profile, email, achievements }: ProfilPageCli
               return (
                 <div
                   key={a.id}
-                  className="flex flex-col items-center gap-1 p-3 bg-white/40 rounded-xl border border-border/60"
+                  className="flex flex-col items-center gap-1 p-3 bg-card/40 rounded-xl border border-border/60"
                 >
                   <span className="text-xl">{achievement?.emoji || '🏅'}</span>
                   <span className="font-sans text-[10px] text-foreground/40 text-center leading-tight">
@@ -176,19 +176,19 @@ export function ProfilPageClient({ profile, email, achievements }: ProfilPageCli
           Statistiques
         </p>
         <div className="grid grid-cols-2 gap-2">
-          <div className="p-3 bg-white/40 rounded-xl border border-border/60 text-center">
+          <div className="p-3 bg-card/40 rounded-xl border border-border/60 text-center">
             <p className="font-serif text-2xl font-bold text-foreground">{profile.total_points || 0}</p>
             <p className="font-sans text-[10px] text-foreground/30">XP total</p>
           </div>
-          <div className="p-3 bg-white/40 rounded-xl border border-border/60 text-center">
+          <div className="p-3 bg-card/40 rounded-xl border border-border/60 text-center">
             <p className="font-serif text-2xl font-bold text-foreground">{profile.tasks_completed || 0}</p>
             <p className="font-sans text-[10px] text-foreground/30">Quetes</p>
           </div>
-          <div className="p-3 bg-white/40 rounded-xl border border-border/60 text-center">
+          <div className="p-3 bg-card/40 rounded-xl border border-border/60 text-center">
             <p className="font-serif text-2xl font-bold text-foreground">{profile.current_streak || 0}j</p>
             <p className="font-sans text-[10px] text-foreground/30">Serie</p>
           </div>
-          <div className="p-3 bg-white/40 rounded-xl border border-border/60 text-center">
+          <div className="p-3 bg-card/40 rounded-xl border border-border/60 text-center">
             <p className="font-serif text-2xl font-bold text-foreground">{profile.longest_streak || 0}j</p>
             <p className="font-sans text-[10px] text-foreground/30">Record</p>
           </div>
@@ -270,9 +270,9 @@ function EditableText({
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && onSave()}
-          className={`flex-1 bg-white/60 border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:border-yellow/30 ${className}`}
+          className={`flex-1 bg-card/60 border border-border rounded-lg px-3 py-1.5 focus:outline-none focus:border-yellow/30 ${className}`}
         />
-        <button onClick={onSave} className="p-1.5 rounded-lg hover:bg-white/80">
+        <button onClick={onSave} className="p-1.5 rounded-lg hover:bg-card/80">
           <Check size={14} className="text-green/60" />
         </button>
       </div>

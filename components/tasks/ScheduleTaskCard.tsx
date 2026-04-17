@@ -115,7 +115,7 @@ export function ScheduleTaskCard({ task, householdId, userId }: ScheduleTaskCard
   return (
     <div
       className={cn(
-        'flex items-center border border-border bg-white rounded-2xl transition-all shadow-sm hover:shadow-md',
+        'flex items-center border border-border bg-card rounded-2xl transition-all shadow-sm hover:shadow-md',
         isCompleted && 'opacity-60 bg-green/10',
         isSkipped && 'opacity-40 bg-charcoal/5'
       )}

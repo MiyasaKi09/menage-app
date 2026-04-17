@@ -53,7 +53,7 @@ export function FiefPageClient({
             className="font-serif text-2xl font-semibold"
             style={
               isImmersive
-                ? { color: 'hsl(30, 40%, 25%)', textShadow: '0 1px 4px rgba(255,245,230,0.8), 0 2px 12px rgba(255,245,230,0.6)' }
+                ? { color: 'rgb(var(--charcoal))', textShadow: '0 1px 4px rgb(var(--cream)/0.8), 0 2px 12px rgb(var(--cream)/0.6)' }
                 : { color: 'hsl(var(--foreground))' }
             }
           >
@@ -63,7 +63,7 @@ export function FiefPageClient({
             className="font-sans text-[11px] mt-1"
             style={
               isImmersive
-                ? { color: 'hsl(30, 30%, 40%)', textShadow: '0 1px 3px rgba(255,245,230,0.8)' }
+                ? { color: 'rgb(var(--ink))', textShadow: '0 1px 3px rgb(var(--cream)/0.8)' }
                 : { color: 'hsl(var(--foreground) / 0.25)' }
             }
           >
@@ -77,13 +77,13 @@ export function FiefPageClient({
           style={
             isImmersive
               ? {
-                  background: 'rgba(255,245,230,0.7)',
+                  background: 'rgb(var(--cream)/0.7)',
                   backdropFilter: 'blur(12px)',
                   WebkitBackdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(232,224,212,0.5)',
-                  boxShadow: '0 4px 20px rgba(30,20,10,0.08)',
+                  border: '1px solid rgb(var(--border)/0.5)',
+                  boxShadow: '0 4px 20px rgb(var(--charcoal)/0.08)',
                 }
-              : { background: 'rgba(255,255,255,0.6)' }
+              : { background: 'rgb(var(--card)/0.6)' }
           }
         >
           {tabs.map((tab) => {
@@ -95,7 +95,7 @@ export function FiefPageClient({
                 onClick={() => setActiveTab(tab.id)}
                 className={`relative flex items-center gap-1.5 px-4 py-2 rounded-lg font-sans font-semibold text-[13px] transition-all duration-200 ${
                   isActive
-                    ? 'text-foreground bg-white'
+                    ? 'text-foreground bg-card'
                     : 'text-foreground/40 hover:text-foreground/60'
                 }`}
               >

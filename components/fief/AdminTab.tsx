@@ -134,7 +134,7 @@ export function AdminTab({ tasks, members, inviteCode, isAdmin }: AdminTabProps)
             const profile = member.profiles as any
             return (
               <div key={member.profile_id} className="flex items-center gap-3 py-2.5">
-                <div className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-card/80 flex items-center justify-center">
                   <span className="font-sans font-semibold text-[12px] text-foreground/40">
                     {(profile?.display_name || 'J')[0].toUpperCase()}
                   </span>
@@ -155,12 +155,12 @@ export function AdminTab({ tasks, members, inviteCode, isAdmin }: AdminTabProps)
           Inviter
         </p>
         <div className="flex items-center gap-2">
-          <div className="flex-1 bg-white/60 rounded-lg px-3 py-2.5 border border-border/60">
+          <div className="flex-1 bg-card/60 rounded-lg px-3 py-2.5 border border-border/60">
             <p className="font-sans font-semibold text-[14px] text-foreground/50 tracking-widest">{inviteCode}</p>
           </div>
           <button
             onClick={copyInviteCode}
-            className="p-2.5 rounded-lg bg-white/60 border border-border/60 hover:bg-white transition-colors"
+            className="p-2.5 rounded-lg bg-card/60 border border-border/60 hover:bg-card transition-colors"
           >
             {codeCopied ? <Check size={16} className="text-green/60" /> : <Copy size={16} className="text-foreground/40" />}
           </button>
