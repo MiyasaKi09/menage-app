@@ -66,41 +66,41 @@ export default async function TasksPage() {
     }
   }))
 
-  // Log pour debug
   if (tasksError) {
     console.error('Error fetching tasks:', tasksError)
-    console.error('Error details:', JSON.stringify(tasksError, null, 2))
   }
-  console.log('Tasks fetched:', tasks?.length || 0, 'tasks')
-  console.log('Sample task:', JSON.stringify(tasks?.[0], null, 2))
-  console.log('All tasks:', JSON.stringify(tasks, null, 2))
 
   const taskCount = tasks?.length || 0
 
   return (
     <div className="min-h-screen relative bg-background">
-
-      <div className="relative z-10 max-w-2xl mx-auto px-6 py-10 space-y-8">
+      <div className="relative z-10 max-w-2xl mx-auto px-4 py-8 space-y-6">
         {/* Header */}
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="font-sans text-[11px] text-foreground/25 tracking-widest uppercase mb-1">
-              {householdName}
-            </p>
-            <h1 className="font-serif text-3xl md:text-4xl text-foreground font-semibold tracking-tight">
-              Quetes
-            </h1>
-            <p className="font-sans text-[12px] text-foreground/30 mt-1">
-              {taskCount} disponible{taskCount > 1 ? 's' : ''}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Link href="/tasks/schedule">
-              <Button variant="ghost" size="sm" className="text-foreground/30 hover:text-foreground/60">Planning</Button>
-            </Link>
-            <Link href="/tasks/history">
-              <Button variant="ghost" size="sm" className="text-foreground/30 hover:text-foreground/60">Historique</Button>
-            </Link>
+        <div className="relative rounded-2xl overflow-hidden px-5 py-5" style={{
+          background: 'linear-gradient(135deg, rgb(var(--primary)/0.08) 0%, transparent 100%)',
+          border: '1px solid rgb(var(--primary)/0.12)',
+        }}>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="font-sans text-[10px] tracking-widest uppercase mb-1"
+                style={{ color: 'rgb(var(--primary)/0.55)' }}>
+                {householdName}
+              </p>
+              <h1 className="font-serif text-3xl font-semibold tracking-tight text-foreground">
+                Quêtes
+              </h1>
+              <p className="font-sans text-[12px] text-foreground/30 mt-0.5">
+                {taskCount} disponible{taskCount > 1 ? 's' : ''}
+              </p>
+            </div>
+            <div className="flex flex-col gap-1 items-end pt-0.5">
+              <Link href="/tasks/schedule">
+                <Button variant="ghost" size="sm" className="text-foreground/35 hover:text-foreground/65 text-[12px]">Planning</Button>
+              </Link>
+              <Link href="/tasks/history">
+                <Button variant="ghost" size="sm" className="text-foreground/35 hover:text-foreground/65 text-[12px]">Historique</Button>
+              </Link>
+            </div>
           </div>
         </div>
 
