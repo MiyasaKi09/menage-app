@@ -264,7 +264,7 @@ export default async function MaisonPage() {
             <h1
               className="font-serif font-black leading-none mt-0.5"
               style={{
-                fontSize: '38px',
+                fontSize: 'clamp(38px, 10vw, 52px)',
                 letterSpacing: '-0.03em',
                 background: 'linear-gradient(135deg, rgb(var(--foreground)) 0%, rgb(var(--primary)/0.8) 100%)',
                 WebkitBackgroundClip: 'text',

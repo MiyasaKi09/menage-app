@@ -59,9 +59,13 @@ export function MaisonQuestsSection({ corveeData, peripeties, userId, householdI
       {/* La corvée — carte au trésor unique */}
       {corvee && corvee.steps.length > 0 && (
         <div className="space-y-3">
-          <p className="font-sans text-[11px] tracking-widest uppercase px-1 font-bold" style={{ color: 'rgb(var(--primary)/0.5)' }}>
-            Corvée de la semaine
-          </p>
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1" style={{ background: 'rgb(var(--primary)/0.12)' }} />
+            <p className="font-sans text-[8px] font-black uppercase tracking-[0.35em]" style={{ color: 'rgb(var(--primary)/0.35)' }}>
+              Corvée de la semaine
+            </p>
+            <div className="h-px flex-1" style={{ background: 'rgb(var(--primary)/0.12)' }} />
+          </div>
           <QuestCard
             questName={corvee.questName}
             categoryEmoji={corvee.categoryEmoji}

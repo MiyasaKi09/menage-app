@@ -67,24 +67,15 @@ function RoomModel() {
 useGLTF.preload('/models/chambre-web.glb')
 
 // Window glow — emissive plane + point light
-function WindowGlow({ position, rotation = [0, 0, 0], size = [0.3, 0.5] }: {
+function WindowGlow({ position, rotation = [0, 0, 0] }: {
   position: [number, number, number]
   rotation?: [number, number, number]
   size?: [number, number]
 }) {
   return (
     <group position={position} rotation={rotation}>
-      <mesh>
-        <planeGeometry args={size} />
-        <meshStandardMaterial
-          color="#fff5e0"
-          emissive="#ffffff"
-          emissiveIntensity={4.0}
-          toneMapped={false}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-      <pointLight color="#ffe8c0" intensity={1.0} distance={5} decay={2} />
+      {/* Point light only — illuminates window frame; bloom picks up from bright surfaces */}
+      <pointLight color="#ffe8c0" intensity={2.2} distance={5} decay={2} />
     </group>
   )
 }
@@ -128,9 +119,9 @@ function DustMotes({ count = 200 }: { count?: number }) {
       </bufferGeometry>
       <pointsMaterial
         color="#fff8d8"
-        size={0.012}
+        size={0.015}
         transparent
-        opacity={0.35}
+        opacity={0.55}
         sizeAttenuation
         depthWrite={false}
         blending={THREE.AdditiveBlending}
@@ -232,12 +223,12 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
   useEffect(() => {
     const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|Android/i.test(navigator.userAgent)
     const fx = new VolumetricLightEffectImpl(camera, {
-      density: 0.03,
-      scattering: 0.4,
+      density: 0.08,
+      scattering: 0.7,
       maxDistance: 12.0,
-      steps: isMobile ? 24 : 48,
-      phaseG: 0.65,
-      lightColor: [1.0, 0.94, 0.78],
+      steps: isMobile ? 32 : 64,
+      phaseG: 0.75,
+      lightColor: [1.0, 0.91, 0.68],
       debugMode: 0,
     })
     setVolumetric(fx)
@@ -305,7 +296,7 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
         shadow-mapSize={[2048, 2048]}
         shadow-bias={-0.0005}
         shadow-normalBias={0.02}
-        shadow-radius={6}
+        shadow-radius={16}
         shadow-camera-near={0.1}
         shadow-camera-far={30}
         shadow-camera-left={-6}
@@ -315,7 +306,7 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
       />
 
       {/* 2. Camera-direction fill — lights the walls facing camera */}
-      <directionalLight position={[5, 5, 5]} intensity={1.5} color="#f0e0c0" />
+      <directionalLight position={[5, 5, 5]} intensity={0.9} color="#f0e0c0" />
 
       {/* 3. Side fill */}
       <directionalLight position={[4, 3, -2]} intensity={0.8} color="#e8d8c0" />
@@ -362,28 +353,28 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
       </Suspense>
 
       {/* ====== DUST MOTES ====== */}
-      <DustMotes count={180} />
+      <DustMotes count={350} />
 
       {/* ====== POST-PROCESSING ====== */}
       <EffectComposer key={volumetric ? 'with-vol' : 'no-vol'}>
         {/* SSAO — contact shadows in stone joints and corners */}
         <N8AO
-          aoRadius={0.5}
-          intensity={2.0}
-          distanceFalloff={0.3}
-          color={new THREE.Color('#8a7a60')}
+          aoRadius={1.2}
+          intensity={4.0}
+          distanceFalloff={0.5}
+          color={new THREE.Color('#7a6a50')}
         />
         {/* Volumetric light rays — ray-marched through shadow map */}
         {volumetric ? <primitive object={volumetric} dispose={null} /> : <></>}
         {/* Bloom — window glow + ray highlights */}
         <Bloom
-          intensity={0.2}
-          luminanceThreshold={0.85}
-          radius={0.8}
+          intensity={0.35}
+          luminanceThreshold={0.75}
+          radius={0.9}
           blendFunction={BlendFunction.SCREEN}
         />
-        {/* Subtle vignette */}
-        <Vignette offset={0.4} darkness={0.15} />
+        {/* Vignette — Ghibli cinematic frame */}
+        <Vignette offset={0.35} darkness={0.3} />
       </EffectComposer>
     </>
   )
