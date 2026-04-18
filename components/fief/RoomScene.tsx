@@ -87,13 +87,13 @@ function WindowBeam({ position, targetPos }: {
       <SpotLight
         position={position}
         target={target}
-        angle={Math.PI / 10}
-        penumbra={0.4}
-        distance={4.5}
-        intensity={60}
-        color="#ffe8b0"
-        attenuation={4.5}
-        anglePower={5}
+        angle={Math.PI / 9}
+        penumbra={0.35}
+        distance={6}
+        intensity={180}
+        color="#ffe8a0"
+        attenuation={2.0}
+        anglePower={6}
         castShadow={false}
       />
     </>
@@ -304,19 +304,19 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
 
   return (
     <>
-      {/* ====== GI-SIMULATED LIGHTING ====== */}
+      {/* ====== LIGHTING — spotlights are PRIMARY source, no diffuse flood ====== */}
 
-      {/* 1. Key directional — warm sun, soft shadows (source of volumetric rays) */}
+      {/* Skeleton directional — only for shadow map / volumetric depth pass */}
       <directionalLight
         ref={keyLightRef}
         position={[-5, 8, -3]}
-        intensity={2.8}
+        intensity={0.4}
         color="#ffe8b0"
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-bias={-0.0005}
         shadow-normalBias={0.02}
-        shadow-radius={16}
+        shadow-radius={8}
         shadow-camera-near={0.1}
         shadow-camera-far={30}
         shadow-camera-left={-6}
@@ -325,31 +325,14 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
         shadow-camera-bottom={-6}
       />
 
-      {/* 2. Weak camera fill — just enough to see back walls */}
-      <directionalLight position={[5, 5, 5]} intensity={0.25} color="#f0e0c0" />
+      {/* Bare minimum ambient — deep shadows, not pitch black */}
+      <ambientLight intensity={0.03} color="#c8b080" />
 
-      {/* 3. Side bounce — very subtle */}
-      <directionalLight position={[4, 3, -2]} intensity={0.15} color="#e8d8c0" />
-
-      {/* 4. Back fill — barely there */}
-      <directionalLight position={[0, 2, -5]} intensity={0.08} color="#d0c0a0" />
-
-      {/* 5. Ground bounce — warm floor reflection */}
-      <pointLight position={[0, -0.5, 0]} intensity={0.15} color="#d4c4a0" distance={5} decay={1} />
-
-      {/* 6. Hemisphere — very low, mainly for sky color tint */}
-      <hemisphereLight args={['#f0e0c8', '#b0a080', 0.15]} />
-
-      {/* 7. Ambient — minimum so shadows aren't pitch black */}
-      <ambientLight intensity={0.06} color="#c8b898" />
-
-      {/* ====== WINDOW BEAMS — drei SpotLight, beam IS the light ====== */}
-      {/* Left window: spotlight outside wall → floor */}
-      <WindowBeam position={[-2.1, 1.6, -0.1]} targetPos={[-0.5, 0, 0.3]} />
-      {/* Center window */}
-      <WindowBeam position={[-0.2, 1.6, -2.2]} targetPos={[0.3, 0, -0.9]} />
-      {/* Right window */}
-      <WindowBeam position={[0.7, 1.6, -2.1]} targetPos={[1.0, 0, -0.7]} />
+      {/* ====== WINDOW BEAMS — SpotLights ARE the primary illumination ====== */}
+      {/* Positioned at window height, just outside the wall, aimed at floor center */}
+      <WindowBeam position={[-2.2, 0.95, 0.0]} targetPos={[-0.3, 0, 0.5]} />
+      <WindowBeam position={[-0.2, 0.95, -2.3]} targetPos={[0.2, 0, -0.8]} />
+      <WindowBeam position={[0.6, 0.95, -2.2]} targetPos={[0.9, 0, -0.6]} />
 
       {/* ====== CAMERA + ORBIT ====== */}
       <SceneSetup />
@@ -419,7 +402,7 @@ export function RoomScene({ isEditMode }: RoomSceneProps) {
         gl={{
           antialias: true,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.3,
+          toneMappingExposure: 1.0,
         }}
         style={{ background: 'transparent' }}
         onCreated={({ camera }) => {
