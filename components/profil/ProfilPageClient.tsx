@@ -41,17 +41,46 @@ export function ProfilPageClient({ profile, email, achievements }: ProfilPageCli
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 pb-24 space-y-8">
-      {/* Player name */}
-      <div className="text-center space-y-2">
-        <EditableText
-          value={fieldValues.display_name}
-          isEditing={editingField === 'display_name'}
-          onStartEdit={() => setEditingField('display_name')}
-          onChange={(v) => setFieldValues((prev) => ({ ...prev, display_name: v }))}
-          onSave={() => saveField('display_name')}
-          className="font-serif text-2xl text-foreground font-bold"
-        />
-        <p className="font-sans text-[11px] text-foreground/25">Niveau {profile.current_level || 1}</p>
+      {/* Hero header */}
+      <div className="relative rounded-2xl overflow-hidden" style={{
+        background: 'linear-gradient(135deg, rgb(var(--deep-blue)/0.92) 0%, rgb(var(--primary)/0.1) 100%)',
+        border: '1px solid rgb(var(--primary)/0.2)',
+      }}>
+        <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-10 -left-10 w-44 h-44 rounded-full opacity-30"
+            style={{ background: 'rgb(var(--character-glow))', filter: 'blur(48px)' }} />
+          <div className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full opacity-20"
+            style={{ background: 'rgb(var(--primary))', filter: 'blur(32px)' }} />
+        </div>
+        <div className="relative z-10 pt-8 pb-6 px-6 text-center space-y-2">
+          <div className="w-14 h-14 mx-auto rounded-full flex items-center justify-center font-serif text-xl font-bold mb-3"
+            style={{
+              background: 'rgb(var(--primary)/0.15)',
+              border: '2px solid rgb(var(--primary)/0.35)',
+              color: 'rgb(var(--primary))',
+            }}>
+            {(fieldValues.display_name || 'A')[0].toUpperCase()}
+          </div>
+          <EditableText
+            value={fieldValues.display_name}
+            isEditing={editingField === 'display_name'}
+            onStartEdit={() => setEditingField('display_name')}
+            onChange={(v) => setFieldValues((prev) => ({ ...prev, display_name: v }))}
+            onSave={() => saveField('display_name')}
+            className="font-serif text-2xl text-foreground font-bold"
+          />
+          {fieldValues.pseudonym && (
+            <p className="font-sans text-[12px] text-foreground/35 italic">&ldquo;{fieldValues.pseudonym}&rdquo;</p>
+          )}
+          <p className="font-sans text-[11px] text-foreground/30">
+            Niveau {profile.current_level || 1} · {profile.total_points || 0} XP
+          </p>
+          {fieldValues.motto && (
+            <p className="font-sans text-[11px] italic mt-1" style={{ color: 'rgb(var(--primary)/0.65)' }}>
+              {fieldValues.motto}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Personal info */}

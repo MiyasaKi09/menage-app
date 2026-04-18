@@ -76,7 +76,7 @@ export function QuestCard({ questName, categoryEmoji, steps, totalPoints }: Ques
                 <button
                   onClick={() => isCurrent && handleComplete(step.task_id)}
                   disabled={!isCurrent}
-                  className="relative"
+                  className="relative flex items-center justify-center min-w-[36px] min-h-[36px]"
                 >
                   {isCurrent && (
                     <motion.div

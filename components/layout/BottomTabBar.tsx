@@ -25,7 +25,7 @@ export function BottomTabBar() {
             <Link
               key={tab.href}
               href={tab.href}
-              className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 ${
+              className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 min-w-[56px] min-h-[44px] justify-center ${
                 isActive
                   ? 'text-primary'
                   : 'text-foreground/25 hover:text-foreground/45'
