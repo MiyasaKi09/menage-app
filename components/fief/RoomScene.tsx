@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useRef, useMemo, useState } from 'react'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
-import { useGLTF, OrbitControls } from '@react-three/drei'
+import { useGLTF, OrbitControls, SpotLight } from '@react-three/drei'
 import { EffectComposer, Bloom, N8AO, Vignette } from '@react-three/postprocessing'
 import { BlendFunction } from 'postprocessing'
 import * as THREE from 'three'
@@ -70,17 +70,33 @@ function RoomModel() {
 
 useGLTF.preload('/models/chambre-web.glb')
 
-// Window glow — emissive plane + point light
-function WindowGlow({ position, rotation = [0, 0, 0] }: {
+// Volumetric window beam using drei SpotLight — the beam IS the light, derived from its physics
+function WindowBeam({ position, targetPos }: {
   position: [number, number, number]
-  rotation?: [number, number, number]
-  size?: [number, number]
+  targetPos: [number, number, number]
 }) {
+  const target = useMemo(() => {
+    const obj = new THREE.Object3D()
+    obj.position.set(...targetPos)
+    return obj
+  }, []) // eslint-disable-line
+
   return (
-    <group position={position} rotation={rotation}>
-      {/* Point light only — illuminates window frame; bloom picks up from bright surfaces */}
-      <pointLight color="#ffe8c0" intensity={2.2} distance={5} decay={2} />
-    </group>
+    <>
+      <primitive object={target} />
+      <SpotLight
+        position={position}
+        target={target}
+        angle={Math.PI / 10}
+        penumbra={0.4}
+        distance={4.5}
+        intensity={60}
+        color="#ffe8b0"
+        attenuation={4.5}
+        anglePower={5}
+        castShadow={false}
+      />
+    </>
   )
 }
 
@@ -327,10 +343,13 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
       {/* 7. Ambient — minimum so shadows aren't pitch black */}
       <ambientLight intensity={0.06} color="#c8b898" />
 
-      {/* ====== WINDOW GLOWS ====== */}
-      <WindowGlow position={[-1.55, 0.962, -0.337]} rotation={[0, Math.PI / 2, 0]} size={[0.3, 0.5]} />
-      <WindowGlow position={[-0.333, 0.972, -1.55]} rotation={[0, 0, 0]} size={[0.3, 0.5]} />
-      <WindowGlow position={[0.505, 0.985, -1.43]} rotation={[0, 0, 0]} size={[0.3, 0.5]} />
+      {/* ====== WINDOW BEAMS — drei SpotLight, beam IS the light ====== */}
+      {/* Left window: spotlight outside wall → floor */}
+      <WindowBeam position={[-2.1, 1.6, -0.1]} targetPos={[-0.5, 0, 0.3]} />
+      {/* Center window */}
+      <WindowBeam position={[-0.2, 1.6, -2.2]} targetPos={[0.3, 0, -0.9]} />
+      {/* Right window */}
+      <WindowBeam position={[0.7, 1.6, -2.1]} targetPos={[1.0, 0, -0.7]} />
 
       {/* ====== CAMERA + ORBIT ====== */}
       <SceneSetup />
@@ -358,6 +377,7 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
 
       {/* ====== DUST MOTES ====== */}
       <DustMotes count={350} />
+
 
       {/* ====== POST-PROCESSING ====== */}
       <EffectComposer key={volumetric ? 'with-vol' : 'no-vol'}>
