@@ -44,9 +44,13 @@ function RoomModel() {
           }
           if (mat.normalMap) mat.normalMap.needsUpdate = true
           if (mat.roughnessMap) mat.roughnessMap.needsUpdate = true
-          // Lighten material colors 35% toward warm beige
+          // Warm tint: lerp 20% toward beige (less bleaching than before)
           if (mat.color) {
-            mat.color.lerp(new THREE.Color('#f0e8d8'), 0.35)
+            mat.color.lerp(new THREE.Color('#f0e8d8'), 0.2)
+          }
+          // Clamp emissive — prevents GLB window glass from burning white
+          if (mat.emissive && mat.emissiveIntensity > 0) {
+            mat.emissiveIntensity = Math.min(mat.emissiveIntensity, 0.12)
           }
           mat.needsUpdate = true
         })
@@ -290,8 +294,8 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
       <directionalLight
         ref={keyLightRef}
         position={[-5, 8, -3]}
-        intensity={2.0}
-        color="#fff4e0"
+        intensity={2.8}
+        color="#ffe8b0"
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-bias={-0.0005}
@@ -305,23 +309,23 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
         shadow-camera-bottom={-6}
       />
 
-      {/* 2. Camera-direction fill — lights the walls facing camera */}
-      <directionalLight position={[5, 5, 5]} intensity={0.9} color="#f0e0c0" />
+      {/* 2. Weak camera fill — just enough to see back walls */}
+      <directionalLight position={[5, 5, 5]} intensity={0.25} color="#f0e0c0" />
 
-      {/* 3. Side fill */}
-      <directionalLight position={[4, 3, -2]} intensity={0.8} color="#e8d8c0" />
+      {/* 3. Side bounce — very subtle */}
+      <directionalLight position={[4, 3, -2]} intensity={0.15} color="#e8d8c0" />
 
-      {/* 4. Back fill — simulates wall bounce */}
-      <directionalLight position={[0, 2, -5]} intensity={0.4} color="#d0c0a0" />
+      {/* 4. Back fill — barely there */}
+      <directionalLight position={[0, 2, -5]} intensity={0.08} color="#d0c0a0" />
 
-      {/* 5. Ground bounce */}
-      <pointLight position={[0, -0.5, 0]} intensity={0.4} color="#d4c4a0" distance={5} decay={1} />
+      {/* 5. Ground bounce — warm floor reflection */}
+      <pointLight position={[0, -0.5, 0]} intensity={0.15} color="#d4c4a0" distance={5} decay={1} />
 
-      {/* 6. Hemisphere — warm sky + warm ground */}
-      <hemisphereLight args={['#f0e0c8', '#b0a080', 0.6]} />
+      {/* 6. Hemisphere — very low, mainly for sky color tint */}
+      <hemisphereLight args={['#f0e0c8', '#b0a080', 0.15]} />
 
-      {/* 7. Ambient — low, env map does most indirect */}
-      <ambientLight intensity={0.25} color="#c8b898" />
+      {/* 7. Ambient — minimum so shadows aren't pitch black */}
+      <ambientLight intensity={0.06} color="#c8b898" />
 
       {/* ====== WINDOW GLOWS ====== */}
       <WindowGlow position={[-1.55, 0.962, -0.337]} rotation={[0, Math.PI / 2, 0]} size={[0.3, 0.5]} />
@@ -395,7 +399,7 @@ export function RoomScene({ isEditMode }: RoomSceneProps) {
         gl={{
           antialias: true,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 2.5,
+          toneMappingExposure: 1.3,
         }}
         style={{ background: 'transparent' }}
         onCreated={({ camera }) => {
