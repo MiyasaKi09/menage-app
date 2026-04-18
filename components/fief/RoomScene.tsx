@@ -70,7 +70,7 @@ function RoomModel() {
 
 useGLTF.preload('/models/chambre-web.glb')
 
-// Window glow — emissive plane + point light
+// Window glow — point light only, no visible quad
 function WindowGlow({ position, rotation = [0, 0, 0] }: {
   position: [number, number, number]
   rotation?: [number, number, number]
@@ -78,9 +78,78 @@ function WindowGlow({ position, rotation = [0, 0, 0] }: {
 }) {
   return (
     <group position={position} rotation={rotation}>
-      {/* Point light only — illuminates window frame; bloom picks up from bright surfaces */}
       <pointLight color="#ffe8c0" intensity={2.2} distance={5} decay={2} />
     </group>
+  )
+}
+
+// Visible light shaft — tapered cone with additive blending + pulsing opacity
+function LightShaft({ from, to, topRadius = 0.06, bottomRadius = 0.32 }: {
+  from: [number, number, number]
+  to: [number, number, number]
+  topRadius?: number
+  bottomRadius?: number
+}) {
+  const meshRef = useRef<THREE.Mesh>(null)
+
+  const { center, quaternion, length } = useMemo(() => {
+    const s = new THREE.Vector3(...from)
+    const e = new THREE.Vector3(...to)
+    const dir = new THREE.Vector3().subVectors(e, s)
+    const len = dir.length()
+    const mid = new THREE.Vector3().lerpVectors(s, e, 0.5)
+    const q = new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(0, 1, 0),
+      dir.normalize()
+    )
+    return { center: mid, quaternion: q, length: len }
+  }, []) // eslint-disable-line
+
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return
+    const mat = meshRef.current.material as THREE.MeshBasicMaterial
+    mat.opacity = 0.07 + Math.sin(clock.elapsedTime * 0.35) * 0.018
+  })
+
+  return (
+    <mesh ref={meshRef} position={center} quaternion={quaternion}>
+      <cylinderGeometry args={[topRadius, bottomRadius, length, 8, 1, true]} />
+      <meshBasicMaterial
+        color="#fff4c8"
+        transparent
+        opacity={0.07}
+        side={THREE.DoubleSide}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </mesh>
+  )
+}
+
+// Floor pool of light where shaft hits ground
+function FloorPool({ position, radius = 0.38 }: {
+  position: [number, number, number]
+  radius?: number
+}) {
+  const meshRef = useRef<THREE.Mesh>(null)
+
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return
+    const mat = meshRef.current.material as THREE.MeshBasicMaterial
+    mat.opacity = 0.10 + Math.sin(clock.elapsedTime * 0.35) * 0.025
+  })
+
+  return (
+    <mesh ref={meshRef} position={position} rotation={[-Math.PI / 2, 0, 0]}>
+      <circleGeometry args={[radius, 24]} />
+      <meshBasicMaterial
+        color="#fff8e0"
+        transparent
+        opacity={0.10}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </mesh>
   )
 }
 
@@ -358,6 +427,19 @@ function SceneContent({ isEditMode }: Pick<RoomSceneProps, 'isEditMode'>) {
 
       {/* ====== DUST MOTES ====== */}
       <DustMotes count={350} />
+
+      {/* ====== LIGHT SHAFTS — one per window ====== */}
+      {/* Left window: shaft from opening → floor */}
+      <LightShaft from={[-1.55, 0.96, -0.34]} to={[-0.92, 0.01, 0.06]} />
+      <FloorPool position={[-0.92, 0.01, 0.06]} radius={0.35} />
+
+      {/* Center window */}
+      <LightShaft from={[-0.33, 0.97, -1.55]} to={[0.30, 0.01, -1.15]} />
+      <FloorPool position={[0.30, 0.01, -1.15]} radius={0.35} />
+
+      {/* Right window */}
+      <LightShaft from={[0.51, 0.99, -1.43]} to={[1.14, 0.01, -1.02]} />
+      <FloorPool position={[1.14, 0.01, -1.02]} radius={0.32} />
 
       {/* ====== POST-PROCESSING ====== */}
       <EffectComposer key={volumetric ? 'with-vol' : 'no-vol'}>
