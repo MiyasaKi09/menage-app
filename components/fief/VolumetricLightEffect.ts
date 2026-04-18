@@ -48,6 +48,25 @@ float ign(vec2 p) {
   return fract(magic.z * fract(dot(p, magic.xy)));
 }
 
+// Low-cost 3D hash for dust density variation
+float dustHash(vec3 p) {
+  p = fract(p * vec3(443.8975, 397.2973, 491.1871));
+  p += dot(p.zxy, p.yxz + 19.19);
+  return fract(p.x * p.y * p.z);
+}
+float dustNoise(vec3 p) {
+  vec3 i = floor(p);
+  vec3 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(
+    mix(mix(dustHash(i), dustHash(i+vec3(1,0,0)), f.x),
+        mix(dustHash(i+vec3(0,1,0)), dustHash(i+vec3(1,1,0)), f.x), f.y),
+    mix(mix(dustHash(i+vec3(0,0,1)), dustHash(i+vec3(1,0,1)), f.x),
+        mix(dustHash(i+vec3(0,1,1)), dustHash(i+vec3(1,1,1)), f.x), f.y),
+    f.z
+  );
+}
+
 vec3 worldPosFromDepth(vec2 uv, float depth) {
   vec4 clip = vec4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
   vec4 view = inverseProjection * clip;
@@ -126,8 +145,11 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, const in float depth,
     vec3 samplePos = cameraPos + rayDir * t;
     float lit = sampleShadow(samplePos);
 
-    float heightFactor = 1.0 + 0.4 * (1.0 - smoothstep(0.0, 2.5, samplePos.y));
-    float localDensity = uDensity * heightFactor;
+    // Density denser near floor (settled dust), with slow animated 3D noise patches
+    float heightFactor = 1.0 + 0.6 * (1.0 - smoothstep(0.0, 2.0, samplePos.y));
+    float noiseSample = dustNoise(samplePos * 2.5 + vec3(0.0, time * 0.04, time * 0.02));
+    float dustPatch = 0.6 + 0.4 * noiseSample;
+    float localDensity = uDensity * heightFactor * dustPatch;
 
     vec3 inScatter = lightColor * uScattering * phase * lit * localDensity;
     transmittance *= exp(-localDensity * stepSize);
